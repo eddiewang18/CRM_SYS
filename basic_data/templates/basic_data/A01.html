@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+A01維護公司(品牌)資料
+{% endblock title %}
+
+
+
+{% block style2 %}
+<link rel="stylesheet" href="{% static 'css/crmForm.css' %}">
+{% endblock style2 %}
+
+
+
+{% block content %}
+
+<div class="wrap">
+    <div class="funcTitle ablock">
+        A01.維護公司(品牌)資料
+    </div>
+    <form action="" method="POST"  novalidate="novalidate">
+        {% csrf_token %}
+        <div class="btnArea ablock">
+            <button type="submit" id="create" name="create" class="create funcbtn">新增</button>
+            <button type="button" id="query" name="query" class="query funcbtn">查詢</button>
+        </div>
+        <div class="formArea ablock">
+            {% for field in form %}
+            <span class="field">
+                <span id="{{ field.auto_id }}_label" class="input_label">{{field.label}}</span>
+                <span class="input_field">{{field}}</span>
+                <span id="{{ field.auto_id }}_err" class="errMsg"></span>
+            </span>
+
+            {% endfor %}
+
+        </div>
+
+
+    </form>
+
+</div>
+
+
+<script src="{% static 'js/examine_col.js' %}"></script>
+<script>
+    var cpnyid = new FieldExamine("id_cpnyid","id_cpnyid_label",false,5,10,'id_cpnyid_err',[checkEngNumCombination]);
+    var cocname = new FieldExamine("id_cocname","id_cocname_label",false,1,255,'id_cocname_err',[]);
+    cpnyid.executeFist();
+    cocname.executeFist();
+
+
+</script>
+<!--Jquery-->
+<script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+<script>
+    $("#create").on("click",function(){
+        var errs = document.querySelectorAll(".errMsg");
+        for(var ele of errs){
+            if(ele.textContent.trim().length>0){
+                console.log("check field");
+                return false;
+            }
+        }
+        return true;
+    })
+</script>
+
+{% include 'share/success_modal.html' %}
+
+{% if success	%}
+	<link rel="stylesheet" href="{%	static 'css/success_modal.css' %}">
+	{% include 'share/show_success_msg.html' %}
+{% endif %}
+
+
+{% include 'share/wrong_modal.html' %}
+
+{% if wrong	%}
+	<link rel="stylesheet" href="{%	static 'css/wrong_modal.css' %}">
+	{% include 'share/show_wrong_msg.html' %}
+{% endif %}
+
+{% include 'share/bootstrap_script.html' %}
+
+
+{% endblock content %}

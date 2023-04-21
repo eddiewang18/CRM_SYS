@@ -1,0 +1,40 @@
+.my-btn {
+    text-decoration: none;
+    color: #fff;
+    background: #00cc99;
+    padding: 5px 16px;
+    display: inline-block;
+    border-radius: 3px;
+    transition: 0.3s;
+  }
+  .my-btn:hover {
+    background: #333;
+  }
+
+  .my-btn:active {
+    border:gainsboro 1px solid ;
+  }
+
+/* .wrong_modal{
+    color: red;
+    font-size: 40px;
+}
+.wrong_text{
+    margin: 20px;
+    color: red;
+} */
+
+/* 
+div.modal {
+
+  position: absolute;
+  left: 50%;
+  top: 50%; 
+  margin-left: -150px;
+  margin-top: -150px;
+}
+ */
+.draggable{
+  cursor: grab;
+  position: absolute;
+}

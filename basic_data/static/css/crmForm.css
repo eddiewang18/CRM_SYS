@@ -1,0 +1,57 @@
+.wrap{
+    margin: 15px 10px;
+    height: 100%;
+}
+
+.funcTitle{
+    font-size: 22px;
+}
+
+.ablock{
+    margin: 10px 0px 0px 0px;
+}
+
+button{
+    margin: 0px 20px 0px 0px;
+    padding: 5px 8px;
+    border-radius: 3px;
+}
+
+button:hover{
+    background-color: gainsboro;
+}
+
+button:active{
+    background-color: rgb(189, 189, 189);
+    color: white;
+}
+
+div.formArea{
+    margin: 25px 0px 0px 0px;
+}
+
+
+
+span{
+    display: inline-block;
+    font-size: 20px;
+    margin: 5px 0px 5px 0px;
+}
+
+span.field{
+    width: 420px;
+}
+
+span.input_label{
+   width: 150px;
+}
+
+span.input_field{
+   width: 250px;
+}
+
+.errMsg{
+    color: red;
+    font-size: 14px;
+    font-weight: 800;
+}

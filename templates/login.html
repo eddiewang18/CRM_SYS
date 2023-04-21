@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	{% include 'share/bootstrap_css.html' %}
+
+	<link rel="stylesheet" href="{%	static 'css/common.css'	%}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+
+
+</head>
+<body>
+{% if not request.user.is_authenticated %}
+	<div class="box">
+		<div class="container">
+			<div class="top">
+				<span id="mainTitle">CRM System</span>
+				<header>Login</header>
+			</div>
+			<form action="" method="POST">
+				{% csrf_token %}
+				<div class="input-field">
+					<input type="text" class="input" placeholder="帳號" name="username" id="id_username">
+					<i class='bx bx-user' ></i>
+				</div>
+
+				<div class="input-field">
+					<input type="Password" class="input" placeholder="密碼" id="id_password" name="password">
+					<i class='bx bx-lock-alt'></i>
+				</div>
+
+				<div class="input-field ">
+					<input type="submit" class="submit loginBtn" value="Login" id="">
+				</div>
+
+			</form>
+		</div>
+	</div>  
+{% else %}
+    <div class="logoutMsg">您已登入，需要 <a class="my-btn" href="{% url 'logout' %}">登出</a>嗎?</div>
+{% endif %}
+{% include 'share/wrong_modal.html' %}
+
+{% if wrong	%}
+	<link rel="stylesheet" href="{%	static 'css/wrong_modal.css' %}">
+	{% include 'share/show_wrong_msg.html' %}
+{% endif %}
+
+{% include 'share/bootstrap_script.html' %}
+
+
+</body>
+</html>
