@@ -22,7 +22,7 @@ A01維護公司(品牌)資料
         {% csrf_token %}
         <div class="btnArea ablock">
             <button type="submit" id="create" name="create" class="create funcbtn">新增</button>
-            <button type="button" id="query" name="query" class="query funcbtn">查詢</button>
+            <button type="submit" id="query" name="query" class="query funcbtn">查詢</button>
         </div>
         <div class="formArea ablock">
             {% for field in form %}
@@ -81,7 +81,128 @@ A01維護公司(品牌)資料
 	{% include 'share/show_wrong_msg.html' %}
 {% endif %}
 
+
+{% include 'share/noData_modal.html' %}
+
+{% if noData	%}
+	<link rel="stylesheet" href="{%	static 'css/noData_modal.css' %}">
+	{% include 'share/show_noData_msg.html' %}
+{% endif %}
+
+
+{% include 'share/queryModal.html' %}
+
+{% if queryModal %}
+
+	{% include 'share/show_queryModal.html' %}
+{% endif %}
+
+
 {% include 'share/bootstrap_script.html' %}
 
+<script src="{% static 'js/common.js' %}"></script>
+<script>
+    moveModal("#modal");
+
+    //按查詢時的相關流程
+    var qbtn = document.querySelector("#qbtn"); // 查詢modal中的[查詢欄位]按鈕
+    var resultbtn = document.querySelector("#resultbtn");// 查詢modal中的[結果顯示]按鈕
+    var modalLowerBody = document.querySelector("#modalLowerBody");
+    var resultModaltable = document.querySelector("#resultModaltable");
+    // 查詢btn
+    // var query_btn = document.querySelector("#query");
+    // query_btn.onclick = function(){
+    //     modalLowerBody.style.display='block';
+    //     return true;
+    // }
+
+    qbtn.onclick = function(){
+        resultModaltable.style.display = 'none';
+        modalLowerBody.style.display = 'block';
+        if(! qbtn.classList.contains("highlight")){
+            qbtn.classList.add('highlight');
+        }
+
+        if(resultbtn.classList.contains("highlight")){
+            resultbtn.classList.remove('highlight');
+            resultbtn.classList.add('gray');
+        }
+
+    }
+    resultbtn.onclick = function(){
+        modalLowerBody.style.display = 'none';
+        resultModaltable.style.display = 'block';
+        if(! resultbtn.classList.contains("highlight")){
+            resultbtn.classList.add('highlight');
+        }
+
+        if(qbtn.classList.contains("highlight")){
+            qbtn.classList.remove('highlight');
+            qbtn.classList.add('gray');
+        }
+
+    }
+
+
+
+</script>
+
+<script>
+    // 送出查詢表單時:
+    // 1.先綁定 [送出查詢表單]的btn
+    var querySubmit = document.querySelector("#querySubmit");
+    querySubmit.addEventListener("click",function(){
+        var input_field_list  = document.querySelectorAll('.qmodal_field input');
+        // 2.先將查詢的欄位輸入框的name屬性 作為 json物件的key , value屬性 作為 json物件的value屬性
+        var request_data = {};
+        for(var i of input_field_list){
+            request_data[i.name]=i.value;
+        }
+        console.log(request_data);
+        
+        //將查詢欄位的資訊(request_data)透過ajax發送至後台
+        
+		 //發送ajax請求時須加上下列這段程式碼來通過django的csrf_token驗證機制
+        function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+        const csrftoken = getCookie('csrftoken');
+		//發送ajax請求時須加上上面這段程式碼來通過django的csrf_token驗證機制
+        $.ajax({
+
+            url:"{% url 'basic_data:a01' %}",
+            method:"POST",
+            dataType:"json",
+            headers: {'X-CSRFToken': csrftoken}, //在headers中要提供csrftoken，讓client發送請求時攜帶csrftoken資訊
+            data:{
+                requestData:JSON.stringify(request_data) ,
+                querySubmit:'true'
+                
+            },
+            success:function(response){
+                console.log(response);
+                console.log("fron-end accpet data!");
+            }
+
+
+            })
+
+    })
+
+    
+
+</script>
 
 {% endblock content %}

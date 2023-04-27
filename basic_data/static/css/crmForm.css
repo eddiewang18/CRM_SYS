@@ -1,3 +1,4 @@
+/* 功能頁面css style */
 .wrap{
     margin: 15px 10px;
     height: 100%;
@@ -31,7 +32,7 @@ div.formArea{
 }
 
 
-
+/* 功能頁面 欄位布局 */
 span{
     display: inline-block;
     font-size: 20px;
@@ -54,4 +55,101 @@ span.input_field{
     color: red;
     font-size: 14px;
     font-weight: 800;
+}
+
+
+/* 查詢modal css */
+/* 查詢modal的欄位縮小 */
+
+.qmodal span{
+    display: inline-block;
+    font-size:16px;
+    margin: 5px 0px 5px 0px;
+}
+
+.qmodal span.field{
+    width: 290px;
+}
+
+
+.qmodal span.input_label{
+    width: 100px;
+ }
+ 
+ .qmodal span.input_field{
+    width: 170px;
+ }
+ 
+ /* 調整查詢modal的整個寬度 */
+ div.qmodal-dialog{
+    width: 400px;
+ }
+
+
+
+ #t1{
+    width:  230px;
+    height: 50px;
+
+}
+
+.queryfuncBlock{
+    width: 95px;
+    padding: 5px 0px;
+    box-sizing: border-box ;
+    margin: 5px;
+    float: left;
+    border: 1px solid black;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.gray{
+    background-color: gainsboro;
+}
+
+.highlight{
+    background-color: rgb(227, 183, 8);
+    color: white;
+    font-size: bold;
+}
+
+
+div.qmodal .modal-header{
+    height: 70px;
+}
+
+/* 結果顯示table 區塊 */
+#resultModaltable{
+    overflow-y: auto;
+    height: 300px;
+    display: None; 
+}
+
+
+#qmodal_result_table{
+    width: 98%;
+    border: 2px solid black;
+    border-collapse: collapse;
+    margin: auto;
+}
+
+#qmodal_result_table td{
+    border: 2px solid black;
+    padding: 5px;
+    font-weight: 800;
+}
+
+.title_row{
+    background-color: aliceblue;
+}
+
+/* modal 的 x按鈕大小設定 */
+button.close span{
+    font-size: 30px;
+}
+
+
+#modalLowerBody{
+   
 }

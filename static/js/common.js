@@ -1,29 +1,20 @@
-function moveContainer(){
-    var draglist = document.querySelectorAll(".draggable");
-    for(var d of draglist){
-        d.addEventListener("mousedown",function(e){
-            var clickX = this.offsetLeft;
-            var clickY = this.offsetTop;
-            var mouseFisrtX = e.clientX;
-            var mouseFisrtY = e.clientY;
-            var differX = mouseFisrtX-clickX;
-            var differY = mouseFisrtY-clickY;
-            var my = this;
-    
-            document.onmousemove = function (e) {
-                var st = document.body.scrollTop;
-                my.style.left = (e.clientX-differX)+"px";
-                my.style.top = (e.clientY-differY+st)+"px";
-                // this.style.top= (e.clientX-differX)+"px";
-                // this.style.mouseFisrtY
-            }
-    
-            document.onmouseup=function(e){
-                document.onmousemove = null;
-                document.onmouseup = null;
-            }
-    
-        })
-    }
-}
+//讓所選的元素可以在頁面上移動
+function moveModal(modalSelector){
+	var modal = document.querySelector(modalSelector);
+	modal.onmousedown= function(e){
+		var diffx = e.pageX-this.offsetLeft;
+		var diffy = e.pageY-this.offsetTop;
 
+		document.onmousemove = function(e){
+			modal.style.left = (e.pageX-diffx)+'px';
+			modal.style.top = (e.pageY-diffy)+'px';
+
+		}
+
+		document.onmouseup = function(){
+			document.onmousemove = null;
+			document.onmouseup  = null;
+		}
+
+	}
+}

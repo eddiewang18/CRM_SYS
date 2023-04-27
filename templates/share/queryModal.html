@@ -1,0 +1,70 @@
+<div id="queryModal" class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+	<div class="modal-dialog qmodal-dialog" role="document">
+	
+	<form action="" method="POST" novalidate="novalidate">
+
+		{% csrf_token %}
+		<div class="modal-content qmodal" id="modal">
+			 <!-- Modal Header -->
+			<div class="modal-header">		
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				  </button>
+			  <div id="t1">
+					<div id="qbtn" class="queryfuncBlock highlight ">查詢欄位</div>
+					<div id="resultbtn" class="queryfuncBlock gray ">結果顯示</div>
+			  </div>
+
+			</div>			
+			
+			<div id="lowerBody">
+
+				<div id="modalLowerBody">
+					<div class="modal-body formArea" >
+						{% for field in form  %}
+							<span class="field">
+								<span id="{{ field.auto_id }}_label" class="input_label qmodal_label">{{field.label}}</span>
+								<span class="input_field qmodal_field">{{field}}</span>
+								<span id="{{ field.auto_id }}_err" class="errMsg"></span>
+							</span>
+						{% endfor %}
+	
+	
+					</div>
+					
+					<div class="modal-footer">
+					  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					  <!-- <button name="querySubmit" type="submit" class="btn btn-primary">送出</button> -->
+					  <button name="querySubmit" id="querySubmit" type="button" class="btn btn-primary">送出</button>
+					</div>
+				</div>
+
+
+				<!-- 結果顯示區域 -->
+				<div id="resultModaltable">
+
+					<table id="qmodal_result_table">
+						<tr class="title_row">
+							{% for field in form  %}
+								{% if forloop.counter0 < 3 %}
+									<td>
+										{{field.label}}
+									</td>
+								{% endif %}
+							{% endfor %}
+						</tr>
+					</table>
+				</div>
+
+				
+
+			</div>
+
+
+
+		  </div>
+
+	</form>
+
+	</div>
+  </div>
