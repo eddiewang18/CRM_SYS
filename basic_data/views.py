@@ -17,6 +17,7 @@ class A01View(View):
         return render(request,'basic_data/A01.html',context)
     
     def post(self,request):
+
         if 'create' in request.POST:
             form = CRM_COMPANY_ModelForm(data=request.POST)
             context = {
@@ -42,23 +43,33 @@ class A01View(View):
 
             return render(request,'basic_data/A01.html',context)
 
-        elif "querySubmit" in request.POST:
+        # elif "querySubmit" in request.POST:
+        #     # print(f'request.POST : {request.POST}')
+        #     requestData = json.loads(request.POST.get("requestData"))
+        #     print(f'{requestData}\n{type(requestData)}\n')
+        #     # cols = ['cpnyid','cocname','coename','coscname','cosename']
+        #     cols = ['cpnyid','cocname','coename']
+        #     result_query = list(CRM_COMPANY().crmQdata(requestData).values(*cols))
+        #     print(result_query)
+
+
+
+        #     return JsonResponse(result_query,safe=False)
+
+        # 用axios發送post
+        elif "querySubmit" in  json.loads(request.body.decode('utf-8'))['params']:
+            
             # print(f'request.POST : {request.POST}')
-            requestData = json.loads(request.POST.get("requestData"))
+            requestData =json.loads(json.loads(request.body.decode('utf-8'))['params']['requestData'])
             print(f'{requestData}\n{type(requestData)}\n')
-            result_query = CRM_COMPANY().crmQdata(requestData)
-            print(f'\n\nresult_query:{result_query}\n\n')
-            context={
-                
-            }
+            # cols = ['cpnyid','cocname','coename','coscname','cosename']
+            cols = ['cpnyid','cocname','coename']
+            result_query = list(CRM_COMPANY().crmQdata(requestData).values(*cols))
+            print(result_query)
 
-            if len(result_query)>0:
-                context['result_query']=result_query
-            else:
-                context['noData']="查無數據"
 
-            return JsonResponse({"Ok":"ajax ok"})
 
+            return JsonResponse(result_query,safe=False)
 
 
 @receiver(pre_save,sender=CRM_COMPANY)

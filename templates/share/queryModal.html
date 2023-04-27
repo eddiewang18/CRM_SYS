@@ -1,25 +1,24 @@
+
 <div id="queryModal" class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
 	<div class="modal-dialog qmodal-dialog" role="document">
 	
-	<form action="" method="POST" novalidate="novalidate">
-
-		{% csrf_token %}
-		<div class="modal-content qmodal" id="modal">
+		<div @mousedown="moveModal" class="modal-content qmodal" id="modal">
 			 <!-- Modal Header -->
 			<div class="modal-header">		
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				  </button>
 			  <div id="t1">
-					<div id="qbtn" class="queryfuncBlock highlight ">查詢欄位</div>
-					<div id="resultbtn" class="queryfuncBlock gray ">結果顯示</div>
-			  </div>
+					<!-- <div @click="queryCol" id="qbtn" class="queryfuncBlock highlight ">查詢欄位</div> -->
+					<div @click="queryCol" id="qbtn" class="queryfuncBlock" :class="cls.qbtn">查詢欄位</div>
+					<div @click="showResult" id="resultbtn" class="queryfuncBlock" :class="cls.resultbtn">結果顯示<span id="qrscount"> %%%qresultCount%%%</span></div>
+			  </div> 
 
 			</div>			
 			
 			<div id="lowerBody">
 
-				<div id="modalLowerBody">
+				<div :style="sty.qbtn" id="modalLowerBody">
 					<div class="modal-body formArea" >
 						{% for field in form  %}
 							<span class="field">
@@ -35,13 +34,13 @@
 					<div class="modal-footer">
 					  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 					  <!-- <button name="querySubmit" type="submit" class="btn btn-primary">送出</button> -->
-					  <button name="querySubmit" id="querySubmit" type="button" class="btn btn-primary">送出</button>
+					  <button @click="queryFunc" name="querySubmit" id="querySubmit" type="button" class="btn btn-primary">送出</button>
 					</div>
 				</div>
 
 
 				<!-- 結果顯示區域 -->
-				<div id="resultModaltable">
+				<div :style="sty.resultbtn" id="resultModaltable">
 
 					<table id="qmodal_result_table">
 						<tr class="title_row">
@@ -53,6 +52,13 @@
 								{% endif %}
 							{% endfor %}
 						</tr>
+						<!-- 以下代碼為測試 -->
+						<tr v-for="(item, index) in responseData">
+							<td v-for="(item1,key,index1) in item" :name="key">
+								%%%item1%%%
+							</td>
+						</tr>
+						<!-- 以上代碼為測試 -->
 					</table>
 				</div>
 
@@ -64,7 +70,6 @@
 
 		  </div>
 
-	</form>
 
 	</div>
   </div>

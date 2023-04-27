@@ -7,6 +7,7 @@ A01維護公司(品牌)資料
 
 
 {% block style2 %}
+<link rel="stylesheet" href="{%	static 'css/noData_modal.css' %}">
 <link rel="stylesheet" href="{% static 'css/crmForm.css' %}">
 {% endblock style2 %}
 
@@ -84,10 +85,10 @@ A01維護公司(品牌)資料
 
 {% include 'share/noData_modal.html' %}
 
-{% if noData	%}
+<!-- {% if noData	%}
 	<link rel="stylesheet" href="{%	static 'css/noData_modal.css' %}">
 	{% include 'share/show_noData_msg.html' %}
-{% endif %}
+{% endif %} -->
 
 
 {% include 'share/queryModal.html' %}
@@ -100,106 +101,237 @@ A01維護公司(品牌)資料
 
 {% include 'share/bootstrap_script.html' %}
 
-<script src="{% static 'js/common.js' %}"></script>
-<script>
-    moveModal("#modal");
 
-    //按查詢時的相關流程
+
+<script src="{% static 'js/vue.js' %}"></script>
+
+<script>
+
     var qbtn = document.querySelector("#qbtn"); // 查詢modal中的[查詢欄位]按鈕
     var resultbtn = document.querySelector("#resultbtn");// 查詢modal中的[結果顯示]按鈕
     var modalLowerBody = document.querySelector("#modalLowerBody");
     var resultModaltable = document.querySelector("#resultModaltable");
-    // 查詢btn
-    // var query_btn = document.querySelector("#query");
-    // query_btn.onclick = function(){
-    //     modalLowerBody.style.display='block';
-    //     return true;
-    // }
+  
+    var vm = new Vue({
+        el:"#queryModal",
+        delimiters: ['%%%', '%%%'],
+        data:{
+            responseData:[],
+            showMsg:false,
+            cls:{
+                qbtn:{
+                    gray:false,
+                    highlight:true
+                },
+                resultbtn:{
+                    gray:true,
+                    highlight:false
+                }
+            },
+            sty:{
+                qbtn:{
+                    display:"block"
+                },
+                resultbtn:{
+                    display:"none"
+                } 
+            },
+            qresultCount:""
 
-    qbtn.onclick = function(){
-        resultModaltable.style.display = 'none';
-        modalLowerBody.style.display = 'block';
-        if(! qbtn.classList.contains("highlight")){
-            qbtn.classList.add('highlight');
+        },
+        methods:{
+            queryFunc(){
+                //queryFunc開始
+                console.log("點擊送出!!");
+                        
+                // 2.先將查詢的欄位輸入框的name屬性 作為 json物件的key , value屬性 作為 json物件的value屬性
+                var input_field_list  = document.querySelectorAll('.qmodal_field input');
+                var request_data = {};
+                for(var i of input_field_list){
+                    request_data[i.name]=i.value;
+                }
+                console.log(request_data);
+
+                //發送ajax請求時須加上下列這段程式碼來通過django的csrf_token驗證機制
+                function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+                 }   
+
+                 const csrftoken = getCookie('csrftoken');
+
+                
+            	//發送ajax請求時須加上上面這段程式碼來通過django的csrf_token驗證機制
+                // $.ajax({
+
+                //     url:"{% url 'basic_data:a01' %}",
+                //     method:"POST",
+                //     dataType:"json",
+                //     headers: {'X-CSRFToken': csrftoken}, //在headers中要提供csrftoken，讓client發送請求時攜帶csrftoken資訊
+                //     data:{
+                //         requestData:JSON.stringify(request_data) ,
+                //         querySubmit:'true'
+                        
+                //     },
+                //     success:function(response){
+                //         console.log(response);//打印成功請求後回傳的資料
+                
+                //         console.log("fron-end accpet data!");
+                //         this.responseData = response;
+                //         console.log(this.responseData);
+                //     }
+
+
+                //     })         
+                
+               axios.defaults.headers.common["X-CSRFToken"]=csrftoken;
+
+                axios.post("{% url 'basic_data:a01' %}",
+                    {
+                        params:{
+                            requestData:JSON.stringify(request_data) ,
+                            querySubmit:'true'
+                        }
+                    }
+                ).then(response => {
+                    console.log("fron-end accpet data!");
+                    console.log(response.data);
+                    this.responseData=response.data;
+                    var count = this.responseData.length;
+                    if(count>0){
+                        this.qresultCount=count+'筆';
+                        this.showResult();
+                    }else{
+                        $('#queryModal').modal('hide');
+                        $('#noDataMsg').modal('show');
+
+                    }
+
+
+                }).catch(function(error){
+                    console.log(error);
+                })
+
+
+
+                //queryFunc結束
+            },
+            moveModal(){
+                //moveModal開始
+                //modal移動
+                var modal = document.querySelector('#modal');
+	            modal.onmousedown= function(e){
+                var diffx = e.pageX-this.offsetLeft;
+                var diffy = e.pageY-this.offsetTop;
+
+                document.onmousemove = function(e){
+                    modal.style.left = (e.pageX-diffx)+'px';
+                    modal.style.top = (e.pageY-diffy)+'px';
+
+                }
+
+                document.onmouseup = function(){
+                    document.onmousemove = null;
+                    document.onmouseup  = null;
+                }
+
+	            }
+                //moveModal結束
+            },
+            queryCol(){
+                // 點擊[查詢欄位]btn時，將[結果顯示]btn的按鈕顏色變灰
+                //queryCol開始
+                this.cls.qbtn.gray=false;
+                this.cls.qbtn.highlight=true;
+                this.cls.resultbtn.gray=true;
+                this.cls.resultbtn.highlight=false;     
+                // 點擊[查詢欄位]btn時，將查詢欄位區塊顯示
+                this.sty.qbtn.display="block";
+                this.sty.resultbtn.display="none";
+                //queryCol結束
+            },
+            showResult(){
+                //showResult開始
+                // 點擊[結果顯示]btn時，將[查詢欄位]btn的按鈕顏色變灰
+                this.cls.resultbtn.gray=false;
+                this.cls.resultbtn.highlight=true;
+                this.cls.qbtn.gray=true;
+                this.cls.qbtn.highlight=false;  
+                // 點擊[結果顯示]btn時，將結果顯示區塊顯示
+                this.sty.qbtn.display="none";
+                this.sty.resultbtn.display="block";
+                //showResult結束
+            },
         }
-
-        if(resultbtn.classList.contains("highlight")){
-            resultbtn.classList.remove('highlight');
-            resultbtn.classList.add('gray');
-        }
-
-    }
-    resultbtn.onclick = function(){
-        modalLowerBody.style.display = 'none';
-        resultModaltable.style.display = 'block';
-        if(! resultbtn.classList.contains("highlight")){
-            resultbtn.classList.add('highlight');
-        }
-
-        if(qbtn.classList.contains("highlight")){
-            qbtn.classList.remove('highlight');
-            qbtn.classList.add('gray');
-        }
-
-    }
+    })
 
 
-
-</script>
-
-<script>
     // 送出查詢表單時:
     // 1.先綁定 [送出查詢表單]的btn
-    var querySubmit = document.querySelector("#querySubmit");
-    querySubmit.addEventListener("click",function(){
-        var input_field_list  = document.querySelectorAll('.qmodal_field input');
-        // 2.先將查詢的欄位輸入框的name屬性 作為 json物件的key , value屬性 作為 json物件的value屬性
-        var request_data = {};
-        for(var i of input_field_list){
-            request_data[i.name]=i.value;
-        }
-        console.log(request_data);
+    // var querySubmit = document.querySelector("#querySubmit");
+    // querySubmit.addEventListener("click",function(){
+    //     var input_field_list  = document.querySelectorAll('.qmodal_field input');
+    //     // 2.先將查詢的欄位輸入框的name屬性 作為 json物件的key , value屬性 作為 json物件的value屬性
+    //     var request_data = {};
+    //     for(var i of input_field_list){
+    //         request_data[i.name]=i.value;
+    //     }
+    //     console.log(request_data);
         
-        //將查詢欄位的資訊(request_data)透過ajax發送至後台
+    //     //將查詢欄位的資訊(request_data)透過ajax發送至後台
         
-		 //發送ajax請求時須加上下列這段程式碼來通過django的csrf_token驗證機制
-        function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-        const csrftoken = getCookie('csrftoken');
-		//發送ajax請求時須加上上面這段程式碼來通過django的csrf_token驗證機制
-        $.ajax({
+	// 	 //發送ajax請求時須加上下列這段程式碼來通過django的csrf_token驗證機制
+    //     function getCookie(name) {
+    //     let cookieValue = null;
+    //     if (document.cookie && document.cookie !== '') {
+    //         const cookies = document.cookie.split(';');
+    //         for (let i = 0; i < cookies.length; i++) {
+    //             const cookie = cookies[i].trim();
+    //             // Does this cookie string begin with the name we want?
+    //             if (cookie.substring(0, name.length + 1) === (name + '=')) {
+    //                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //     return cookieValue;
+    // }
+    //     const csrftoken = getCookie('csrftoken');
+	// 	//發送ajax請求時須加上上面這段程式碼來通過django的csrf_token驗證機制
+    //     $.ajax({
 
-            url:"{% url 'basic_data:a01' %}",
-            method:"POST",
-            dataType:"json",
-            headers: {'X-CSRFToken': csrftoken}, //在headers中要提供csrftoken，讓client發送請求時攜帶csrftoken資訊
-            data:{
-                requestData:JSON.stringify(request_data) ,
-                querySubmit:'true'
+    //         url:"{% url 'basic_data:a01' %}",
+    //         method:"POST",
+    //         dataType:"json",
+    //         headers: {'X-CSRFToken': csrftoken}, //在headers中要提供csrftoken，讓client發送請求時攜帶csrftoken資訊
+    //         data:{
+    //             requestData:JSON.stringify(request_data) ,
+    //             querySubmit:'true'
                 
-            },
-            success:function(response){
-                console.log(response);
-                console.log("fron-end accpet data!");
-            }
+    //         },
+    //         success:function(response){
+    //             console.log(response);//打印成功請求後回傳的資料
+          
+    //             console.log("fron-end accpet data!");
+    //             // vm.showMsg=true;
+    //             vm.responseData = response;
+    //         }
 
 
-            })
+    //         })
 
-    })
+    // })
 
     
 

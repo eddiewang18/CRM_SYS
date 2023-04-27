@@ -150,6 +150,15 @@ button.close span{
 }
 
 
-#modalLowerBody{
-   
+#qmodal_result_table td{
+    padding: 5px;
+    height: 25px;
+}
+
+/* 顯示查詢比數的字樣style */
+#qrscount{
+    font-weight: bold;
+    color: rgb(220, 15, 15);
+    display: inline-block;
+    margin: 0px 0px 0px  4px;
 }
