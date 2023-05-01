@@ -72,7 +72,7 @@ function FieldExamine(field_ele_id,field_name_ele_id,blank,min,max,err_msg_block
         
     }
 
-    this.executeFist = function(){
+    this.executeField = function(){
         var msg='';
         var msg_list = examine(self.field_ele,self.field_name_ele,self.field_name,self.field_tag_name);
         // console.log(msg_list);
@@ -88,7 +88,7 @@ function FieldExamine(field_ele_id,field_name_ele_id,blank,min,max,err_msg_block
         self.err_msg_block_ele.innerHTML = msg;
     }
 
-    this.field_ele.addEventListener('keyup',this.executeFist)
+    this.field_ele.addEventListener('keyup',this.executeField)
     
 }
 

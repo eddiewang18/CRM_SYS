@@ -122,6 +122,7 @@ div.qmodal .modal-header{
 /* 結果顯示table 區塊 */
 #resultModaltable{
     overflow-y: auto;
+    overflow-x: auto;
     height: 300px;
     display: None; 
 }
@@ -161,4 +162,13 @@ button.close span{
     color: rgb(220, 15, 15);
     display: inline-block;
     margin: 0px 0px 0px  4px;
+}
+
+
+.selected{
+    background-color:gainsboro;
+  }
+  
+.btnArea a {
+    color: black;
 }

@@ -37,7 +37,7 @@
 .modal-confirm .modal-footer a {
     color: #999;
 }		
-.modal-confirm .icon-box {
+#noDataMsg .modal-confirm .icon-box {
     width: 80px;
     height: 80px;
     margin: 0 auto;
@@ -46,7 +46,7 @@
     text-align: center;
     border: 3px solid #c8bb2a;
 }
-.modal-confirm .icon-box i {
+#noDataMsg .modal-confirm .icon-box i {
     color: #ccbf2a;
     font-size: 46px;
     display: inline-block;
@@ -54,7 +54,7 @@
 }
 
 
-.modal-title{
+#noDataMsg .modal-title{
   color:#ccbf2a;
 font-family:arial;
 }

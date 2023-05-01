@@ -17,8 +17,8 @@ class CrmQueryData():
         qs_result = self.__class__
         count = 0 # 用來輔助判斷最後查詢的結果是否為全查
         count1 = 0
-        print(f"----------\n開始查詢數據")
-        print(f'queryDict:{queryDict}')
+        # print(f"----------\n開始查詢數據")
+        # print(f'queryDict:{queryDict}')
         for queryType, fields in self.fieldQueryRule.items():
             # 依不同欄位的類型queryType(有的欄位用equal查詢 有的欄位用like....)
             # 如果查詢類型有對應的欄位則進行資料查詢 篩選
@@ -49,15 +49,12 @@ class CrmQueryData():
                         count1+=1
                     else :
                         qs_result = qs_result.filter(**qdict)
-                    print(f'queryType:{queryType}')
-                    print(f'qdict:{qdict}')
-                    print(f'qs_result:{qs_result}')
-                    print("\n")
-        #     else:
-        #         count+=1
-        # if count%len(self.fieldQueryRule)==0:
-        #     return self.__class__.objects.all()
-        print(f"結束查詢數據\n----------")
+                    # print(f'queryType:{queryType}')
+                    # print(f'qdict:{qdict}')
+                    # print(f'qs_result:{qs_result}')
+                    # print("\n")
+
+        # print(f"結束查詢數據\n----------")
         return qs_result
 
 

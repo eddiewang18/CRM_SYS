@@ -5,15 +5,16 @@ from django.core.exceptions import ValidationError
 
 
 class CRM_COMPANY_ModelForm(ModelForm):
-
-    def __init__(self,*args,**kwargs):
-        super().__init__(*args,**kwargs)
-        self.errList = []
-
-
+    
     class Meta :
         model=CRM_COMPANY
         fields = ["cpnyid","cocname","coename","coscname","cosename"]
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.errList = []
+        self.fields['cpnyid'].widget.attrs.update({'class': 'pkField'}) #為某個欄位加上class屬性值
+
+
 
     def clean_cpnyid(self):
         cpnyid = self.cleaned_data.get("cpnyid")

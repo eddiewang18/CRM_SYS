@@ -45,20 +45,21 @@
 					<table id="qmodal_result_table">
 						<tr class="title_row">
 							{% for field in form  %}
-								{% if forloop.counter0 < 3 %}
+								<!-- {% if forloop.counter0 < 3 %}
 									<td>
 										{{field.label}}
 									</td>
-								{% endif %}
+								{% endif %} -->
+								<td>
+									{{field.label}}
+								</td>
 							{% endfor %}
 						</tr>
-						<!-- 以下代碼為測試 -->
-						<tr v-for="(item, index) in responseData">
-							<td v-for="(item1,key,index1) in item" :name="key">
+						<tr  v-for="(item, index) in responseData">
+							<td @click="showQuery" v-for="(item1,key,index1) in item" :name="key">
 								%%%item1%%%
 							</td>
 						</tr>
-						<!-- 以上代碼為測試 -->
 					</table>
 				</div>
 

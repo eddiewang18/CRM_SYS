@@ -37,7 +37,7 @@
 .modal-confirm .modal-footer a {
     color: #999;
 }		
-.modal-confirm .icon-box {
+#successMsg .modal-confirm .icon-box , #successMsg_vue .modal-confirm .icon-box{
     width: 80px;
     height: 80px;
     margin: 0 auto;
@@ -46,7 +46,7 @@
     text-align: center;
     border: 3px solid #2acc76;
 }
-.modal-confirm .icon-box i {
+#successMsg .modal-confirm .icon-box i , #successMsg_vue .modal-confirm .icon-box i{
     color: #2acc76;
     font-size: 46px;
     display: inline-block;
@@ -54,7 +54,7 @@
 }
 
 
-.modal-title{
+#successMsg .modal-title, #successMsg_vue  .modal-title{
   color:#2acc76;
 font-family:arial;
 }

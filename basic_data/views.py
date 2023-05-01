@@ -30,9 +30,9 @@ class A01View(View):
                 context['success']="成功儲存"
                 context['form']=CRM_COMPANY_ModelForm()
                 return render(request,'basic_data/A01.html',context)
-            else:
-                context['wrong']=form.errList[0]
-                return render(request,'basic_data/A01.html',context)
+            
+            context['wrong']=form.errList[0]
+            return render(request,'basic_data/A01.html',context)
         elif 'query' in request.POST:
             form = CRM_COMPANY_ModelForm()
             context = {
@@ -61,15 +61,49 @@ class A01View(View):
             
             # print(f'request.POST : {request.POST}')
             requestData =json.loads(json.loads(request.body.decode('utf-8'))['params']['requestData'])
-            print(f'{requestData}\n{type(requestData)}\n')
-            # cols = ['cpnyid','cocname','coename','coscname','cosename']
-            cols = ['cpnyid','cocname','coename']
+            # print(f'{requestData}\n{type(requestData)}\n')
+            cols = ['cpnyid','cocname','coename','coscname','cosename']
+            # cols = ['cpnyid','cocname','coename']
             result_query = list(CRM_COMPANY().crmQdata(requestData).values(*cols))
-            print(result_query)
-
-
+            # print(result_query)
 
             return JsonResponse(result_query,safe=False)
+        elif "delete" in  json.loads(request.body.decode('utf-8'))['params']:
+            print("\n==========delete==========\n")
+
+            requestData =json.loads(request.body.decode('utf-8'))
+            pk_fields = json.loads(requestData['params']['pk_fields']) 
+            print(f'pk_fields : {pk_fields} | pk_fields type :{type(pk_fields)}')
+            del_instance = CRM_COMPANY().crmQdata(pk_fields)[0]
+            print(del_instance)
+            del_instance.delete()
+            # print("\ndelete OK\n")
+            return JsonResponse({})
+
+    def put(self,request):
+        print()
+        requestData =json.loads(request.body.decode('utf-8'))
+        pk_fields = json.loads(requestData['params']['pk_fields']) 
+        print(f'pk_fields : {pk_fields}')
+        updata_data = json.loads(requestData['params']['updateData'])
+        updated_instance = CRM_COMPANY().crmQdata(pk_fields)[0]
+        print(f'updated_instance : {updated_instance}')
+        form = CRM_COMPANY_ModelForm(instance=updated_instance,data=updata_data)
+        context = {
+            'form':form,
+            'queryModal':True
+        }
+        if form.is_valid():
+            
+            # context['success']="成功儲存"
+            context['form']=CRM_COMPANY_ModelForm()
+            form.save()
+
+            return JsonResponse({"update":"success"})
+        wrongMsg=form.errList[0]
+        print("表單驗證有誤")
+
+        return JsonResponse({"update":"fail","wrongMsg":wrongMsg})
 
 
 @receiver(pre_save,sender=CRM_COMPANY)
