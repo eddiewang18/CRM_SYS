@@ -1,4 +1,4 @@
-from .models import CRM_COMPANY
+from .models import CRM_COMPANY,SHOPGROUP
 from django.forms import ModelForm
 from django import forms
 from django.core.exceptions import ValidationError
@@ -49,3 +49,9 @@ class CRM_COMPANY_ModelForm(ModelForm):
         else:
             return cocname 
         
+
+class SHOPGROUP_ModelForm(ModelForm):
+    
+    class Meta :
+        model=SHOPGROUP
+        fields = ["shopgroup_id","shopgroup_name"]

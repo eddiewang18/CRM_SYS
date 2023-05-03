@@ -6,7 +6,7 @@ function checkStrLen(testStr,min,max){
     if(str_len>=min && str_len<=max){
         return [true];
     }
-    return [false,' 輸入的長度為'+min+'~'+max+'個字元'];
+    return [false,' 需輸入的長度為'+min+'~'+max+'個字元'];
 }
 
 
@@ -21,6 +21,12 @@ function checkEngNumCombination(testStr){
     return [false,' 僅能是英數字的組合'];
 }
 
+function fieldRequired(testStr){
+    if(testStr.length<1){
+        return [false," 不可空白"]
+    }
+    return [true]
+}
 
 // 輸入欄位的元素(field_ele_id)  輸入欄位名稱的元素(field_name_ele) 可否空白(blank) 欄位值長度範圍(min,max) 顯示警告訊息的區塊id(err_msg_block_id) 其他檢核函數> check_func_list
 // 至少會做的檢核 :
@@ -48,10 +54,12 @@ function FieldExamine(field_ele_id,field_name_ele_id,blank,min,max,err_msg_block
         }
     
         if(!blank){
-            if(input_txt.length<1){
-                // checkMsg+= field_name+" 不可空白"+"<br/>";
-                check_msg_list.push(field_name+" 不可空白");
+            if(!fieldRequired(input_txt)[0]){
+                check_msg_list.push(field_name+fieldRequired(input_txt)[1]);
             }
+            // if(input_txt.length<1){
+            //     check_msg_list.push(field_name+" 不可空白");
+            // }
             if(!checkStrLen(input_txt,min,max)[0]){
                 // checkMsg+= field_name+checkStrLen(input_txt,min,max)[1]+"<br/>";
                 check_msg_list.push(field_name+checkStrLen(input_txt,min,max)[1]);

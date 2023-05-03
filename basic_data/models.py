@@ -83,3 +83,25 @@ class CRM_COMPANY(models.Model,CrmQueryData):
         }  
 
 
+class SHOPGROUP(models.Model,CrmQueryData):
+    shopgroup_id = models.CharField(primary_key=True,max_length=10,db_column="shopgroup_id",verbose_name="群組編號")
+    shopgroup_name = models.CharField(max_length=50,db_column="shopgroup_name",verbose_name="群組名稱",unique=True)
+    cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
+    cdate = models.DateField(db_column="cdate",verbose_name='創立日期',auto_now_add=True)
+    ctime = models.TimeField(db_column="ctime",verbose_name='創立時間',auto_now_add=True)
+    muser = models.CharField(max_length=20,db_column="muser",verbose_name='異動者') 
+    mdate = models.DateField(db_column="mdate",verbose_name='異動日期',auto_now=True)
+    mtime = models.TimeField(db_column="mtime",verbose_name='異動時間',auto_now=True)
+
+    def __str__(self):
+        return  self.shopgroup_name   
+
+    class Meta:
+        db_table = "SHOPGROUP"  
+
+    fieldQueryRule = {
+        "equals":[],
+        "like":['shopgroup_id',"shopgroup_name"],
+        'date_range':[],
+        'number_range':[],
+        }  

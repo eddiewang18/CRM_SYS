@@ -31,14 +31,15 @@
     </div>
     <form action="" method="POST"  novalidate="novalidate">
         {% csrf_token %}
-        <div class="btnArea ablock">
+        <!-- <div class="btnArea ablock">
             <button @click="intoCreate" type="button" id="intoCreate" name="intoCreate" class="intoCreate funcbtn" v-if="onquery">進入新增模式</button>
             <button @click="examine_front_end_col" type="submit" id="create" name="create" class="create funcbtn" v-if="! onquery">新增</button>
             <button type="submit" id="query"  name="query" class="query funcbtn">查詢</button>
             <button @click="update" type="button" id="update" name="update" class="update funcbtn" v-if="onquery">修改</button>
             <button  @click="del"  type="button" id="delete" name="delete" class="delete funcbtn" v-if="onquery">刪除</button>
 
-        </div>
+        </div> -->
+        {% include 'share/btnArea.html' %}
         <div class="formArea ablock">
             {% for field in form %}
             <span class="field">

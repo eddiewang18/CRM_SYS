@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 from django.views import View
 from .models import CRM_COMPANY
-from .forms import CRM_COMPANY_ModelForm
+from .forms import CRM_COMPANY_ModelForm,SHOPGROUP_ModelForm
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.http import JsonResponse
@@ -106,13 +106,15 @@ import json
 #         return JsonResponse({"update":"fail","wrongMsg":wrongMsg})
 
 
-@receiver(pre_save,sender=CRM_COMPANY)
-def crm_company_pre_save(instance,**kwargs):
-    cpnyid = instance.pk 
-    print(instance)
-    data_exists =  CRM_COMPANY.objects.filter(cpnyid=cpnyid).exists()
-    if not data_exists:
-        instance.cuser = instance.muser
+def dataCuser(model):
+    @receiver(pre_save,sender=model)
+    def cuser_pre_save(instance,**kwargs):
+        pk_field = instance.pk 
+        data_exists =  model.objects.filter(pk=pk_field).exists()
+        if not data_exists:
+            instance.cuser = instance.muser
+dataCuser(CRM_COMPANY)
+
     
 class FnView(View):
     """
@@ -205,3 +207,26 @@ class A01View(FnView):
     model_form = CRM_COMPANY_ModelForm
     html_file = 'basic_data/A01.html'
     return_query_cols = ['cpnyid','cocname','coename','coscname','cosename']
+
+
+class A02View(View):
+    def get(self,request):
+        form = SHOPGROUP_ModelForm()
+        context = {
+            'form':form
+        }
+        return render(request,'basic_data/A02.html',context)
+
+    def post(self,request):
+        print('\na02 post\n')
+        data = json.loads(request.POST.get("postData")) 
+        insert_data = data.get("insert") # [{'shopgroup_id': 'wdf', 'shopgroup_name': '123'}, {'shopgroup_id': 'ewq', 'shopgroup_name': '234'}]
+        update_data = data.get("update")
+        delete_data = data.get('delete')
+        print(f'\ninsert_data : {insert_data}\n')
+        print(f'\nupdate_data : {update_data}\n')
+        print(f'\ndelete_data : {delete_data}\n')
+
+        return JsonResponse({"update":"ok"})
+
+

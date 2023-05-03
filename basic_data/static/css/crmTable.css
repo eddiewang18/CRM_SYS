@@ -1,0 +1,51 @@
+
+div.tableArea{
+    height: 400px;
+
+}
+
+.c1{
+    height: 100%;
+    width: 48%;
+    float: left;
+    margin: 0% 1%;
+}
+
+div.table{
+
+    width: 100%;
+    height: 83%;
+    margin: 1% 0%;
+    overflow: auto;
+    border: 2px solid black;
+}
+
+.tableBtn{
+
+    width: 100%;
+    height: 13%;
+    margin: 1% 0%;
+    text-align: center;
+}
+
+table{
+    width: 100%;
+
+    font-size: 16px;
+    border-collapse: collapse;
+
+}
+
+td,th{
+    height: 28px;
+    border: 2px solid black;
+    padding: 5px;
+}
+
+.titleRow{
+    top: 0;
+    position: sticky;
+    background-color:rgba(205, 255, 255, 0.867);
+    font-weight: 700;
+}
+
