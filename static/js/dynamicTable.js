@@ -31,13 +31,36 @@ function createCheckbox(checkbox_name_attr,value_attr){
     return checkboxEle;
 }
     
+function init_table(firstTds){
+    var currentTrs = document.querySelectorAll("tr:not(.firstRow)"); //取得載入網頁時當前table中除索引列以外的各個資料列
 
+      // 如果載入網頁時，當前table中有除索引列以外的各個資料列
+    if(currentTrs.length>0)
+    {
+        // 依序對那些列的各個儲存格欄位設置 belong_field(自訂屬性，用來標示此儲存格對應到db table中的哪個欄位) 與 id
+        for(var i=0;i<currentTrs.length;i++){
+            
+            var tr_tds= currentTrs[i].querySelectorAll("td");
+
+            for(var j=0;j<firstTds.length;j++){
+                var firstTdEle = firstTds[j]; 
+                //取得td元素的name屬性
+                var name_attr = firstTdEle.getAttribute("name");
+                tr_tds[j].setAttribute("name",name_attr);
+                tr_tds[j].setAttribute("belong_field",name_attr);
+                tr_tds[j].setAttribute("id","td"+(i+1)+(j+1));
+    
+            }
+
+        }
+    }  
+}
 
 
 
 //實現動態表格
 //pkList裡面存primary key 的欄位的name屬性
-function dynamic_table(tableID,addBtnID,delBtnID,pkList=[],titleRow=true,input_type_config){
+function dynamic_table(tableID,addBtnID,delBtnID,pkList=[],titleRow=true,input_type_config,multiple_selected=true){
 
 /*
 input_type_config > 應傳進一個 物件包裹各個物件的參數，每個物件表示每個欄位輸入的特性(文字輸入,下拉選單,checkbox....)
@@ -60,6 +83,8 @@ input_type_config = {
 
 }
     
+multiple_selected > 判斷動態表格支不支持多重選中資料列 , true : 可 , false : 不可
+
 */
 
     var table = document.getElementById(tableID);
@@ -91,27 +116,29 @@ input_type_config = {
     //     }
     // }
 
-    var currentTrs = document.querySelectorAll("tr:not(.firstRow)"); //取得載入網頁時當前table中除索引列以外的各個資料列
-
-    // 如果載入網頁時，當前table中有除索引列以外的各個資料列
-    if(currentTrs.length>0){
-        // 依序對那些列的各個儲存格欄位設置 belong_field(自訂屬性，用來標示此儲存格對應到db table中的哪個欄位) 與 id
-        for(var i=0;i<currentTrs.length;i++){
-            
-            var tr_tds= currentTrs[i].querySelectorAll("td");
-
-            for(var j=0;j<firstTds.length;j++){
-                var firstTdEle = firstTds[j]; 
-                //取得td元素的name屬性
-                var name_attr = firstTdEle.getAttribute("name");
-
-                tr_tds[j].setAttribute("belong_field",name_attr);
-                tr_tds[j].setAttribute("id","td"+(i+1)+(j+1));
+    init_table(firstTds);
+  
+    // var currentTrs = document.querySelectorAll("tr:not(.firstRow)"); //取得載入網頁時當前table中除索引列以外的各個資料列
     
-            }
+    // // 如果載入網頁時，當前table中有除索引列以外的各個資料列
+    // if(currentTrs.length>0){
+    //     // 依序對那些列的各個儲存格欄位設置 belong_field(自訂屬性，用來標示此儲存格對應到db table中的哪個欄位) 與 id
+    //     for(var i=0;i<currentTrs.length;i++){
+            
+    //         var tr_tds= currentTrs[i].querySelectorAll("td");
 
-        }
-    }
+    //         for(var j=0;j<firstTds.length;j++){
+    //             var firstTdEle = firstTds[j]; 
+    //             //取得td元素的name屬性
+    //             var name_attr = firstTdEle.getAttribute("name");
+    //             tr_tds[j].setAttribute("name",name_attr);
+    //             tr_tds[j].setAttribute("belong_field",name_attr);
+    //             tr_tds[j].setAttribute("id","td"+(i+1)+(j+1));
+    
+    //         }
+
+    //     }
+    // }
 
     // 新增table列的相關操作
     add.addEventListener("click",function(){
@@ -165,11 +192,55 @@ input_type_config = {
             var ele_value;
             var ele = e.target;
             if(ele.tagName=="TD" && !(ele.parentNode.classList.contains("firstRow"))){
-                if(ele.parentNode.classList.contains("selected")){
+
+
+                // if(ele.parentNode.classList.contains("selected")){
+                //     ele.parentNode.classList.remove("selected");
+                    
+                // }else{
+                //     ele.parentNode.classList.add("selected");
+                //     ele.addEventListener('click',function(){
+                //     //表格中欄位可被編輯的條件為: 你是一個新增列 或是 你不是pk的欄位
+                //     if(ele.parentNode.classList.contains("newRow") || !pkList.includes(ele.getAttribute("belong_field"))){
+                //         ele.setAttribute("contenteditable","true");
+                //         ele.addEventListener("keypress",function(e){
+                //             if(e.key=="Enter"){
+                //                 e.preventDefault();
+                //             }
+                //         })
+                //       }
+                //     })
+
+                //     //當使用者對一個原有數據列進行修改，則標記該列已被更改
+                //     ele.addEventListener("input", function() {
+                //         // console.log("contenteditable element changed");
+                //         if(!this.parentNode.classList.contains("updateRow") && !(this.parentNode.classList.contains("newRow"))){
+                //             this.parentNode.classList.add("updateRow");
+                //         }
+                //     });
+                if(ele.parentNode.classList.contains("selected") && multiple_selected){
                     ele.parentNode.classList.remove("selected");
                     
                 }else{
-                    ele.parentNode.classList.add("selected");
+					
+					
+					if(!multiple_selected)
+					{
+						
+
+					  //實現整張table只會被選中(forcus)一列(底色變灰)
+					  var already_selected_rows = document.getElementsByClassName("selected");
+					  if(already_selected_rows.length>0){
+						for(var selected_row of already_selected_rows){
+						  selected_row.classList.remove("selected");
+						}
+					  }
+	
+					}
+                    
+					ele.parentNode.classList.add("selected");
+					
+					
                     ele.addEventListener('click',function(){
                     //表格中欄位可被編輯的條件為: 你是一個新增列 或是 你不是pk的欄位
                     if(ele.parentNode.classList.contains("newRow") || !pkList.includes(ele.getAttribute("belong_field"))){
@@ -182,6 +253,7 @@ input_type_config = {
                       }
                     })
 
+                    //當使用者對一個原有數據列進行修改，則標記該列已被更改
                     ele.addEventListener("input", function() {
                         // console.log("contenteditable element changed");
                         if(!this.parentNode.classList.contains("updateRow") && !(this.parentNode.classList.contains("newRow"))){
@@ -189,8 +261,8 @@ input_type_config = {
                         }
                     });
                     
-                    
                 }
+
                 ele.addEventListener('blur',function(){
                         ele.setAttribute("contenteditable","false");
 

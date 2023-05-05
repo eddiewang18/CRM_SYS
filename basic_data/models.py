@@ -81,7 +81,8 @@ class CRM_COMPANY(models.Model,CrmQueryData):
         'date_range':[],
         'number_range':[],
         }  
-
+    def __str__(self):
+        return self.cocname
 
 class SHOPGROUP(models.Model,CrmQueryData):
     shopgroup_id = models.CharField(primary_key=True,max_length=10,db_column="shopgroup_id",verbose_name="群組編號")
@@ -105,3 +106,62 @@ class SHOPGROUP(models.Model,CrmQueryData):
         'date_range':[],
         'number_range':[],
         }  
+
+
+class County(models.Model):
+    county_id = models.CharField(primary_key=True,max_length=10,db_column='county_id',verbose_name='縣市代號')
+    county_name = models.CharField(max_length=60,db_column='county_name',verbose_name='縣市名稱',unique=True)
+    muser = models.CharField(max_length=20,db_column="muser",verbose_name='異動者',default='admin') 
+    mdate = models.DateField(db_column="mdate",verbose_name='異動日期',auto_now=True)
+    mtime = models.TimeField(db_column="mtime",verbose_name='異動時間',auto_now=True)
+
+    def __str__(self):
+        return self.county_name
+
+    class Meta:
+        db_table = "County"  
+
+class Area(models.Model):
+    county_id = models.ForeignKey(to='County',to_field='county_id',verbose_name='所屬縣市',db_column="county_id",on_delete=models.CASCADE)
+    post_id = models.CharField(primary_key=True,max_length=10,db_column='post_id',verbose_name='地區代號')
+    post_name = models.CharField(max_length=60,db_column='post_name',verbose_name='地區名稱')
+    postal = models.CharField(max_length=10,db_column='postal',verbose_name='郵遞區號')
+    muser = models.CharField(max_length=20,db_column="muser",verbose_name='異動者',default='admin') 
+    mdate = models.DateField(db_column="mdate",verbose_name='異動日期',auto_now=True)
+    mtime = models.TimeField(db_column="mtime",verbose_name='異動時間',auto_now=True)
+    def __str__(self):
+        return self.post_name
+
+    class Meta:
+        db_table = "Area"  
+
+
+class SHOP(models.Model):
+    cpnyid               = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
+    shop_id              = models.CharField(primary_key=True,max_length=10,db_column='shop_id',verbose_name='分店編號')
+    shop_name            = models.CharField(max_length=30,db_column='shop_name',verbose_name='分店名稱',unique=True)
+    shop_scname          = models.CharField(blank=True,null=True,max_length=10,db_column='shop_scname',verbose_name='分店簡稱')
+    shop_kind_choices = [("0","總店"),("1","直營店"),("2","加盟店")]
+    shop_kind            = models.CharField(blank=True,null=True,max_length=10,db_column='shop_kind',verbose_name='分店類型',choices=shop_kind_choices)
+    shopgroup_id         = models.ForeignKey(blank=True,null=True,to='SHOPGROUP',to_field='shopgroup_id',db_column="shopgroup_id",verbose_name="分店群組",on_delete=models.CASCADE)
+    shop_chief           = models.CharField(blank=True,null=True,max_length=50,db_column='shop_chief',verbose_name='分店店長')
+    shop_disable_choices = [('0','停業'),('1','營業中')]
+    shop_disable         = models.CharField(blank=True,null=True,max_length=1,db_column='shop_disable',verbose_name='營業狀態',choices=shop_disable_choices,default='1')
+    shop_disable_date    = models.DateField(blank=True,null=True,db_column='shop_disable_date',verbose_name='停業日期')
+    shop_note            = models.CharField(blank=True,null=True,max_length=50,db_column='shop_note',verbose_name='分店說明')
+    county_id            = models.ForeignKey(blank=True,null=True,to='County',to_field='county_id',verbose_name='所在縣市',db_column="county_id",on_delete=models.CASCADE)
+    post_id              = models.ForeignKey(blank=True,null=True,to='Area',to_field='post_id',verbose_name='所在地區',db_column="post_id",on_delete=models.CASCADE)
+    fax                  = models.CharField(blank=True,null=True,max_length=30,db_column='fax',verbose_name='傳真號碼')
+    telno                =  models.CharField(blank=True,null=True,max_length=20,db_column='telno',verbose_name='電話號碼')
+    cuser                = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
+    cdate                = models.DateField(db_column="cdate",verbose_name='創立日期',auto_now_add=True)
+    ctime                = models.TimeField(db_column="ctime",verbose_name='創立時間',auto_now_add=True)
+    muser                = models.CharField(max_length=20,db_column="muser",verbose_name='異動者') 
+    mdate                = models.DateField(db_column="mdate",verbose_name='異動日期',auto_now=True)
+    mtime                = models.TimeField(db_column="mtime",verbose_name='異動時間',auto_now=True)
+
+    def __str__(self):
+        return self.shop_name
+
+    class Meta:
+        db_table = "SHOP"  

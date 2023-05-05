@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from django.views import View
-from .models import CRM_COMPANY
+from .models import CRM_COMPANY,SHOPGROUP,SHOP
 from .forms import CRM_COMPANY_ModelForm,SHOPGROUP_ModelForm
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
@@ -105,6 +105,30 @@ import json
 
 #         return JsonResponse({"update":"fail","wrongMsg":wrongMsg})
 
+
+# 將每一列資料指定的choices欄位轉成human readable的欄位值
+def turnChoiceField2readable(data,choicesInfo:list):
+    """
+    data > queryset type , 格式 : [{col1:value1,col2:value2,....},{col1:value1,col2:value2,....}]
+    choices_belong_model > choices所屬的model
+    choices_attr_name > choices的屬性名
+    choices_field_name > 要轉成readale的choices欄位名
+    [{'choices_belong_model':SHOP,"choices_attr_name":"shop_kind_choices","choices_field_name":shop_kind},{}]
+    """
+    def get_readable_choicefield(model,choices_attr,choice_value):
+        try :
+            if choice_value :
+                choicesList = getattr(model,choices_attr)
+                for choice in choicesList:
+                    if choice[0]==choice_value:
+                        return choice[1]
+            return ''
+        except :
+            print(f"在{model}中找不到屬性{choices_attr}")
+    for i in data:
+        for info in choicesInfo:
+            label_name= get_readable_choicefield(info['choices_belong_model'],info['choices_attr_name'],i[info['choices_field_name']])
+            i[info['choices_field_name']]=label_name
 
 def dataCuser(model):
     @receiver(pre_save,sender=model)
@@ -211,11 +235,55 @@ class A01View(FnView):
 
 class A02View(View):
     def get(self,request):
+        
+        if 'switch' in request.GET :
+            requestData = json.loads(request.GET.get('postData')) 
+            shopgroup_id = requestData.get('pk')
+            shopgroup_obj = SHOPGROUP.objects.get(pk = shopgroup_id)
+            included_shop_objs =  shopgroup_obj.shop_set.all().values('shop_id','shop_name','shop_kind','cpnyid__cocname')
+            choice2readableInfos = [{'choices_belong_model':SHOP,"choices_attr_name":"shop_kind_choices","choices_field_name":'shop_kind'}]
+            turnChoiceField2readable(included_shop_objs,choice2readableInfos)
+
+            print(included_shop_objs)
+            return JsonResponse(list(included_shop_objs),safe=False)
+
+        if 'query_condition' in request.GET :
+            print('\nquery_condition\n')
+            requestData = json.loads(request.GET.get('postData')) 
+            print(f'\nrequestData:{requestData}|type : {type(requestData)}\n')
+            qs_result = list(SHOPGROUP().crmQdata(requestData).values("shopgroup_id","shopgroup_name"))
+            print(f'\nqs_result:{qs_result}\n')
+
+            return JsonResponse(qs_result,safe=False)
+
         form = SHOPGROUP_ModelForm()
+        objs = SHOPGROUP.objects.all()
+        first_obj = objs.first()
+        # cpnyid__cocname > 使用 foreignkey__關聯model某屬性 可以讓該屬性做為顯示的資料
+        included_shop_objs = first_obj.shop_set.all().values('shop_id','shop_name','shop_kind','cpnyid__cocname')
+        choice2readableInfos = [{'choices_belong_model':SHOP,"choices_attr_name":"shop_kind_choices","choices_field_name":'shop_kind'}]
+        turnChoiceField2readable(included_shop_objs,choice2readableInfos)
+
+        # print()
+        # print(included_shop_objs)
+
+        
+        objs = objs.values('shopgroup_id','shopgroup_name')
+
         context = {
-            'form':form
+            'form':form,
+            'objs':objs,
+            'included_shop_objs':included_shop_objs
         }
+
+        if 'query' in request.GET :
+            context['queryModal']=True
+
+        
         return render(request,'basic_data/A02.html',context)
+
+
+
 
     def post(self,request):
         print('\na02 post\n')
@@ -227,6 +295,36 @@ class A02View(View):
         print(f'\nupdate_data : {update_data}\n')
         print(f'\ndelete_data : {delete_data}\n')
 
+        if len(insert_data)>0:
+            for data_row in insert_data:
+                form = SHOPGROUP_ModelForm(data=data_row)
+                if form.is_valid():
+                    table_data = form.save(commit=False)
+                    table_data.muser = request.user.username
+                    table_data.save()
+                    print(f'\ncreate a new row\n')
+                else:
+                    print(f'\nform.errors :{form.errors}\n')
+        
+        if len(update_data)>0:
+            for data_row in update_data:
+                obj = SHOPGROUP.objects.get(pk=data_row['shopgroup_id'])
+                form = SHOPGROUP_ModelForm(instance=obj,data=data_row)
+                if form.is_valid():
+                    table_data = form.save(commit=False)
+                    table_data.muser = request.user.username
+                    table_data.save()
+                    print(f'\nupdate a row\n')
+                else:
+                    print(f'\nform.errors :{form.errors}\n')
+
+        if len(delete_data)>0:
+            for data_row in delete_data:
+                SHOPGROUP.objects.get(pk=data_row['shopgroup_id']).delete()
+                print(f'\ndelete a row\n')
+        
         return JsonResponse({"update":"ok"})
+
+dataCuser(SHOPGROUP)
 
 

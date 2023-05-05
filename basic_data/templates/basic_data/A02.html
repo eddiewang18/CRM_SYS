@@ -28,8 +28,11 @@
 
     <!-- 儲存按鈕區塊 -->
     <div class="btnArea ablock">
-        <button type="submit" id="query"  name="query" class="query funcbtn">查詢</button>
-        <button @click="update" type="button" id="update" name="update" class="update funcbtn" >儲存/修改</button>
+        <form action="" method="GET">
+            <button type="submit" id="query"  name="query" class="query funcbtn">查詢</button>
+            <button @click="update" type="button" id="update" name="update" class="update funcbtn" >儲存/修改</button>
+
+        </form>
     </div>
     
     <div class="tableArea ablock">
@@ -37,13 +40,41 @@
             <div class="table">
                 <table class="tableData" id="table1">
                     <tr class="titleRow">
-                        <td name="shopgroup_id">
+                        <td class="pkField" name="shopgroup_id">
                             群組編號
                         </td>
                         <td name="shopgroup_name">
                             群組名稱
                         </td>
                     </tr>
+
+
+                    {% for obj in objs %}
+                    {% if forloop.counter == 1 %}
+                    <tr v-if="tr_show" class="selected">
+                        {% for field in obj.values %}
+                        <td @click="showShop($event)">
+                            {{field}}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% else %}
+                    <tr v-if="tr_show" >
+                        {% for field in obj.values %}
+                        <td @click="showShop($event)">
+                            {{field}}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+
+                    <tr v-if="!tr_show" v-for=" (item,index) in responseData1">
+                        <td  @click="showShop($event)" v-for="(item1,key,index1) in item">
+                            %%%item1%%%
+                        </td>
+                    </tr>
+
                 </table>
             </div>
             <div class="tableBtn">
@@ -53,8 +84,36 @@
         </div>
         <div class="c1">
             <div class="table">
-                <table class="tableData" id="table1">
-
+                <table class="tableData" id="table2">
+                    <tr class="titleRow">
+                        <td >
+                            分店編號
+                        </td>
+                        <td>
+                            分店名稱
+                        </td>
+                        <td >
+                            分店類型
+                        </td>
+                        <td >
+                            公司品牌
+                        </td>
+                    </tr>
+                    {% for shop_obj in included_shop_objs %}
+                    <tr v-if="!switchData">
+                        {% for field in shop_obj.values %}
+                            <td v-if="!switchData">
+                                {{field}}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                        
+                    {% endfor %}
+                    <tr v-if="switchData" v-for="(item, index) in responseData">
+                        <td v-for="(item1,key,index1) in item">
+                            %%%item1%%%
+                        </td>
+                    </tr>
                 </table>
             </div>
             <div class="tableBtn">
@@ -71,8 +130,12 @@
 <!--引入可由vue實例所控制文字訊息的成功modal -->
 {% include 'share/success_modal_vue.html' %}
 
+{% include 'share/noData_modal.html' %}
+
 <script src="{% static 'js/dynamicTable.js' %}"></script>
 <script>
+
+
 
 var input_type_config1 = {
     "shopgroup_id":{
@@ -83,7 +146,6 @@ var input_type_config1 = {
     },
 }
 
-    dynamic_table("table1","add1","del1",pkList=['shopgroup_id'],titleRow=true,input_type_config1)
 </script>
 
 <script src="{% static 'js/common.js' %}"></script>
@@ -91,6 +153,88 @@ var input_type_config1 = {
 <script src="{% static 'js/vue.js' %}"></script>
 
 <script>
+
+
+    var vm_tableArea = new Vue({
+        el:".tableArea",
+        delimiters: ['%%%', '%%%'],
+        data:{
+            switchData:false,
+            responseData :[],
+            responseData1:[],
+            tr_show:true
+        },
+        methods:{
+            showShop(event){
+
+                if(!event.target.parentNode.classList.contains("newRow")){
+
+                    var pk = document.querySelector("td.pkField").getAttribute('name');
+                    var data_pk_val = event.target.parentNode.querySelector(`[name="${pk}"]`).textContent.trim();
+                    
+                    //發送ajax請求時須加上下列這段程式碼來通過django的csrf_token驗證機制
+                    postData = {
+                        pk:data_pk_val,
+                        
+                    }
+                    console.log(postData);
+                    const csrftoken = getCookie('csrftoken');
+                    var self = this;
+                    $.ajax({
+
+                        url:'{% url "basic_data:a02" %}',
+                        method:"GET",
+                        dataType:"json",
+                        headers: {'X-CSRFToken': csrftoken}, //在headers中要提供csrftoken，讓client發送請求時攜帶csrftoken資訊
+                        data:{
+                            postData:JSON.stringify(postData),
+                            switch:true
+                            
+                        },
+                        success:function(response){
+                            console.log("switch OK");
+                            console.log(response);
+                            self.$nextTick(function () {
+                                self.switchData=true;
+                                self.responseData = response;
+
+                        });
+
+
+                
+                        }
+
+
+                    })
+
+
+                }
+
+
+
+            }
+        }
+    })
+
+    dynamic_table("table1","add1","del1",pkList=['shopgroup_id'],titleRow=true,input_type_config1,false);
+
+     // 由vue控制顯示成功訊息的modal
+     var vm_successModal = new Vue({
+        el:"#successMsg_vue",
+        delimiters: ['%%%', '%%%'],
+        data:{
+            successMsg:"",
+            isUpdate:true
+        },
+        methods:{
+            redirectHomeFn(){
+                if(!this.isUpdate){
+                    // 成功刪除資料後會重新導向新增的頁面
+                    window.location.href = "{% url 'basic_data:a02' %}";
+                }
+            }
+        }
+    })
 
     // 由vue控制顯示錯誤訊息的modal
     var vm_wrongModal = new Vue({
@@ -163,12 +307,12 @@ var input_type_config1 = {
                             tr_td_name_attr = tr_td[i].getAttribute("belong_field");
                             input_type = this.input_type_config[tr_td_name_attr]['inputType'];
                             if(input_type==='checkbox'){
-                                values = tr_td[i].querySelector("input").value;
+                                values = tr_td[i].querySelector("input").value.trim();
                             }
                             else if(input_type==='select'){
-                                values = tr_td[i].querySelector("select").value;
+                                values = tr_td[i].querySelector("select").value.trim();
                             }else{
-                                values = tr_td[i].textContent;
+                                values = tr_td[i].textContent.trim();
                             }
                             
                             obj_data[key]=values;
@@ -307,23 +451,113 @@ var input_type_config1 = {
                         },
                         success:function(response){
                             console.log("OK");
+                            vm_successModal.successMsg="資料異動成功";
+                            $('#successMsg_vue').modal('show');
+                            vm_successModal.isUpdate = false;
                         }
 
 
                     })
                 }
+        },
 
-            
-
-
-
-            
-
-        }
     }})
 </script>
 
+<!-- 則引入查詢欄位條件的modal 並顯示 -->
+{% if queryModal %}
+    {% include 'share/queryModal_table.html' %}
+	{% include 'share/show_queryModal.html' %}
+{% endif %}
+<script>
+    var vm = new Vue({
+        el:"#queryModal",
+        delimiters: ['%%%', '%%%'],
+        data:{
+            responseData:[],
+            showMsg:false,
+            data_index:0
+        },
+        methods:{
+            //當在modal查詢框中按下送出btn會觸發此函數
+            queryFunc(){
+                //queryFunc開始                        
+                // 2.先將查詢的欄位輸入框的name屬性 作為 json物件的key , value屬性 作為 json物件的value屬性
+                var input_field_list  = document.querySelectorAll('.qmodal_field input');
+                var request_data = {};
+                for(var i of input_field_list){
+                    request_data[i.name]=i.value;
+                }
+                console.log(request_data);
 
+                const csrftoken = getCookie('csrftoken');
+                var self = this;
+                $.ajax({
+
+                    url:'{% url "basic_data:a02" %}',
+                    method:"GET",
+                    dataType:"json",
+                    headers: {'X-CSRFToken': csrftoken}, //在headers中要提供csrftoken，讓client發送請求時攜帶csrftoken資訊
+                    data:{
+                        postData:JSON.stringify(request_data),
+                        query_condition:true
+                        
+                    },
+                    success:function(response){
+                        $('#queryModal').modal('hide');
+                        console.log("switch OK");
+                        console.log(response);
+                        if(response.length>0){
+                            self.$nextTick(function () {
+                            vm_tableArea.tr_show = false;
+                            vm_tableArea.responseData1 = response;
+                            self.$nextTick(function () {
+                                self.query_init_table()
+                            
+                            })
+                         });
+                        }else
+                        {
+
+                        $('#noDataMsg').modal('show'); 
+                        }
+            
+                    }
+
+
+                })
+            },
+            moveModal(){
+                //moveModal開始
+                //modal移動
+                var modal = document.querySelector('#modal');
+	            modal.onmousedown= function(e){
+                var diffx = e.pageX-this.offsetLeft;
+                var diffy = e.pageY-this.offsetTop;
+
+                document.onmousemove = function(e){
+                    modal.style.left = (e.pageX-diffx)+'px';
+                    modal.style.top = (e.pageY-diffy)+'px';
+
+                }
+
+                document.onmouseup = function(){
+                    document.onmousemove = null;
+                    document.onmouseup  = null;
+                }
+
+	            }
+                //moveModal結束
+            },
+            query_init_table(){
+                var table = document.getElementById("table1");
+                var firstTr = table.querySelectorAll("tr")[0];
+                var firstTds = firstTr.querySelectorAll("td"); 
+                init_table(firstTds);
+            }
+        }
+    })
+</script>
 
 
 {% endblock content %}
