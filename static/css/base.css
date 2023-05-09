@@ -6,7 +6,7 @@
 }
 body{
   font-family: sans-serif;
-  overflow: hidden;
+  overflow: auto;
   user-select: none;
   background-color:rgb(235, 235, 235);
 }

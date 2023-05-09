@@ -22,6 +22,7 @@ function checkEngNumCombination(testStr){
 }
 
 function fieldRequired(testStr){
+    
     if(testStr.length<1){
         return [false," 不可空白"]
     }
@@ -31,8 +32,9 @@ function fieldRequired(testStr){
 // 輸入欄位的元素(field_ele_id)  輸入欄位名稱的元素(field_name_ele) 可否空白(blank) 欄位值長度範圍(min,max) 顯示警告訊息的區塊id(err_msg_block_id) 其他檢核函數> check_func_list
 // 至少會做的檢核 :
 //     1.可否空白 > 1.1如果 不可空白 會再做> 長度的檢核
+//      is_input_field > 是否為單純的文字輸入, 是為true 否為 false
 
-function FieldExamine(field_ele_id,field_name_ele_id,blank,min,max,err_msg_block_id,check_func_list){
+function FieldExamine(field_ele_id,field_name_ele_id,blank,is_input_field,min,max,err_msg_block_id,check_func_list){
     
     this.field_ele = document.getElementById(field_ele_id);
     this.field_name_ele = document.getElementById(field_name_ele_id);
@@ -45,23 +47,19 @@ function FieldExamine(field_ele_id,field_name_ele_id,blank,min,max,err_msg_block
 
     function examine(field_ele,field_name_ele,field_name,field_tag_name){
         var input_txt ; //輸入的欄位內容
-        // var checkMsg = '';
         var check_msg_list = [];
-        if(field_tag_name.toLowerCase()==='input'){
+        if(field_tag_name.toLowerCase()==='input' || field_tag_name.toLowerCase()==='select'){
             input_txt=field_ele.value;
         }else{
-            input_txt = field_ele.textContext;
+            input_txt = field_ele.textContext.trim();
         }
     
         if(!blank){
             if(!fieldRequired(input_txt)[0]){
                 check_msg_list.push(field_name+fieldRequired(input_txt)[1]);
             }
-            // if(input_txt.length<1){
-            //     check_msg_list.push(field_name+" 不可空白");
-            // }
-            if(!checkStrLen(input_txt,min,max)[0]){
-                // checkMsg+= field_name+checkStrLen(input_txt,min,max)[1]+"<br/>";
+
+            if(is_input_field && !checkStrLen(input_txt,min,max)[0]){
                 check_msg_list.push(field_name+checkStrLen(input_txt,min,max)[1]);
             }
         }
@@ -69,7 +67,6 @@ function FieldExamine(field_ele_id,field_name_ele_id,blank,min,max,err_msg_block
         if(check_func_list.length>0){
             for(var func of check_func_list){
                 if(!func(input_txt)[0]){
-                    // checkMsg+= field_name+func(input_txt)[1]+"<br/>";
                     check_msg_list.push(field_name+func(input_txt)[1]);
                 }
             }
@@ -94,10 +91,11 @@ function FieldExamine(field_ele_id,field_name_ele_id,blank,min,max,err_msg_block
            
         }
         self.err_msg_block_ele.innerHTML = msg;
+        //console.log(`${self.field_name} 執行欄位檢核`);
     }
 
-    this.field_ele.addEventListener('keyup',this.executeField)
-    
+    this.field_ele.addEventListener('keyup',this.executeField);
+    this.field_ele.addEventListener('change',this.executeField);
 }
 
 

@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 from django.views import View
-from .models import CRM_COMPANY,SHOPGROUP,SHOP
-from .forms import CRM_COMPANY_ModelForm,SHOPGROUP_ModelForm
+from .models import CRM_COMPANY,SHOPGROUP,SHOP,County,Area
+from .forms import CRM_COMPANY_ModelForm,SHOPGROUP_ModelForm,SHOP_ModelForm,SHOP_QModelForm,SHOP_RModelForm
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.http import JsonResponse
@@ -145,6 +145,8 @@ class FnView(View):
     屬性:
         model :  開發功能對應的 Model
         model_form : 開發功能對應的 ModelForm
+        query_model_form : 開發功能按查尋按鈕時跳出來對應的查詢表單欄位
+        result_model_form  : 開發功能結果顯示時跳出來對應的表單欄位
         html_file :  開發功能對應的html頁面
         return_query_cols : 查詢時要返回的欄位資料，以list的類別儲存 e.g. [col1,col2,.....]
 
@@ -184,8 +186,13 @@ class FnView(View):
             return render(request,self.html_file,context)
         elif 'query' in request.POST:
             form = self.model_form()
+            qform = self.query_model_form() 
+            rform = self.verbose_name_fields
+            print(f'rform : {rform}\n')
             context = {
                 'form':form,
+                "qform":qform,
+                "rform":rform,
                 'queryModal':True
             }
         
@@ -195,6 +202,8 @@ class FnView(View):
         elif "querySubmit" in  json.loads(request.body.decode('utf-8'))['params']:
             requestData =json.loads(json.loads(request.body.decode('utf-8'))['params']['requestData'])
             result_query = list(self.model().crmQdata(requestData).values(*self.return_query_cols ))
+            # result_query = list(self.model().crmQdata(requestData).values())
+            print(f'\n查詢時回傳的資料:\n{result_query}|type:{type(result_query)}\n')
             return JsonResponse(result_query,safe=False)
         elif "delete" in  json.loads(request.body.decode('utf-8'))['params']:
             requestData =json.loads(request.body.decode('utf-8'))
@@ -225,13 +234,38 @@ class FnView(View):
 
         return JsonResponse({"update":"fail","wrongMsg":wrongMsg})
 
+def county_area(request):
+    if 'county_id' in request.GET:
+        county_id = request.GET.get('county_id')
+        post_objs = list(Area.objects.filter(county_id=county_id).values("post_id","post_name"))
+        return JsonResponse(post_objs,safe=False)
 
 class A01View(FnView):
     model = CRM_COMPANY
     model_form = CRM_COMPANY_ModelForm
+    query_model_form = CRM_COMPANY_ModelForm
+    verbose_name_fields = model_form.verbose_name_fields
     html_file = 'basic_data/A01.html'
-    return_query_cols = ['cpnyid','cocname','coename','coscname','cosename']
+    return_query_cols = model_form.return_query_cols
 
+class A03View(FnView):
+    model = SHOP
+    model_form = SHOP_ModelForm
+    query_model_form = SHOP_QModelForm
+    verbose_name_fields = model_form.verbose_name_fields
+    html_file = 'basic_data/A03.html'
+    return_query_cols = model_form.return_query_cols
+    def get(self,request):
+        """
+        get 方法返回ModelForm空白欄位表單
+        """
+
+
+        form = self.model_form()
+        context = {
+            'form':form
+        }
+        return render(request,self.html_file,context)
 
 class A02View(View):
     def get(self,request):

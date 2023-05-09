@@ -17,10 +17,10 @@
 			</div>			
 			
 			<div id="lowerBody">
-
+				<!-- 查詢時顯示的欄位選項 -->
 				<div :style="sty.qbtn" id="modalLowerBody">
 					<div class="modal-body formArea" >
-						{% for field in form  %}
+						{% for field in qform  %}
 							<span class="field">
 								<span id="{{ field.auto_id }}_label" class="input_label qmodal_label">{{field.label}}</span>
 								<span class="input_field qmodal_field">{{field}}</span>
@@ -43,14 +43,12 @@
 
 					<table id="qmodal_result_table">
 						<tr class="title_row">
-							{% for field in form  %}
-								<!-- {% if forloop.counter0 < 3 %}
-									<td>
-										{{field.label}}
-									</td>
-								{% endif %} -->
-								<td>
+							{% for field in rform  %}
+								<!-- <td>
 									{{field.label}}
+								</td> -->
+								<td>
+									{{field}}
 								</td>
 							{% endfor %}
 						</tr>

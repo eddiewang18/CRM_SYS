@@ -13,8 +13,8 @@ A01.維護公司(品牌)資料
 
 
 {% block field_examine %}
-var cpnyid = new FieldExamine("id_cpnyid","id_cpnyid_label",false,5,10,'id_cpnyid_err',[checkEngNumCombination]);
-var cocname = new FieldExamine("id_cocname","id_cocname_label",false,1,255,'id_cocname_err',[]);
+var cpnyid = new FieldExamine("id_cpnyid","id_cpnyid_label",false,true,5,10,'id_cpnyid_err',[checkEngNumCombination]);
+var cocname = new FieldExamine("id_cocname","id_cocname_label",false,true,1,255,'id_cocname_err',[]);
 cpnyid.executeField();
 cocname.executeField();
 {% endblock field_examine %}

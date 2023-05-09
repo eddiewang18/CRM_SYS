@@ -25,25 +25,28 @@ class CrmQueryData():
             if len(fields)>0 :
                 for field in fields:
                     qdict = {}
-                    if queryType=='equal':
-                        queryValue = queryDict.get(field)
-                        if len(queryValue)>0:
-                            qdict[field]=queryValue
-                        
-                    if queryType=='like':
-                        queryValue = queryDict.get(field)
-                        if len(queryValue)>0:
-                            qdict[field+'__icontains']=queryValue
-                    if queryType=='date_range':
-                        sdate = queryDict.get(field+"_sdate")
-                        edate = queryDict.get(field+"_edate")
-                        if len(queryValue)>0:
-                            qdict[field+'__range']=[sdate,edate]
-                    if queryType=='number_range':
-                        upperVal = queryDict.get(field+"_upperVal")
-                        lowerVal = queryDict.get(field+"_lowerVal")
-                        if len(upperVal)>0 or len(lowerVal)>0:
-                            qdict[field+'__range']=[lowerVal,upperVal]
+                    try:
+                        if queryType=='equal':
+                            queryValue = queryDict.get(field)
+                            if len(queryValue)>0:
+                                qdict[field]=queryValue
+                            
+                        if queryType=='like':
+                            queryValue = queryDict.get(field)
+                            if len(queryValue)>0:
+                                qdict[field+'__icontains']=queryValue
+                        if queryType=='date_range':
+                            sdate = queryDict.get(field+"_sdate")
+                            edate = queryDict.get(field+"_edate")
+                            if len(queryValue)>0:
+                                qdict[field+'__range']=[sdate,edate]
+                        if queryType=='number_range':
+                            upperVal = queryDict.get(field+"_upperVal")
+                            lowerVal = queryDict.get(field+"_lowerVal")
+                            if len(upperVal)>0 or len(lowerVal)>0:
+                                qdict[field+'__range']=[lowerVal,upperVal]
+                    except:
+                        continue
                     if count1==0:
                         qs_result = qs_result.objects.filter(**qdict)
                         count1+=1
@@ -136,7 +139,7 @@ class Area(models.Model):
         db_table = "Area"  
 
 
-class SHOP(models.Model):
+class SHOP(models.Model,CrmQueryData):
     cpnyid               = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
     shop_id              = models.CharField(primary_key=True,max_length=10,db_column='shop_id',verbose_name='分店編號')
     shop_name            = models.CharField(max_length=30,db_column='shop_name',verbose_name='分店名稱',unique=True)
@@ -165,3 +168,10 @@ class SHOP(models.Model):
 
     class Meta:
         db_table = "SHOP"  
+    
+    fieldQueryRule = {
+        "equals":['shop_kind','shopgroup_id',"shop_disable","county_id","post_id"],
+        "like":['cpnyid',"shop_id","shop_name","shop_scname","shop_chief","shop_note","fax","telno"],
+        'date_range':["shop_disable_sdate","shop_disable_edate"],
+        'number_range':[],
+        }  

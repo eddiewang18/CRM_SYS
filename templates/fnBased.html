@@ -98,8 +98,9 @@
 
 
 <!-- 則引入查詢欄位條件的modal 並顯示 -->
+{% include 'share/queryModal.html' %}
 {% if queryModal %}
-    {% include 'share/queryModal.html' %}
+    
 	{% include 'share/show_queryModal.html' %}
 {% endif %}
 
@@ -336,13 +337,11 @@
                         }
                     }
                 ).then(response => {
-                    // console.log("fron-end accpet data!");
-                    // console.log(response.data);
-                    // console.log(response.data[0]);
+
                     this.responseData=response.data;
-
+                    // console.log(response.data);
                     var count = this.responseData.length;
-
+                    // console.log(count);
                     //若有查詢的資料有結果，則做以下事情:
                     if(count>0){
                         // 1.將顯示結果的圖示亮起來，並顯示查詢到幾筆
@@ -352,16 +351,20 @@
 
                         //2.將查出來的第一筆資料列代入form表單中
                         var data = this.responseData[0];
-                        var input_field1s = document.querySelectorAll('.field1 > input');
-                        for(var i of input_field1s){
-                        var k= i.getAttribute('name');
-                        var v = data[k];
-                        if(v==null){
+ 
+                        var input_field1s = document.querySelectorAll('.form_field');
+
+                        for(var i of input_field1s)
+                        {   
+                            var k= i.getAttribute('name');
+                            var v = data[k];
+                            if(v==null)
+                            {
                                 v='';
                             }
-                        i.setAttribute('value',v);
+                            i.value = v;
                         }
-
+  
                         //3 將input元素中class含有 pkField 設為只讀
                         var pkFields = document.querySelectorAll(".field1 input.pkField");
                         for(var i=0 ; i<pkFields.length;i++){
@@ -382,7 +385,8 @@
                             for(var errMsg of errListMsgs){
                                 errMsg.innerHTML='';
                             }
-
+                            {% block do_other_queryFunc_nextTick_thing %}
+                            {% endblock do_other_queryFunc_nextTick_thing %}
                         });
 
 
@@ -451,17 +455,17 @@
             showQuery(e){
                 //在QueryModal查詢出來資料列中，每點選一列就動態更新form表單的資料
                 var data = this.responseData[e.target.parentNode.getAttribute('dataRow')-1];
-                var input_field1s = document.querySelectorAll('.field1 > input');
+                var input_field1s = document.querySelectorAll('.form_field');
                 for(var i of input_field1s){
                    var k= i.getAttribute('name');
                    var v = data[k];
                    if(v==null){
                      v='';
                    }
-                   i.setAttribute('value',v);
+                   i.value = v;
                 }
-
-
+                {% block do_other_showQuery_thing %}
+                {% endblock do_other_showQuery_thing %}
             }
         }
     })
@@ -473,3 +477,4 @@
       modal_table_selected("#qmodal_result_table","selected","title_row");
 </script>
 {% endblock content %}
+

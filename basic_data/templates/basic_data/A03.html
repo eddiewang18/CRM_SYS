@@ -1,0 +1,140 @@
+{% extends 'fnBased.html' %}
+{% load static %}
+
+
+{% block title %}
+A03維護分店基本資料
+{% endblock title %}
+
+
+{% block functitle %}
+A03維護分店基本資料
+{% endblock functitle %}
+
+
+{% block field_examine %}
+
+var shop_id = new FieldExamine("id_shop_id","id_shop_id_label",false,true,5,10,'id_shop_id_err',[checkEngNumCombination]);
+var shop_name = new FieldExamine("id_shop_name","id_shop_name_label",false,true,1,255,'id_shop_name_err',[]);
+var cpnyid = new FieldExamine("id_cpnyid","id_cpnyid_label",false,false,0,0,'id_cpnyid_err',[]);
+var shop_kind = new FieldExamine("id_shop_kind","id_shop_kind_label",false,false,0,0,'id_shop_kind_err',[]);
+var shop_chief = new FieldExamine("id_shop_chief","id_shop_chief_label",false,true,1,50,'id_shop_chief_err',[checkEngNumCombination]);
+
+shop_id.executeField();
+shop_name.executeField();
+cpnyid.executeField();
+shop_kind.executeField();
+shop_chief.executeField();
+
+{% endblock field_examine %}
+
+{% block redirecHomeURL %}
+'{%  url "basic_data:a03" %}'
+{% endblock redirecHomeURL %}
+
+
+
+{% block intoCreateURL %}
+'{%  url "basic_data:a03" %}'
+{% endblock intoCreateURL %}
+
+{% block putURL %}
+'{%  url "basic_data:a03" %}'
+{% endblock putURL %}
+
+{% block postURL %}
+'{%  url "basic_data:a03" %}'
+{% endblock postURL %}
+
+{% block qPostURL %}
+'{%  url "basic_data:a03" %}'
+{% endblock qPostURL %}
+
+<!-- 針對a03查詢資料後，如何讓地區正確的顯示在欄位上進行操作 -->
+{% block do_other_showQuery_thing %}
+    county_area_ajax(data,"{% url 'basic_data:county_area' %}");
+{% endblock do_other_showQuery_thing %}
+
+{% block do_other_queryFunc_nextTick_thing %}
+    county_area_ajax(data,"{% url 'basic_data:county_area' %}");
+{% endblock do_other_queryFunc_nextTick_thing %}
+
+{% block other_content %}
+<!-- 針對縣市/鄉鎮連動關係操作 -->
+<script>
+    document.addEventListener("change",function(e){
+        if(e.target.id==='id_county_id'){
+            var changed_ele = e.target;
+            var changed_ele_parent = e.target.parentNode.parentNode.parentNode;
+            var post = changed_ele_parent.querySelector("#id_post_id");
+            console.log(changed_ele);
+            console.log(changed_ele_parent);
+            console.log(post);
+            var county_id_val = changed_ele.value;
+            $.ajax({
+                url:"{% url 'basic_data:county_area' %}",
+                method:"GET",
+                dataType:"json",
+                data:{
+                    county_id:county_id_val
+                },
+                success:function(response){
+                    console.log(response);
+                    var option_html = "";
+                        for(var obj of response){
+                            var post_id = obj["post_id"];
+                            var name = obj["post_name"];
+                            option_html+=`<option value="${post_id}">${name}</option>`;
+                        }
+                        post.innerHTML =  option_html;
+                }
+            })
+
+            console.log("-------------------");
+        }
+    })
+
+    // var county_id = document.querySelector("#id_county_id");
+    // county_id.addEventListener("change",function(){
+    //   var county_id_val = this.value;
+    //   $.ajax({
+    //     url:"{% url 'basic_data:a03' %}",
+    //     method:"GET",
+    //     dataType:"json",
+    //     data:{
+    //         county_id:county_id_val
+    //     },
+    //     success:function(response){
+    //         console.log(response);
+    //         var option_html = "";
+    //             for(var obj of response){
+    //                 var post_id = obj["post_id"];
+    //                 var name = obj["post_name"];
+    //                 option_html+=`<option value="${post_id}">${name}</option>`;
+    //             }
+    //             $("#id_post_id").html(option_html); 
+    //     }
+    //   })
+    // })
+
+// 針對 營業狀態 與 停業日期 連動關係進行操作
+// 當 營業狀態 > 營業中 > 停業日期欄位不提供輸入 ， 營業狀態 > 停業 > 停業日期欄位提供輸入
+
+var shop_disable = document.querySelector("#id_shop_disable");
+var shop_disable_date =  document.querySelector("#id_shop_disable_date");
+shop_disable.addEventListener('change',function(e){
+    console.log(`shop_disable : ${this.value}`);
+   if(this.value=='0'){
+    // 如果 營業狀態 切到停業  停業日期欄位提供輸入 
+    shop_disable_date.disabled=false;
+   }else{
+     // 如果 營業狀態 切到營業中 停業日期欄位不提供輸入，且需清空停業日期的值
+    shop_disable_date.disabled=true;
+    shop_disable_date.value = "";
+   }
+})
+
+</script>
+{% endblock other_content %}
+
+

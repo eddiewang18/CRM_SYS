@@ -39,6 +39,8 @@
                <ul>
                   <li><a class="funcLink" href="{% url 'basic_data:a01' %}">維護公司(品牌)資料</a></li>
                   <li><a class="funcLink" href="{% url 'basic_data:a02' %}">維護分店群組資料</a></li>
+                  <li><a class="funcLink" href="{% url 'basic_data:a03' %}">維護分店資料</a></li>
+
                </ul>
             </li>
             <li><a class="logout" href="{% url 'logout'  %}">登出</a></li>
@@ -47,6 +49,10 @@
       </nav>
       {% block content %}
       {% endblock content %}
+
+
+      {% block other_content %}
+      {% endblock other_content %}
 
       {% include 'share/bootstrap_script.html' %}
 
