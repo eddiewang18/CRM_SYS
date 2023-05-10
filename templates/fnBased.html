@@ -167,7 +167,7 @@
             update(){
                 // 修改數據
                 // 找出所有欄位與primary key的欄位
-                var fields = document.querySelectorAll(".field1 input");
+                var fields = document.querySelectorAll(".form_field");
                 var pk_fields = {}; // 存放primary key的欄位，用這個欄位值從資料庫中撈資料
                 var updateData = {}; // 將要修改的值存放於此
                 for(var field of fields){
@@ -213,7 +213,7 @@
             del(){
 
                // 1.找出所有欄位
-               var fields = document.querySelectorAll(".field1 input");
+               var fields = document.querySelectorAll(".form_field");
                 var pk_fields = {};
                 for(var field of fields){
                     if(field.classList.contains("pkField")){
@@ -293,7 +293,7 @@
             queryFunc(){
                 //queryFunc開始                        
                 // 2.先將查詢的欄位輸入框的name屬性 作為 json物件的key , value屬性 作為 json物件的value屬性
-                var input_field_list  = document.querySelectorAll('.qmodal_field input');
+                var input_field_list  = document.querySelectorAll('.qfield');
                 var request_data = {};
                 for(var i of input_field_list){
                     request_data[i.name]=i.value;
@@ -339,7 +339,9 @@
                 ).then(response => {
 
                     this.responseData=response.data;
-                    // console.log(response.data);
+                    console.log("回傳的資料:")
+                    console.log(response.data);
+                    console.log("---------------");
                     var count = this.responseData.length;
                     // console.log(count);
                     //若有查詢的資料有結果，則做以下事情:

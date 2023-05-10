@@ -13,51 +13,70 @@ class CrmQueryData():
 	'number_range':[],
     }
 
-    def crmQdata(self,queryDict):
+    def crmQdata(self,queryDict,fk_list={}):
         qs_result = self.__class__
         count = 0 # 用來輔助判斷最後查詢的結果是否為全查
         count1 = 0
-        # print(f"----------\n開始查詢數據")
-        # print(f'queryDict:{queryDict}')
+        print("================查詢數據開始=====================")
+        print(f'查詢條件(queryDict):{queryDict}\n')
         for queryType, fields in self.fieldQueryRule.items():
             # 依不同欄位的類型queryType(有的欄位用equal查詢 有的欄位用like....)
             # 如果查詢類型有對應的欄位則進行資料查詢 篩選
+            print("----------------------")
+            print(f"查詢類型 {queryType} 開始:")
             if len(fields)>0 :
                 for field in fields:
+                    print("#####################")
+                    print(f"查詢欄位:{field}")
                     qdict = {}
                     try:
-                        if queryType=='equal':
+                        if queryType=='equals':
                             queryValue = queryDict.get(field)
+                            print(f'queryValue:{queryValue}')
                             if len(queryValue)>0:
+                                if field in fk_list:
+                                    field = fk_list[field]
                                 qdict[field]=queryValue
-                            
+
                         if queryType=='like':
                             queryValue = queryDict.get(field)
+                            print(f'queryValue:{queryValue}')
                             if len(queryValue)>0:
+                                if field in fk_list:
+                                    field = fk_list[field]
                                 qdict[field+'__icontains']=queryValue
                         if queryType=='date_range':
                             sdate = queryDict.get(field+"_sdate")
                             edate = queryDict.get(field+"_edate")
-                            if len(queryValue)>0:
+                            if len(sdate)>0 or len(edate)>0:
+                                if field in fk_list:
+                                    field = fk_list[field]
                                 qdict[field+'__range']=[sdate,edate]
                         if queryType=='number_range':
                             upperVal = queryDict.get(field+"_upperVal")
                             lowerVal = queryDict.get(field+"_lowerVal")
                             if len(upperVal)>0 or len(lowerVal)>0:
+                                if field in fk_list:
+                                    field = fk_list[field]
                                 qdict[field+'__range']=[lowerVal,upperVal]
-                    except:
+                    except Exception as err:
+                        print(f'查詢時的例外訊息:{str(err)}')
                         continue
+                    print(f"下的查詢條件:{qdict}")
                     if count1==0:
                         qs_result = qs_result.objects.filter(**qdict)
                         count1+=1
                     else :
                         qs_result = qs_result.filter(**qdict)
+                    print(f"依條件查詢的返回結果:{qs_result}")
                     # print(f'queryType:{queryType}')
                     # print(f'qdict:{qdict}')
                     # print(f'qs_result:{qs_result}')
-                    # print("\n")
+                    print("#####################")
 
-        # print(f"結束查詢數據\n----------")
+            print(f"查詢類型 {queryType} 結束!")                
+        print(f"最終的查詢結果:\n{qs_result}")
+        print("================查詢數據結束=====================")
         return qs_result
 
 
@@ -86,6 +105,9 @@ class CRM_COMPANY(models.Model,CrmQueryData):
         }  
     def __str__(self):
         return self.cocname
+    fk_list = {
+    }
+
 
 class SHOPGROUP(models.Model,CrmQueryData):
     shopgroup_id = models.CharField(primary_key=True,max_length=10,db_column="shopgroup_id",verbose_name="群組編號")
@@ -109,7 +131,8 @@ class SHOPGROUP(models.Model,CrmQueryData):
         'date_range':[],
         'number_range':[],
         }  
-
+    fk_list = {
+    }
 
 class County(models.Model):
     county_id = models.CharField(primary_key=True,max_length=10,db_column='county_id',verbose_name='縣市代號')
@@ -172,6 +195,13 @@ class SHOP(models.Model,CrmQueryData):
     fieldQueryRule = {
         "equals":['shop_kind','shopgroup_id',"shop_disable","county_id","post_id"],
         "like":['cpnyid',"shop_id","shop_name","shop_scname","shop_chief","shop_note","fax","telno"],
-        'date_range':["shop_disable_sdate","shop_disable_edate"],
+        'date_range':["shop_disable_date"],
         'number_range':[],
         }  
+    # fk_list 紀錄該model中對應的外鍵欄位
+    fk_list = {
+        'cpnyid':'cpnyid__cpnyid',
+        'shopgroup_id':"shopgroup_id__shopgroup_id",
+        'county_id':"county_id__county_id",
+        "post_id":"post_id__post_id"
+    }
