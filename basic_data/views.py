@@ -98,7 +98,8 @@ class FnView(View):
                 'form':form,
                 "qform":qform,
                 "rform":rform,
-                'queryModal':True
+                'queryModal':True,
+                "queryModalScript":True
             }
         
             return render(request,self.html_file,context)

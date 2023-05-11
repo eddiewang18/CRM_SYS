@@ -59,6 +59,71 @@ shop_chief.executeField();
     county_area_ajax(data,"{% url 'basic_data:county_area' %}");
 {% endblock do_other_queryFunc_nextTick_thing %}
 
+
+{% block do_other_queryModal_script_thing %}
+<!-- 當開啟querymodal時，針對[營業狀態]與[停業日期起訖]連動關係進行操作  -->
+<script>
+    var shop_disable_q = document.querySelector(".qmodal_field > #id_shop_disable");
+    var shop_disable_sdate = document.querySelector(".qmodal_field > #id_shop_disable_date_sdate");
+    var shop_disable_edate = document.querySelector(".qmodal_field > #id_shop_disable_date_edate");
+    var shop_disable_date_err =  document.querySelector("#id_shop_disable_date_edate_err");
+
+    shop_disable_q.addEventListener("change",function(){
+        if(this.value==='0')
+        {
+            shop_disable_sdate.disabled=false;
+            shop_disable_edate.disabled=false;
+        }else
+        {
+            shop_disable_sdate.disabled=true;
+            shop_disable_edate.disabled=true;
+            shop_disable_sdate.value="";
+            shop_disable_edate.value="";
+            shop_disable_date_err.innerHTML="";
+        }
+    })
+
+</script>
+
+{% endblock do_other_queryModal_script_thing %}
+
+{% block do_other_queryFunc_thing %}
+// 針對[停業日期起][停業日期訖]輸入的規則進行操作
+var shop_disable_sdate = document.querySelector(".qmodal_field > #id_shop_disable_date_sdate");
+var shop_disable_edate = document.querySelector(".qmodal_field > #id_shop_disable_date_edate");
+var shop_disable_date_err =  document.querySelector("#id_shop_disable_date_edate_err");
+var ok = true;
+if(shop_disable_sdate.value.length>0 || shop_disable_edate.value.length>0)
+{
+    if(!(shop_disable_sdate.value.length>0 && shop_disable_edate.value.length>0))
+    {
+        shop_disable_date_err.innerHTML="欄位 停業日期起 及 停業日期訖 均需輸入條件";
+        ok = false;
+    }
+
+}
+
+if(shop_disable_sdate.value.length>0 && shop_disable_edate.value.length>0)
+{
+    if(shop_disable_sdate.value>shop_disable_edate.value)
+    {
+        shop_disable_date_err.innerHTML="欄位 停業日期起 需小於 停業日期訖 均需輸入條件";
+        ok=false;
+
+    }
+
+}
+if(!ok)
+{
+    this.exec_queryFunc = false;
+}else
+{   
+    this.exec_queryFunc = true;
+    shop_disable_date_err.innerHTML="";
+}
+
+{% endblock do_other_queryFunc_thing %}
+
 {% block other_content %}
 <!-- 針對縣市/鄉鎮連動關係操作 -->
 <script>

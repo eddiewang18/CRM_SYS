@@ -203,7 +203,7 @@ class SHOP_QModelForm(ModelForm):
                 'class': 'form-control'
                 }
             )
-        set_class_attr2_fields(self.fields,"qfield",specific_fields_attrs=None)
+        set_class_attr2_fields(self.fields,"qfield",specific_fields_attrs={"shop_disable_date_sdate":{"disabled":"true"},"shop_disable_date_edate":{"disabled":"true"}})
 
         self.fields["post_id"].queryset= Area.objects.none()
         if "county_id" in self.data:

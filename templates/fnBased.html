@@ -100,7 +100,6 @@
 <!-- 則引入查詢欄位條件的modal 並顯示 -->
 {% include 'share/queryModal.html' %}
 {% if queryModal %}
-    
 	{% include 'share/show_queryModal.html' %}
 {% endif %}
 
@@ -286,125 +285,129 @@
                 } 
             },
             qresultCount:"",
-            data_index:0
+            data_index:0,
+            exec_queryFunc:true
 
         },
         methods:{
             queryFunc(){
-                //queryFunc開始                        
-                // 2.先將查詢的欄位輸入框的name屬性 作為 json物件的key , value屬性 作為 json物件的value屬性
-                var input_field_list  = document.querySelectorAll('.qfield');
-                var request_data = {};
-                for(var i of input_field_list){
-                    request_data[i.name]=i.value;
-                }
-                console.log(request_data);
-
-                //發送ajax請求時須加上下列這段程式碼來通過django的csrf_token驗證機制
-                 const csrftoken = getCookie('csrftoken');
-
-                
-            	//發送ajax請求時須加上上面這段程式碼來通過django的csrf_token驗證機制
-                // $.ajax({
-
-                //     url:"{% url 'basic_data:a01' %}",
-                //     method:"POST",
-                //     dataType:"json",
-                //     headers: {'X-CSRFToken': csrftoken}, //在headers中要提供csrftoken，讓client發送請求時攜帶csrftoken資訊
-                //     data:{
-                //         requestData:JSON.stringify(request_data) ,
-                //         querySubmit:'true'
-                        
-                //     },
-                //     success:function(response){
-                //         console.log(response);//打印成功請求後回傳的資料
-                
-                //         console.log("fron-end accpet data!");
-                //         this.responseData = response;
-                //         console.log(this.responseData);
-                //     }
-
-
-                //     })         
-                
-               axios.defaults.headers.common["X-CSRFToken"]=csrftoken;
-
-                axios.post({% block qPostURL %}{% endblock qPostURL %},
-                    {
-                        params:{
-                            requestData:JSON.stringify(request_data) ,
-                            querySubmit:'true'
-                        }
+                {% block do_other_queryFunc_thing %}
+                {% endblock do_other_queryFunc_thing %}
+                if(this.exec_queryFunc)
+                {
+                    //queryFunc開始                        
+                    // 2.先將查詢的欄位輸入框的name屬性 作為 json物件的key , value屬性 作為 json物件的value屬性
+                    var input_field_list  = document.querySelectorAll('.qfield');
+                    var request_data = {};
+                    for(var i of input_field_list){
+                        request_data[i.name]=i.value;
                     }
-                ).then(response => {
+                    console.log(request_data);
 
-                    this.responseData=response.data;
-                    console.log("回傳的資料:")
-                    console.log(response.data);
-                    console.log("---------------");
-                    var count = this.responseData.length;
-                    // console.log(count);
-                    //若有查詢的資料有結果，則做以下事情:
-                    if(count>0){
-                        // 1.將顯示結果的圖示亮起來，並顯示查詢到幾筆
-                        this.qresultCount=count+'筆';
-                        this.showResult();
-                        vm_btnArea.onquery = true;
+                    //發送ajax請求時須加上下列這段程式碼來通過django的csrf_token驗證機制
+                    const csrftoken = getCookie('csrftoken');
 
-                        //2.將查出來的第一筆資料列代入form表單中
-                        var data = this.responseData[0];
- 
-                        var input_field1s = document.querySelectorAll('.form_field');
-
-                        for(var i of input_field1s)
-                        {   
-                            var k= i.getAttribute('name');
-                            var v = data[k];
-                            if(v==null)
-                            {
-                                v='';
-                            }
-                            i.value = v;
-                        }
-  
-                        //3 將input元素中class含有 pkField 設為只讀
-                        var pkFields = document.querySelectorAll(".field1 input.pkField");
-                        for(var i=0 ; i<pkFields.length;i++){
-                            pkFields[i].setAttribute('disabled',"true");
-                        }
-
-
-                        //4.渲染完成後 >再默認選中第一列數據
-                        this.$nextTick(function () {
-                            var allTrs = document.querySelectorAll("#qmodal_result_table tr");
-                            allTrs[1].classList.add('selected');
-
-                            for(var i=0;i<allTrs.length;i++){
-                                allTrs[i].setAttribute('dataRow',`${i}`);
-                            }
-                            
-                            var errListMsgs = document.querySelectorAll(".errMsg");
-                            for(var errMsg of errListMsgs){
-                                errMsg.innerHTML='';
-                            }
-                            {% block do_other_queryFunc_nextTick_thing %}
-                            {% endblock do_other_queryFunc_nextTick_thing %}
-                        });
-
-
-                    }else{
-                        //如果查詢結果為0筆，則告知使用者查無資料
-                        $('#queryModal').modal('hide');
-                        $('#noDataMsg').modal('show');
-
-                    }
                     
+                    //發送ajax請求時須加上上面這段程式碼來通過django的csrf_token驗證機制
+                    // $.ajax({
 
-                }).catch(function(error){
-                    console.log(error);
-                })
+                    //     url:"{% url 'basic_data:a01' %}",
+                    //     method:"POST",
+                    //     dataType:"json",
+                    //     headers: {'X-CSRFToken': csrftoken}, //在headers中要提供csrftoken，讓client發送請求時攜帶csrftoken資訊
+                    //     data:{
+                    //         requestData:JSON.stringify(request_data) ,
+                    //         querySubmit:'true'
+                            
+                    //     },
+                    //     success:function(response){
+                    //         console.log(response);//打印成功請求後回傳的資料
+                    
+                    //         console.log("fron-end accpet data!");
+                    //         this.responseData = response;
+                    //         console.log(this.responseData);
+                    //     }
 
 
+                    //     })         
+                    
+                axios.defaults.headers.common["X-CSRFToken"]=csrftoken;
+
+                    axios.post({% block qPostURL %}{% endblock qPostURL %},
+                        {
+                            params:{
+                                requestData:JSON.stringify(request_data) ,
+                                querySubmit:'true'
+                            }
+                        }
+                    ).then(response => {
+
+                        this.responseData=response.data;
+                        console.log("回傳的資料:")
+                        console.log(response.data);
+                        console.log("---------------");
+                        var count = this.responseData.length;
+                        // console.log(count);
+                        //若有查詢的資料有結果，則做以下事情:
+                        if(count>0){
+                            // 1.將顯示結果的圖示亮起來，並顯示查詢到幾筆
+                            this.qresultCount=count+'筆';
+                            this.showResult();
+                            vm_btnArea.onquery = true;
+
+                            //2.將查出來的第一筆資料列代入form表單中
+                            var data = this.responseData[0];
+    
+                            var input_field1s = document.querySelectorAll('.form_field');
+
+                            for(var i of input_field1s)
+                            {   
+                                var k= i.getAttribute('name');
+                                var v = data[k];
+                                if(v==null)
+                                {
+                                    v='';
+                                }
+                                i.value = v;
+                            }
+    
+                            //3 將input元素中class含有 pkField 設為只讀
+                            var pkFields = document.querySelectorAll(".field1 input.pkField");
+                            for(var i=0 ; i<pkFields.length;i++){
+                                pkFields[i].setAttribute('disabled',"true");
+                            }
+
+
+                            //4.渲染完成後 >再默認選中第一列數據
+                            this.$nextTick(function () {
+                                var allTrs = document.querySelectorAll("#qmodal_result_table tr");
+                                allTrs[1].classList.add('selected');
+
+                                for(var i=0;i<allTrs.length;i++){
+                                    allTrs[i].setAttribute('dataRow',`${i}`);
+                                }
+                                
+                                var errListMsgs = document.querySelectorAll(".errMsg");
+                                for(var errMsg of errListMsgs){
+                                    errMsg.innerHTML='';
+                                }
+                                {% block do_other_queryFunc_nextTick_thing %}
+                                {% endblock do_other_queryFunc_nextTick_thing %}
+                            });
+
+
+                        }else{
+                            //如果查詢結果為0筆，則告知使用者查無資料
+                            $('#queryModal').modal('hide');
+                            $('#noDataMsg').modal('show');
+
+                        }
+                        
+
+                    }).catch(function(error){
+                        console.log(error);
+                    })
+                }
 
                 //queryFunc結束
             },
@@ -478,5 +481,10 @@
     // modal表格> USER 只能單選一列的資料內容
       modal_table_selected("#qmodal_result_table","selected","title_row");
 </script>
+{% if queryModal %}
+    {% block do_other_queryModal_script_thing %}
+    {% endblock do_other_queryModal_script_thing %}
+{% endif%}
+
 {% endblock content %}
 
