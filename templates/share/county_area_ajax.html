@@ -1,0 +1,34 @@
+<script>
+    document.addEventListener("change",function(e){
+        if(e.target.id==='id_county_id'){
+            var changed_ele = e.target;
+            var changed_ele_parent = e.target.parentNode.parentNode.parentNode;
+            var post = changed_ele_parent.querySelector("#id_post_id");
+            console.log(changed_ele);
+            console.log(changed_ele_parent);
+            console.log(post);
+            var county_id_val = changed_ele.value;
+            $.ajax({
+                url:"{% url 'basic_data:county_area' %}",
+                method:"GET",
+                dataType:"json",
+                data:{
+                    county_id:county_id_val
+                },
+                success:function(response){
+                    console.log(response);
+                    var option_html = "";
+                        for(var obj of response){
+                            var post_id = obj["post_id"];
+                            var name = obj["post_name"];
+                            option_html+=`<option value="${post_id}">${name}</option>`;
+                        }
+                        post.innerHTML =  option_html;
+                }
+            })
+
+            console.log("-------------------");
+        }
+    })
+ 
+</script>

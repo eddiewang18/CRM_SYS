@@ -1,35 +1,35 @@
 {% extends 'fn2Based.html' %}
 {% block title %}
-維護分店群組資料
+維護員工群組資料
 {% endblock title %}
 
 {% block funcTitle %}
-A02維護分店群組資料
+A04維護員工群組資料
 {% endblock funcTitle %}
 
 
 {% block titleRow %}
-<td class="pkField" name="shopgroup_id">
-    群組編號
+<td class="pkField" name="group_id">
+    員工群組編號
 </td>
-<td name="shopgroup_name">
-    群組名稱
+<td name="group_name">
+    員工群組名稱
 </td>
 {% endblock titleRow %}
 
 
 {% block subtable_titleRow %}
 <td >
-    分店編號
+    員工編號
 </td>
 <td>
-    分店名稱
+    員工名稱
 </td>
 <td >
-    分店類型
+    所屬分店
 </td>
 <td >
-    公司品牌
+    所屬公司品牌
 </td>
 {% endblock subtable_titleRow %}
 
@@ -37,10 +37,10 @@ A02維護分店群組資料
 {% block main_table_fields_input_typpe %}
 <script>
 var input_type_config1 = {
-    "shopgroup_id":{
+    "group_id":{
         inputType : "input",
     },
-    "shopgroup_name":{
+    "group_name":{
         inputType : "input",
     },
 }
@@ -49,46 +49,47 @@ var input_type_config1 = {
 
 
 {% block dynamic_table_settings %}
-dynamic_table("table1","add1","del1",pkList=['shopgroup_id'],titleRow=true,input_type_config1,false);
+dynamic_table("table1","add1","del1",pkList=['group_id'],titleRow=true,input_type_config1,false);
 {% endblock dynamic_table_settings %}
 
 {% block vm_successModal_redirectURL %}
-"{% url 'basic_data:a02' %}"
+"{% url 'basic_data:a04' %}"
 {% endblock vm_successModal_redirectURL %}
 
 {% block input_type_config_settings %}
-    shopgroup_id:{
+    group_id:{
         inputType : "input",
     },
-    shopgroup_name:{
+    group_name:{
         inputType : "input",
     }
 {% endblock input_type_config_settings %}
 
 
 {% block field_check_rule_settings %}
-    shopgroup_id:{
+    group_id:{
         checkStrLen:[4,10],
         checkEngNumCombination:true,
         repeatness : true,
         required:true
     },
-    shopgroup_name:{
-        checkStrLen:[0,50],
+    group_name:{
+        checkStrLen:[0,20],
         checkEngNumCombination:false,
         repeatness : true,
         required:true
     }
 {% endblock field_check_rule_settings %}
 
+
 {% block showShop_ajax_url %}
-'{% url "basic_data:a02" %}'
+'{% url "basic_data:a04" %}'
 {% endblock showShop_ajax_url %}
 
 {% block queryFunc_ajax_url %}
-'{% url "basic_data:a02" %}'
+'{% url "basic_data:a04" %}'
 {% endblock queryFunc_ajax_url %}
 
 {% block update_ajax_url %}
-'{% url "basic_data:a02" %}'
+'{% url "basic_data:a04" %}'
 {% endblock update_ajax_url %}

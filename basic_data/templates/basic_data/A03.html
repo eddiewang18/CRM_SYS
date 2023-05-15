@@ -126,61 +126,10 @@ if(!ok)
 
 {% block other_content %}
 <!-- 針對縣市/鄉鎮連動關係操作 -->
+{% include 'share/county_area_ajax.html' %}
+
 <script>
-    document.addEventListener("change",function(e){
-        if(e.target.id==='id_county_id'){
-            var changed_ele = e.target;
-            var changed_ele_parent = e.target.parentNode.parentNode.parentNode;
-            var post = changed_ele_parent.querySelector("#id_post_id");
-            console.log(changed_ele);
-            console.log(changed_ele_parent);
-            console.log(post);
-            var county_id_val = changed_ele.value;
-            $.ajax({
-                url:"{% url 'basic_data:county_area' %}",
-                method:"GET",
-                dataType:"json",
-                data:{
-                    county_id:county_id_val
-                },
-                success:function(response){
-                    console.log(response);
-                    var option_html = "";
-                        for(var obj of response){
-                            var post_id = obj["post_id"];
-                            var name = obj["post_name"];
-                            option_html+=`<option value="${post_id}">${name}</option>`;
-                        }
-                        post.innerHTML =  option_html;
-                }
-            })
 
-            console.log("-------------------");
-        }
-    })
-
-    // var county_id = document.querySelector("#id_county_id");
-    // county_id.addEventListener("change",function(){
-    //   var county_id_val = this.value;
-    //   $.ajax({
-    //     url:"{% url 'basic_data:a03' %}",
-    //     method:"GET",
-    //     dataType:"json",
-    //     data:{
-    //         county_id:county_id_val
-    //     },
-    //     success:function(response){
-    //         console.log(response);
-    //         var option_html = "";
-    //             for(var obj of response){
-    //                 var post_id = obj["post_id"];
-    //                 var name = obj["post_name"];
-    //                 option_html+=`<option value="${post_id}">${name}</option>`;
-    //             }
-    //             $("#id_post_id").html(option_html); 
-    //     }
-    //   })
-    // })
 
 // 針對 營業狀態 與 停業日期 連動關係進行操作
 // 當 營業狀態 > 營業中 > 停業日期欄位不提供輸入 ， 營業狀態 > 停業 > 停業日期欄位提供輸入

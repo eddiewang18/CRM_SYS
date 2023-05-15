@@ -1,4 +1,4 @@
-from .models import CRM_COMPANY,SHOPGROUP,SHOP,Area
+from .models import CRM_COMPANY,SHOPGROUP,SHOP,Area,HRUSER_GROUP,CRM_HRUSER
 from django.forms import ModelForm
 from django import forms
 from django.core.exceptions import ValidationError
@@ -26,14 +26,7 @@ def set_class_attr2_fields(fields:dict,general_attrs:str,specific_fields_attrs=N
 
 
 class CRM_COMPANY_ModelForm(ModelForm):
-    # verbose_name_fields = []
-    # return_query_cols = []
-    # for i in CRM_COMPANY._meta.get_fields(): 
-    #     try:
-    #         verbose_name_fields.append(i.verbose_name)
-    #         return_query_cols.append(i.name)
-    #     except:
-    #         continue
+
     class Meta :
         model=CRM_COMPANY
         fields = ["cpnyid","cocname","coename","coscname","cosename"]
@@ -99,14 +92,7 @@ class SHOPGROUP_ModelForm(ModelForm):
 
 
 class SHOP_ModelForm(ModelForm):
-    # verbose_name_fields = []
-    # return_query_cols = []
-    # for i in SHOP._meta.get_fields(): 
-    #     try:
-    #         verbose_name_fields.append(i.verbose_name)
-    #         return_query_cols.append(i.name)
-    #     except:
-    #         continue
+
 
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
@@ -227,12 +213,177 @@ class SHOP_QModelForm(ModelForm):
          "fax","telno"] 
 
 
-class SHOP_RModelForm(ModelForm):
-    
+
+
+class HRUSER_GROUP_ModelForm(ModelForm):
+    class Meta :
+        model=HRUSER_GROUP
+        fields = ["group_id","group_name"]
+
+#####################################################
+
+class CRM_HRUSER_ModelForm(ModelForm):
+
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.fields["pwd"].widget = forms.widgets.PasswordInput(
+
+            )
+        self.fields["birthday"].widget = forms.widgets.DateInput(
+            attrs={
+                'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)',
+                'class': 'form-control'
+                }
+            )
+        self.fields["indate"].widget = forms.widgets.DateInput(
+            attrs={
+                'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)',
+                'class': 'form-control'
+                }
+            )    
+
+        self.fields["quitdate"].widget = forms.widgets.DateInput(
+            attrs={
+                'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)',
+                'class': 'form-control'
+                }
+            )
+        set_class_attr2_fields(self.fields,'form_field',{"empid":{"class":"pkField"}})
+        self.errList = []
+
+        self.fields["post_id"].queryset= Area.objects.none()
+        if "county_id" in self.data:
+            try:
+                county_id = self.data.get("county_id")
+                self.fields["post_id"].queryset= Area.objects.filter(county_id=county_id)
+            except:
+                pass
+        elif self.instance.pk:
+            self.fields["post_id"].queryset= self.instance.county_id.area_set.all()        
+
+######################################################################################
+        self.fields["shop_id"].queryset= SHOP.objects.none()
+        if "cpnyid" in self.data:
+            try:
+                cpnyid = self.data.get("shop_id")
+                self.fields["shop_id"].queryset= SHOP.objects.filter(cpnyid=cpnyid)
+            except:
+                pass
+        elif self.instance.pk:
+            self.fields["shop_id"].queryset= self.instance.cpnyid.shop_set.all()   
+
+
+
+        self.verbose_name_fields = []
+        self.return_query_cols = []
+        for i in CRM_HRUSER._meta.get_fields(): 
+            try:
+                self.verbose_name_fields.append(i.verbose_name)
+                self.return_query_cols.append(i.name)
+            except:
+                continue
 
     class Meta :
-        model=SHOP
-        fields = ["shop_id","shop_name","cpnyid",
-        "shop_kind","shop_chief"] 
+        model=CRM_HRUSER
+        fields = ["cpnyid","shop_id","empid","cname","ename","identid","birthday",
+        "pwd","telno","mobilno","sex","email","indate","quitdate",
+        "group_id","emp_type","county_id","email","post_id","note",
+        ] 
 
-        # fields =[f.name for f in model._meta.get_fields()]  
+    def clean_empid(self):
+        empid = self.cleaned_data.get("empid")
+        data_exists = None
+        if not self.instance.pk :
+            data_exists = CRM_HRUSER.objects.filter(empid=empid).exists()
+        else:
+            data_exists = CRM_HRUSER.objects.filter(empid=empid).exclude(empid=empid).exists()
+        if data_exists :
+            errMsg = f"員工編號 {empid} 已存在 不可重複輸入"
+            self.errList.append(errMsg)
+            raise ValidationError(errMsg)
+        else:
+            return empid
+
+
+
+
+
+class CRM_HRUSER_QModelForm(ModelForm):
+
+    birthday_sdate = forms.DateField(label="出生日期起")
+    birthday_edate = forms.DateField(label="出生日期迄")
+    indate_sdate = forms.DateField(label="到職日期起")
+    indate_edate = forms.DateField(label="到職日期迄")
+    quitdate_sdate = forms.DateField(label="離職日期起")
+    quitdate_edate = forms.DateField(label="離職日期迄")
+
+    
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.fields["birthday_sdate"].widget = forms.widgets.DateInput(
+            attrs={
+                'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)',
+                'class': 'form-control'
+                }
+            )
+        self.fields["birthday_edate"].widget = forms.widgets.DateInput(
+            attrs={
+                'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)',
+                'class': 'form-control'
+                }
+            )
+        self.fields["indate_sdate"].widget = forms.widgets.DateInput(
+            attrs={
+                'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)',
+                'class': 'form-control'
+                }
+            )
+        self.fields["indate_edate"].widget = forms.widgets.DateInput(
+            attrs={
+                'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)',
+                'class': 'form-control'
+                }
+            )    
+
+        self.fields["quitdate_sdate"].widget = forms.widgets.DateInput(
+            attrs={
+                'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)',
+                'class': 'form-control'
+                }
+            )
+        self.fields["quitdate_edate"].widget = forms.widgets.DateInput(
+            attrs={
+                'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)',
+                'class': 'form-control'
+                }
+            )       
+        set_class_attr2_fields(self.fields,"qfield",specific_fields_attrs={})
+
+        self.fields["post_id"].queryset= Area.objects.none()
+        if "county_id" in self.data:
+            try:
+                county_id = self.data.get("county_id")
+                self.fields["post_id"].queryset= Area.objects.filter(county_id=county_id)
+            except:
+                pass
+        elif self.instance.pk:
+            self.fields["post_id"].queryset= self.instance.county_id.area_set.all()    
+
+######################################################################################
+        self.fields["shop_id"].queryset= SHOP.objects.none()
+        if "cpnyid" in self.data:
+            try:
+                cpnyid = self.data.get("shop_id")
+                self.fields["shop_id"].queryset= SHOP.objects.filter(cpnyid=cpnyid)
+            except:
+                pass
+        elif self.instance.pk:
+            self.fields["shop_id"].queryset= self.instance.cpnyid.shop_set.all()   
+       
+
+    class Meta :
+        model=CRM_HRUSER
+        fields = ["cpnyid","shop_id","empid","cname","ename","identid","birthday_sdate","birthday_edate",
+        "pwd","telno","mobilno","sex","email","indate_sdate","indate_edate","quitdate_sdate",
+        "quitdate_edate","group_id","emp_type","county_id","email","post_id",
+        ] 

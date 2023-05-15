@@ -1,0 +1,82 @@
+{% extends 'fnBased.html' %}
+{% load static %}
+
+
+{% block title %}
+A05維護員工基本資料
+{% endblock title %}
+
+
+{% block functitle %}
+A05維護員工基本資料
+{% endblock functitle %}
+
+
+{% block field_examine %}
+
+var empid = new FieldExamine("id_empid","id_empid_label",false,true,5,10,'id_empid_err',[checkEngNumCombination]);
+var cpnyid = new FieldExamine("id_cpnyid","id_cpnyid_label",false,false,0,0,'id_cpnyid_err',[]);
+var shop_id = new FieldExamine("id_shop_id","id_shop_id_label",false,false,0,0,'id_shop_id_err',[]);
+var pwd = new FieldExamine("id_pwd","id_pwd_label",false,true,5,20,'id_pwd_err',[]);
+var cname = new FieldExamine("id_cname","id_cname_label",false,true,1,20,'id_cname_err',[]);
+var emp_type = new FieldExamine("id_emp_type","id_emp_type_label",false,false,0,0,'id_emp_type_err',[]);
+
+empid.executeField();
+cpnyid.executeField();
+shop_id.executeField();
+pwd.executeField();
+cname.executeField();
+emp_type.executeField();
+
+{% endblock field_examine %}
+
+{% block redirecHomeURL %}
+'{%  url "basic_data:a05" %}'
+{% endblock redirecHomeURL %}
+
+
+
+{% block intoCreateURL %}
+'{%  url "basic_data:a05" %}'
+{% endblock intoCreateURL %}
+
+{% block putURL %}
+'{%  url "basic_data:a05" %}'
+{% endblock putURL %}
+
+{% block postURL %}
+'{%  url "basic_data:a05" %}'
+{% endblock postURL %}
+
+{% block qPostURL %}
+'{%  url "basic_data:a05" %}'
+{% endblock qPostURL %}
+
+<!-- 針對a05查詢資料後，如何讓地區正確的顯示在欄位上進行操作 -->
+{% block do_other_showQuery_thing %}
+    county_area_ajax(data,"{% url 'basic_data:county_area' %}");
+    cpny_shop_ajax(data,"{% url 'basic_data:cpnyid_shop' %}");
+{% endblock do_other_showQuery_thing %}
+
+{% block do_other_queryFunc_nextTick_thing %}
+    county_area_ajax(data,"{% url 'basic_data:county_area' %}");
+    cpny_shop_ajax(data,"{% url 'basic_data:cpnyid_shop' %}");
+{% endblock do_other_queryFunc_nextTick_thing %}
+
+
+{% block do_other_queryModal_script_thing %}
+
+{% endblock do_other_queryModal_script_thing %}
+
+{% block do_other_queryFunc_thing %}
+
+{% endblock do_other_queryFunc_thing %}
+
+{% block other_content %}
+
+<!-- 針對縣市/鄉鎮連動關係操作 -->
+{% include 'share/county_area_ajax.html' %}
+{% include 'share/cpny_shop_ajax.html' %}
+{% endblock other_content %}
+
+

@@ -90,3 +90,30 @@ function county_area_ajax(data,url){
 		}
 		})	
 }
+
+
+function cpny_shop_ajax(data,url){
+	var cpnyid_val = data['cpnyid'];
+	var post_id_val = data['shop_id'];
+	
+	$.ajax({
+		url:url,
+		method:"GET",
+		dataType:"json",
+		data:{
+			cpnyid:cpnyid_val
+		},
+		success:function(response){
+			console.log(response);
+			var option_html = "";
+				for(var obj of response){
+					var post_id = obj["shop_id"];
+					var name = obj["shop_name"];
+					option_html+=`<option value="${post_id}">${name}</option>`;
+				}
+				$("#id_shop_id").html(option_html); 
+				$("#id_shop_id").val(post_id_val);
+		}
+		})	
+}
+

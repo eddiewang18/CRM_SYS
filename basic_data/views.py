@@ -1,9 +1,9 @@
 from django.shortcuts import render,redirect
 from django.views import View
-from .models import CRM_COMPANY,SHOPGROUP,SHOP,County,Area
+from .models import (CRM_COMPANY,SHOPGROUP,SHOP,County,Area,HRUSER_GROUP,CRM_HRUSER)
 from .forms import (
-    CRM_COMPANY_ModelForm,SHOPGROUP_ModelForm,SHOP_ModelForm,SHOP_QModelForm,SHOP_RModelForm
-    ,CRM_COMPANY_QModelForm
+    CRM_COMPANY_ModelForm,SHOPGROUP_ModelForm,SHOP_ModelForm,SHOP_QModelForm
+    ,CRM_COMPANY_QModelForm,HRUSER_GROUP_ModelForm,CRM_HRUSER_ModelForm,CRM_HRUSER_QModelForm
 )
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
@@ -99,7 +99,7 @@ class FnView(View):
                 "qform":qform,
                 "rform":rform,
                 'queryModal':True,
-                "queryModalScript":True
+
             }
         
             return render(request,self.html_file,context)
@@ -154,6 +154,13 @@ def county_area(request):
         post_objs = list(Area.objects.filter(county_id=county_id).values("post_id","post_name"))
         return JsonResponse(post_objs,safe=False)
 
+# def county_area(request):
+#     if 'change_select_ele' in request.GET:
+#         print("\nchange_select_ele\n")
+#         county_id = request.GET.get('change_select_ele')
+#         post_objs = list(Area.objects.filter(county_id=county_id).values("post_id","post_name"))
+#         return JsonResponse(post_objs,safe=False)
+
 class A01View(FnView):
     model = CRM_COMPANY
     model_form = CRM_COMPANY_ModelForm
@@ -174,96 +181,106 @@ class A03View(FnView):
     html_file = 'basic_data/A03.html'
     # return_query_cols = model_form.return_query_cols
     return_query_cols = model_form().return_query_cols
-    def get(self,request):
-        """
-        get 方法返回ModelForm空白欄位表單
-        """
 
 
-        form = self.model_form()
-        context = {
-            'form':form
-        }
-        return render(request,self.html_file,context)
 
-class A02View(View):
+class Fn2View(View):
+    """
+    主表搭配副表的功能
+
+    屬性:
+        model :  開發功能對應的 Model
+        model_form : 開發功能對應的 ModelForm
+        html_file :  開發功能對應的html頁面
+        fk_attr : str類型,主表對應副表的相關資料集合，以 副表小寫_set 的形式表現 
+        fk_cols_show_list : list類型，儲存前台畫面中副表要呈現的欄位
+        choice2readableInfos : list類型，將副表中為下拉選單的欄位依依轉換為易讀的值，一個下拉選單的欄位以dict型態分別存入在choice2readableInfos中
+        cols_show_list : list類型，儲存前台畫面中主表要呈現的欄位
+    """
     def get(self,request):
         
         if 'switch' in request.GET :
             requestData = json.loads(request.GET.get('postData')) 
-            shopgroup_id = requestData.get('pk')
-            shopgroup_obj = SHOPGROUP.objects.get(pk = shopgroup_id)
-            included_shop_objs =  shopgroup_obj.shop_set.all().values('shop_id','shop_name','shop_kind','cpnyid__cocname')
-            choice2readableInfos = [{'choices_belong_model':SHOP,"choices_attr_name":"shop_kind_choices","choices_field_name":'shop_kind'}]
-            turnChoiceField2readable(included_shop_objs,choice2readableInfos)
+            # shopgroup_id = requestData.get('pk')
+            primary_key =  requestData.get('pk')
+            # shopgroup_obj = SHOPGROUP.objects.get(pk = shopgroup_id)
+            main_obj = self.model.objects.get(pk = primary_key)
+            included_fk_objs = getattr(main_obj,self.fk_attr).all().values(*self.fk_cols_show_list)
+            # included_shop_objs =  shopgroup_obj.shop_set.all().values('shop_id','shop_name','shop_kind','cpnyid__cocname')
+            # choice2readableInfos = [{'choices_belong_model':SHOP,"choices_attr_name":"shop_kind_choices","choices_field_name":'shop_kind'}]
+            # turnChoiceField2readable(included_shop_objs,choice2readableInfos)
+            turnChoiceField2readable(included_fk_objs,self.choice2readableInfos)
 
             # print(included_shop_objs)
-            return JsonResponse(list(included_shop_objs),safe=False)
+            return JsonResponse(list(included_fk_objs),safe=False)
 
         if 'query_condition' in request.GET :
-            # print('\nquery_condition\n')
+            print('\nquery_condition\n')
             requestData = json.loads(request.GET.get('postData')) 
-            # print(f'\nrequestData:{requestData}|type : {type(requestData)}\n')
-            qs_result = list(SHOPGROUP().crmQdata(requestData,self.model.fk_list).values("shopgroup_id","shopgroup_name"))
-            # print(f'\nqs_result:{qs_result}\n')
+            print(f'\nrequestData:{requestData}|type : {type(requestData)}\n')
+            # qs_result = list(SHOPGROUP().crmQdata(requestData,self.model.fk_list).values("shopgroup_id","shopgroup_name"))
+            qs_result = list(self.model().crmQdata(requestData,self.model.fk_list).values(*self.cols_show_list))
 
+            print(f'\nqs_result:{qs_result}\n')
             return JsonResponse(qs_result,safe=False)
 
-        form = SHOPGROUP_ModelForm()
-        objs = SHOPGROUP.objects.all()
-        first_obj = objs.first()
-        # cpnyid__cocname > 使用 foreignkey__關聯model某屬性 可以讓該屬性做為顯示的資料
-        included_shop_objs = first_obj.shop_set.all().values('shop_id','shop_name','shop_kind','cpnyid__cocname')
-        choice2readableInfos = [{'choices_belong_model':SHOP,"choices_attr_name":"shop_kind_choices","choices_field_name":'shop_kind'}]
-        turnChoiceField2readable(included_shop_objs,choice2readableInfos)
+        # form = SHOPGROUP_ModelForm()
+        form = self.model_form()
+        # objs = SHOPGROUP.objects.all()
 
+        objs = self.model.objects.all().order_by(self.query_order)
+        included_fk_objs=[]
+        if len(objs)>0:
+            first_obj = objs.first()
+        # cpnyid__cocname > 使用 foreignkey__關聯model某屬性 可以讓該屬性做為顯示的資料
+        # included_shop_objs = first_obj.shop_set.all().values('shop_id','shop_name','shop_kind','cpnyid__cocname')
+            included_fk_objs = getattr(first_obj,self.fk_attr).all().values(*self.fk_cols_show_list)
+        # choice2readableInfos = [{'choices_belong_model':SHOP,"choices_attr_name":"shop_kind_choices","choices_field_name":'shop_kind'}]
+            turnChoiceField2readable(included_fk_objs,self.choice2readableInfos)
         # print()
         # print(included_shop_objs)
-
-        
-        objs = objs.values('shopgroup_id','shopgroup_name')
-
+            objs = objs.values(*self.cols_show_list).order_by(self.query_order)
         context = {
             'form':form,
             'objs':objs,
-            'included_shop_objs':included_shop_objs
+            'included_fk_objs':included_fk_objs
         }
 
         if 'query' in request.GET :
             context['queryModal']=True
-
-        
-        return render(request,'basic_data/A02.html',context)
-
-
-
+        # return render(request,'basic_data/A02.html',context)
+        return render(request,self.html_file,context)
 
     def post(self,request):
-        # print('\na02 post\n')
+        print('\na02 post\n')
         data = json.loads(request.POST.get("postData")) 
         insert_data = data.get("insert") # [{'shopgroup_id': 'wdf', 'shopgroup_name': '123'}, {'shopgroup_id': 'ewq', 'shopgroup_name': '234'}]
         update_data = data.get("update")
         delete_data = data.get('delete')
-        # print(f'\ninsert_data : {insert_data}\n')
-        # print(f'\nupdate_data : {update_data}\n')
-        # print(f'\ndelete_data : {delete_data}\n')
+        print(f'\ninsert_data : {insert_data}\n')
+        print(f'\nupdate_data : {update_data}\n')
+        print(f'\ndelete_data : {delete_data}\n')
+        if len(delete_data)>0:
+            for data_row in delete_data:
+                self.model.objects.get(pk=data_row[self.pk_key]).delete()
+                # print(f'\ndelete a row\n')
 
         if len(insert_data)>0:
             for data_row in insert_data:
-                form = SHOPGROUP_ModelForm(data=data_row)
+                form = self.model_form(data=data_row)
                 if form.is_valid():
                     table_data = form.save(commit=False)
                     table_data.muser = request.user.username
                     table_data.save()
-                    # print(f'\ncreate a new row\n')
+                    print(f'\ncreate a new row\n')
                 else:
                     pass
-                    # print(f'\nform.errors :{form.errors}\n')
+                    print(f'\nform.errors :{form.errors}\n')
         
         if len(update_data)>0:
             for data_row in update_data:
-                obj = SHOPGROUP.objects.get(pk=data_row['shopgroup_id'])
-                form = SHOPGROUP_ModelForm(instance=obj,data=data_row)
+                obj =self.model.objects.get(pk=data_row[self.pk_key])
+                form =  self.model_form(instance=obj,data=data_row)
                 if form.is_valid():
                     table_data = form.save(commit=False)
                     table_data.muser = request.user.username
@@ -272,14 +289,46 @@ class A02View(View):
                 else:
                     # print(f'\nform.errors :{form.errors}\n')
                     pass
-
-        if len(delete_data)>0:
-            for data_row in delete_data:
-                SHOPGROUP.objects.get(pk=data_row['shopgroup_id']).delete()
-                # print(f'\ndelete a row\n')
-        
         return JsonResponse({"update":"ok"})
 
+class A02View(Fn2View):
+    model = SHOPGROUP
+    model_form = SHOPGROUP_ModelForm
+    html_file = 'basic_data/A02.html'
+    fk_attr = 'shop_set'
+    fk_cols_show_list = ['shop_id','shop_name','shop_kind','cpnyid__cocname']
+    choice2readableInfos =  [{'choices_belong_model':SHOP,"choices_attr_name":"shop_kind_choices","choices_field_name":'shop_kind'}]
+    cols_show_list = ['shopgroup_id','shopgroup_name']
+    pk_key = 'shopgroup_id'
+    query_order = 'shopgroup_id'
 dataCuser(SHOPGROUP)
 
+class A04View(Fn2View):
+    model = HRUSER_GROUP
+    model_form = HRUSER_GROUP_ModelForm
+    html_file = 'basic_data/A04.html'
+    fk_attr = 'crm_hruser_set'
+    fk_cols_show_list = ['empid','cname','shop_id__shop_name','cpnyid__cocname']
+    choice2readableInfos =  []
+    cols_show_list = ['group_id','group_name']
+    pk_key = 'group_id'
+    query_order = 'group_id'
+dataCuser(HRUSER_GROUP)
 
+
+
+def cpnyid_shop(request):
+    if 'cpnyid' in request.GET:
+        cpnyid = request.GET.get('cpnyid')
+        shop_objs = list(SHOP.objects.filter(cpnyid=cpnyid).values("shop_id","shop_name"))
+        return JsonResponse(shop_objs,safe=False)
+
+
+
+class A05View(FnView):
+    model = CRM_HRUSER
+    model_form = CRM_HRUSER_ModelForm
+    query_model_form = CRM_HRUSER_QModelForm
+    verbose_name_fields = model_form().verbose_name_fields
+    html_file = 'basic_data/A05.html'
+    return_query_cols = model_form().return_query_cols
