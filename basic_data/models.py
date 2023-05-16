@@ -278,3 +278,95 @@ class CRM_HRUSER(models.Model,CrmQueryData):
         'county_id':"county_id__county_id",
         "post_id":"post_id__post_id"
     }
+
+
+class VIPINFO_GROUP(models.Model):
+    vipinfo_group_id = models.CharField(primary_key=True,max_length=10,verbose_name="會員群組編號",db_column='vipinfo_group_id')
+    vipinfo_group_name = models.CharField(max_length=20,verbose_name="會員群組名稱",db_column='vipinfo_group_name')
+    cpnyid = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
+    cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
+    cdate = models.DateField(db_column="cdate",verbose_name='創立日期',auto_now_add=True)
+    ctime = models.TimeField(db_column="ctime",verbose_name='創立時間',auto_now_add=True)
+    muser = models.CharField(max_length=20,db_column="muser",verbose_name='異動者') 
+    mdate = models.DateField(db_column="mdate",verbose_name='異動日期',auto_now=True)
+    mtime = models.TimeField(db_column="mtime",verbose_name='異動時間',auto_now=True)
+
+    def __str__(self):
+        return  self.vipinfo_group_name   
+
+    class Meta:
+        db_table = "VIPINFO_GROUP"  
+
+    fieldQueryRule = {
+        "equals":["cpnyid"],
+        "like":['vipinfo_group_id',"vipinfo_group_name"],
+        'date_range':[],
+        'number_range':[],
+        }  
+    fk_list = {
+        'cpnyid':'cpnyid__cpnyid',
+    }        
+
+
+class VIPINFO(models.Model,CrmQueryData):
+    vip_id = models.CharField(primary_key=True,max_length=20,db_column='vip_id',verbose_name='會員編號')
+    vip_name = models.CharField(max_length=50,db_column='vip_name',verbose_name="會員姓名")
+    cpnyid = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
+    shop_id = models.ForeignKey(to="SHOP",to_field="shop_id",on_delete=models.CASCADE,db_column='shop_id',verbose_name='申請分店')
+    vipinfo_group_id = models.ForeignKey(to="VIPINFO_GROUP",to_field='vipinfo_group_id',db_column='vipinfo_group_id',verbose_name='會員群組',on_delete=models.CASCADE)
+    county_id = models.ForeignKey(blank=True,null=True,to='County',to_field='county_id',verbose_name='居住縣市',db_column="county_id",on_delete=models.CASCADE)
+    post_id   = models.ForeignKey(blank=True,null=True,to='Area',to_field='post_id',verbose_name='居住地區',db_column="post_id",on_delete=models.CASCADE)    
+    apply_date =  models.DateField(db_column="apply_date",verbose_name="申請日期")
+    telno     =  models.CharField(blank=True,null=True,max_length=20,db_column='telno',verbose_name='電話號碼')
+    black = models.BooleanField(blank=True,null=True,db_column='black',verbose_name='黑名單')
+    sex_choices = [("0","女"),("1","男")]
+    sex = models.CharField(max_length=2,db_column="sex",verbose_name="性別",blank=True,null=True,choices=sex_choices)  
+    birthday = models.DateField(db_column="birthday",verbose_name="出生日期",blank=True,null=True)
+    edu_lv_choice = [("0","小學畢業"),("1","國中畢業"),("2","高中畢業"),("3","大學畢業"),("4","碩士畢業"),("5","博士畢業")]
+    edu_lv = models.CharField(max_length=2,choices=edu_lv_choice,verbose_name="教育程度",db_column='edu_lv',null=True,blank=True)
+    email = models.CharField(max_length=50,verbose_name='電子信箱',db_column='email',blank=True,null=True)
+    mobilno  = models.CharField(max_length=20,db_column="mobilno",verbose_name="行動電話",blank=True,null=True)
+    job_cat_choices = [("0","經營/人資類"),("1","行政／總務／法務類"),("2","財會／金融專業類"),("3","經營/人資類"),("4","行銷／企劃／專案管理類"),("5","經營/人資類"),("6","財會／金融專業類"),("7","行銷／企劃／專案管理類"),
+    ("8","客服／門市／業務／貿易類"),("9","餐飲／旅遊 ／美容美髮類"),("10","資訊軟體系統類"),("11","操作／技術／維修類"),
+    ("12","資材／物流／運輸類"),("13","營建／製圖類"),("14","營建／製圖類"),("15","傳播藝術／設計類"),
+    ("16","文字／傳媒工作類"),("17","醫療／保健服務類"),("18","學術／教育／輔導類"),("19","研發相關類"),
+    ("20","生產製造／品管／環衛類"),("21","軍警消／保全類")
+    ]
+    job_cat = models.CharField(max_length=3,db_column='job_cat',verbose_name='職務類別',choices=job_cat_choices,blank=True,null=True)
+    vip_cpny = models.CharField(max_length=100,db_column='vip_cpny',verbose_name="所屬公司名稱",blank=True,null=True)
+    end_date = models.DateField(db_column="end_date",verbose_name="有效日期",blank=True,null=True)
+    vip_position = models.CharField(max_length=100,db_column='vip_position',verbose_name="職稱",blank=True,null=True)
+    familysize = models.PositiveIntegerField(db_column='familysize',verbose_name="家庭人數",blank=True,null=True)
+    ispromote = models.BooleanField(db_column='ispromote',verbose_name='是否行銷',default=True)
+    prom_sdate = models.DateField(db_column="prom_sdate",verbose_name="行銷分析開始日",auto_now_add=True)
+    vip_FB = models.CharField(max_length=30,db_column='vip_FB',verbose_name="FB帳號",blank=True,null=True) 
+    vip_IG = models.CharField(max_length=30,db_column='vip_IG',verbose_name="IG帳號",blank=True,null=True) 
+    vip_LINE = models.CharField(max_length=30,db_column='vip_LINE',verbose_name="LINE帳號",blank=True,null=True) 
+    note = models.TextField(max_length=255,db_column='note',verbose_name="備註",blank=True,null=True)
+    cuser                = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
+    cdate                = models.DateField(db_column="cdate",verbose_name='創立日期',auto_now_add=True)
+    ctime                = models.TimeField(db_column="ctime",verbose_name='創立時間',auto_now_add=True)
+    muser                = models.CharField(max_length=20,db_column="muser",verbose_name='異動者') 
+    mdate                = models.DateField(db_column="mdate",verbose_name='異動日期',auto_now=True)
+    mtime                = models.TimeField(db_column="mtime",verbose_name='異動時間',auto_now=True)
+
+    def __str__(self):
+        return f"{self.vip_id} {self.vip_name}"
+
+    class Meta:
+        db_table = "VIPINFO"  
+    
+    fieldQueryRule = {
+        "equals":['cpnyid','shop_id',"vipinfo_group_id","county_id","post_id","black","sex","edu_lv","job_cat","ispromote"],
+        "like":['vip_id',"vip_name","email","telno","mobilno","vip_cpny","vip_position","vip_FB","vip_IG","vip_LINE","note"],
+        'date_range':["apply_date","birthday","end_date","prom_sdate"],
+        'number_range':["familysize"],
+        }  
+    # fk_list 紀錄該model中對應的外鍵欄位
+    fk_list = {
+        'cpnyid':'cpnyid__cpnyid',
+		'vipinfo_group_id':'vipinfo_group_id__vipinfo_group_id',
+        'shop_id':"shop_id__shop_id",
+        'county_id':"county_id__county_id",
+        "post_id":"post_id__post_id"
+    }

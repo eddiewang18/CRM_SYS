@@ -107,38 +107,10 @@ multiple_selected > 判斷動態表格支不支持多重選中資料列 , true :
 
     }
 
-    // 若使用者的資料表欄位有指定primary key 時， 
-    // if(pkList.length>0){
-    //     for(var i=0;i<firstTds.length;i++){
-    //         if(pkList.includes(firstTds[i].getAttribute("name"))){
-    //             pk_index.push(i);  
-    //         }
-    //     }
-    // }
 
     init_table(firstTds);
   
-    // var currentTrs = document.querySelectorAll("tr:not(.firstRow)"); //取得載入網頁時當前table中除索引列以外的各個資料列
-    
-    // // 如果載入網頁時，當前table中有除索引列以外的各個資料列
-    // if(currentTrs.length>0){
-    //     // 依序對那些列的各個儲存格欄位設置 belong_field(自訂屬性，用來標示此儲存格對應到db table中的哪個欄位) 與 id
-    //     for(var i=0;i<currentTrs.length;i++){
-            
-    //         var tr_tds= currentTrs[i].querySelectorAll("td");
 
-    //         for(var j=0;j<firstTds.length;j++){
-    //             var firstTdEle = firstTds[j]; 
-    //             //取得td元素的name屬性
-    //             var name_attr = firstTdEle.getAttribute("name");
-    //             tr_tds[j].setAttribute("name",name_attr);
-    //             tr_tds[j].setAttribute("belong_field",name_attr);
-    //             tr_tds[j].setAttribute("id","td"+(i+1)+(j+1));
-    
-    //         }
-
-    //     }
-    // }
 
     // 新增table列的相關操作
     add.addEventListener("click",function(){
@@ -150,10 +122,15 @@ multiple_selected > 判斷動態表格支不支持多重選中資料列 , true :
             var firstTdEle = firstTds[i];
             //取得td元素的name屬性
             var name_attr = firstTdEle.getAttribute("name");
+
+            
             var td = document.createElement("td");
             td.setAttribute("belong_field",name_attr);
             td.setAttribute("id","td"+(current_rowsLen)+(i+1));
 
+            console.log(input_type_config);
+            console.log(`name_attr:${name_attr}`);
+            console.log(input_type_config[name_attr]);
             var input_type = input_type_config[name_attr]['inputType'];
             if(input_type==="checkbox"){
                 td.appendChild(createCheckbox(input_type_config[name_attr]['name'],input_type_config[name_attr]['value']));
@@ -194,30 +171,6 @@ multiple_selected > 判斷動態表格支不支持多重選中資料列 , true :
             if(ele.tagName=="TD" && !(ele.parentNode.classList.contains("firstRow"))){
 
 
-                // if(ele.parentNode.classList.contains("selected")){
-                //     ele.parentNode.classList.remove("selected");
-                    
-                // }else{
-                //     ele.parentNode.classList.add("selected");
-                //     ele.addEventListener('click',function(){
-                //     //表格中欄位可被編輯的條件為: 你是一個新增列 或是 你不是pk的欄位
-                //     if(ele.parentNode.classList.contains("newRow") || !pkList.includes(ele.getAttribute("belong_field"))){
-                //         ele.setAttribute("contenteditable","true");
-                //         ele.addEventListener("keypress",function(e){
-                //             if(e.key=="Enter"){
-                //                 e.preventDefault();
-                //             }
-                //         })
-                //       }
-                //     })
-
-                //     //當使用者對一個原有數據列進行修改，則標記該列已被更改
-                //     ele.addEventListener("input", function() {
-                //         // console.log("contenteditable element changed");
-                //         if(!this.parentNode.classList.contains("updateRow") && !(this.parentNode.classList.contains("newRow"))){
-                //             this.parentNode.classList.add("updateRow");
-                //         }
-                //     });
                 if(ele.parentNode.classList.contains("selected") && multiple_selected){
                     ele.parentNode.classList.remove("selected");
                     
@@ -243,7 +196,7 @@ multiple_selected > 判斷動態表格支不支持多重選中資料列 , true :
 					
                     ele.addEventListener('click',function(){
                     //表格中欄位可被編輯的條件為: 你是一個新增列 或是 你不是pk的欄位
-                    if(ele.parentNode.classList.contains("newRow") || !pkList.includes(ele.getAttribute("belong_field"))){
+                    if(ele.parentNode.classList.contains("newRow") || !pkList.includes(ele.getAttribute("belong_field")) || ele.childNodes[0].tagName!=="SELECT"){
                         ele.setAttribute("contenteditable","true");
                         ele.addEventListener("keypress",function(e){
                             if(e.key=="Enter"){

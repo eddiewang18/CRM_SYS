@@ -1,4 +1,4 @@
-from .models import CRM_COMPANY,SHOPGROUP,SHOP,Area,HRUSER_GROUP,CRM_HRUSER
+from .models import CRM_COMPANY,SHOPGROUP,SHOP,Area,HRUSER_GROUP,CRM_HRUSER,VIPINFO_GROUP
 from django.forms import ModelForm
 from django import forms
 from django.core.exceptions import ValidationError
@@ -387,3 +387,12 @@ class CRM_HRUSER_QModelForm(ModelForm):
         "pwd","telno","mobilno","sex","email","indate_sdate","indate_edate","quitdate_sdate",
         "quitdate_edate","group_id","emp_type","county_id","email","post_id",
         ] 
+
+
+
+class VIPINFO_GROUP_ModelForm(ModelForm):
+    class Meta :
+        model=VIPINFO_GROUP
+        fields = ["vipinfo_group_id","vipinfo_group_name","cpnyid"]
+
+

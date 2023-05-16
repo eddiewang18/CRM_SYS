@@ -1,9 +1,9 @@
 from django.shortcuts import render,redirect
 from django.views import View
-from .models import (CRM_COMPANY,SHOPGROUP,SHOP,County,Area,HRUSER_GROUP,CRM_HRUSER)
+from .models import (CRM_COMPANY,SHOPGROUP,SHOP,County,Area,HRUSER_GROUP,CRM_HRUSER,VIPINFO_GROUP)
 from .forms import (
     CRM_COMPANY_ModelForm,SHOPGROUP_ModelForm,SHOP_ModelForm,SHOP_QModelForm
-    ,CRM_COMPANY_QModelForm,HRUSER_GROUP_ModelForm,CRM_HRUSER_ModelForm,CRM_HRUSER_QModelForm
+    ,CRM_COMPANY_QModelForm,HRUSER_GROUP_ModelForm,CRM_HRUSER_ModelForm,CRM_HRUSER_QModelForm,VIPINFO_GROUP_ModelForm
 )
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
@@ -332,3 +332,61 @@ class A05View(FnView):
     verbose_name_fields = model_form().verbose_name_fields
     html_file = 'basic_data/A05.html'
     return_query_cols = model_form().return_query_cols
+
+
+class A06View(Fn2View):
+    model = VIPINFO_GROUP
+    model_form = VIPINFO_GROUP_ModelForm
+    html_file = 'basic_data/A06.html'
+    fk_attr = 'vipinfo_set'
+    fk_cols_show_list = ['vip_id','vip_name','shop_id__shop_name']
+    choice2readableInfos =  []
+    cols_show_list = ['vipinfo_group_id','vipinfo_group_name',"cpnyid"]
+    pk_key = 'vipinfo_group_id'
+    query_order = 'vipinfo_group_id'
+
+
+    def get(self,request):
+        
+        if 'switch' in request.GET :
+            requestData = json.loads(request.GET.get('postData')) 
+            primary_key =  requestData.get('pk')
+            main_obj = self.model.objects.get(pk = primary_key)
+            included_fk_objs = getattr(main_obj,self.fk_attr).all().values(*self.fk_cols_show_list)
+            turnChoiceField2readable(included_fk_objs,self.choice2readableInfos)
+            return JsonResponse(list(included_fk_objs),safe=False)
+
+        if 'query_condition' in request.GET :
+            print('\nquery_condition\n')
+            requestData = json.loads(request.GET.get('postData')) 
+            print(f'\nrequestData:{requestData}|type : {type(requestData)}\n')
+            qs_result = list(self.model().crmQdata(requestData,self.model.fk_list).values(*self.cols_show_list))
+
+            print(f'\nqs_result:{qs_result}\n')
+            return JsonResponse(qs_result,safe=False)
+        form = self.model_form()
+        objs = self.model.objects.all().order_by(self.query_order)
+        included_fk_objs=[]
+        if len(objs)>0:
+            first_obj = objs.first()
+            included_fk_objs = getattr(first_obj,self.fk_attr).all().values(*self.fk_cols_show_list)
+            turnChoiceField2readable(included_fk_objs,self.choice2readableInfos)
+            objs = objs.values(*self.cols_show_list).order_by(self.query_order)
+        context = {
+            'form':form,
+            'objs':objs,
+            'included_fk_objs':included_fk_objs
+        }
+
+        if 'query' in request.GET :
+            context['queryModal']=True
+
+        cpny_options = []
+        for cpny_data in list(CRM_COMPANY.objects.all().values("cpnyid","cocname")):
+            cpny_options.append({"value":cpny_data["cpnyid"],"label":cpny_data["cocname"]})
+        context['cpny_options']= json.dumps(cpny_options,ensure_ascii=False) 
+        print(context['cpny_options'])
+        print(type(context['cpny_options']))
+        return render(request,self.html_file,context)
+
+dataCuser(VIPINFO_GROUP)

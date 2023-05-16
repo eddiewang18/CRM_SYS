@@ -1,0 +1,107 @@
+{% extends 'fn2Based.html' %}
+{% block title %}
+維護會員群組資料
+{% endblock title %}
+
+{% block funcTitle %}
+A06維護會員群組資料
+{% endblock funcTitle %}
+
+
+{% block titleRow %}
+<td class="pkField" name="vipinfo_group_id">
+    會員群組編號
+</td>
+<td name="vipinfo_group_name">
+    會員群組名稱
+</td>
+<td name="cpnyid">
+    公司品牌
+</td>
+{% endblock titleRow %}
+
+
+{% block subtable_titleRow %}
+<td >
+    會員編號
+</td>
+<td>
+    會員名稱
+</td>
+<td >
+    申請分店
+</td>
+
+{% endblock subtable_titleRow %}
+
+
+{% block main_table_fields_input_typpe %}
+<script>
+
+
+var input_type_config1 = {
+    "vipinfo_group_id":{
+        inputType : "input",
+    },
+    "vipinfo_group_name":{
+        inputType : "input",
+    },
+	"cpnyid" :{
+		inputType : "select",
+		name:'cpnyid',
+		option : {{cpny_options|safe}}
+	},
+};
+console.log(input_type_config1["cpnyid"]['option']);
+
+</script>
+{% endblock main_table_fields_input_typpe %}
+
+
+{% block dynamic_table_settings %}
+dynamic_table("table1","add1","del1",pkList=['vipinfo_group_id'],titleRow=true,input_type_config1,false);
+{% endblock dynamic_table_settings %}
+
+{% block vm_successModal_redirectURL %}
+"{% url 'basic_data:a06' %}"
+{% endblock vm_successModal_redirectURL %}
+
+{% block input_type_config_settings %}
+    "vipinfo_group_id":{
+        inputType : "input",
+    },
+    "vipinfo_group_name":{
+        inputType : "input",
+    },
+    "cpnyid" :{
+        inputType : "select",
+    }
+{% endblock input_type_config_settings %}
+
+
+{% block field_check_rule_settings %}
+    vipinfo_group_id:{
+        checkStrLen:[4,10],
+        checkEngNumCombination:true,
+        repeatness : true,
+        required:true
+    },
+    vipinfo_group_name:{
+        checkStrLen:[0,20],
+        checkEngNumCombination:false,
+        repeatness : true,
+        required:true
+    }
+{% endblock field_check_rule_settings %}
+
+{% block showShop_ajax_url %}
+'{% url "basic_data:a06" %}'
+{% endblock showShop_ajax_url %}
+
+{% block queryFunc_ajax_url %}
+'{% url "basic_data:a06" %}'
+{% endblock queryFunc_ajax_url %}
+
+{% block update_ajax_url %}
+'{% url "basic_data:a06" %}'
+{% endblock update_ajax_url %}
