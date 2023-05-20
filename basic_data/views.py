@@ -1,9 +1,10 @@
 from django.shortcuts import render,redirect
 from django.views import View
-from .models import (CRM_COMPANY,SHOPGROUP,SHOP,County,Area,HRUSER_GROUP,CRM_HRUSER,VIPINFO_GROUP)
+from .models import (CRM_COMPANY,SHOPGROUP,SHOP,County,Area,HRUSER_GROUP,CRM_HRUSER,VIPINFO_GROUP,VIPINFO)
 from .forms import (
     CRM_COMPANY_ModelForm,SHOPGROUP_ModelForm,SHOP_ModelForm,SHOP_QModelForm
-    ,CRM_COMPANY_QModelForm,HRUSER_GROUP_ModelForm,CRM_HRUSER_ModelForm,CRM_HRUSER_QModelForm,VIPINFO_GROUP_ModelForm
+    ,CRM_COMPANY_QModelForm,HRUSER_GROUP_ModelForm,CRM_HRUSER_ModelForm,CRM_HRUSER_QModelForm,VIPINFO_GROUP_ModelForm,
+    VIPINFO_ModelForm,VIPINFO_QModelForm
 )
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
@@ -81,13 +82,17 @@ class FnView(View):
             }
             if form.is_valid():
                 table_data = form.save(commit=False)
+                
+                print(f'\n form: {form.data}\n')
                 table_data.muser = request.user.username
                 table_data.save()
                 context['success']="成功儲存"  
                 context['form']=self.model_form()
                 return render(request,self.html_file,context)
-            
-            context['wrong']=form.errList[0]
+            try:
+                context['wrong']=form.errList[0]
+            except:
+                print(f"\n{form.errors}\n")
             return render(request,self.html_file,context)
         elif 'query' in request.POST:
             form = self.model_form()
@@ -390,3 +395,22 @@ class A06View(Fn2View):
         return render(request,self.html_file,context)
 
 dataCuser(VIPINFO_GROUP)
+
+def cpnyid_vipgrp(request):
+    if 'cpnyid' in request.GET:
+        cpnyid = request.GET.get('cpnyid')
+        vipgrp_objs = list(VIPINFO_GROUP.objects.filter(cpnyid=cpnyid).values("vipinfo_group_id","vipinfo_group_name"))
+        return JsonResponse(vipgrp_objs,safe=False)
+
+
+
+
+class A07View(FnView):
+    model = VIPINFO
+    model_form = VIPINFO_ModelForm
+    query_model_form = VIPINFO_QModelForm
+    verbose_name_fields = model_form().verbose_name_fields
+    html_file = 'basic_data/A07.html'
+    return_query_cols = model_form().return_query_cols
+
+dataCuser(VIPINFO)

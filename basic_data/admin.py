@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import CRM_COMPANY,SHOPGROUP,County,Area,SHOP,CRM_HRUSER,HRUSER_GROUP
+from .models import (CRM_COMPANY,SHOPGROUP,County,Area,SHOP,CRM_HRUSER,HRUSER_GROUP,
+VIPINFO)
 # Register your models here.
 
 class CRM_COMPANYModelAdmin(admin.ModelAdmin):
@@ -41,3 +42,10 @@ class CRM_HRUSERModelAdmin(admin.ModelAdmin):
 
 
 admin.site.register(CRM_HRUSER,CRM_HRUSERModelAdmin)
+
+
+class VIPINFOModelAdmin(admin.ModelAdmin):
+    list_display = ['vip_id',"vip_name",'cpnyid','shop_id','vipinfo_group_id','county_id','post_id','black','birthday','email']
+
+
+admin.site.register(VIPINFO,VIPINFOModelAdmin)

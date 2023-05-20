@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (A01View,A02View,A03View,
-A04View,A05View,cpnyid_shop,
-county_area,A06View)
+A04View,A05View,cpnyid_shop,cpnyid_vipgrp,
+county_area,A06View,A07View)
 app_name = "basic_data"
 
 urlpatterns = [
@@ -11,7 +11,8 @@ urlpatterns = [
     path('a04/',A04View.as_view(),name="a04"),
     path('a05/',A05View.as_view(),name="a05"),
     path('a06/',A06View.as_view(),name="a06"),
+    path('a07/',A07View.as_view(),name="a07"),
     path('county_area/',county_area,name="county_area"),
-    path('cpnyid_shop/',cpnyid_shop,name="cpnyid_shop")
-
+    path('cpnyid_shop/',cpnyid_shop,name="cpnyid_shop"),
+    path('cpnyid_vipgrp/',cpnyid_vipgrp,name="cpnyid_vipgrp"),
 ]

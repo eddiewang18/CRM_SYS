@@ -3,13 +3,13 @@
         if(e.target.id==='id_cpnyid'){
             var changed_ele = e.target;
             var changed_ele_parent = e.target.parentNode.parentNode.parentNode;
-            var post = changed_ele_parent.querySelector("#id_shop_id");
+            var post = changed_ele_parent.querySelector("#id_vipinfo_group_id");
             console.log(changed_ele);
             console.log(changed_ele_parent);
             console.log(post);
             var cpnyid_val = changed_ele.value;
             $.ajax({
-                url:"{% url 'basic_data:cpnyid_shop' %}",
+                url:"{% url 'basic_data:cpnyid_vipgrp' %}",
                 method:"GET",
                 dataType:"json",
                 data:{
@@ -19,12 +19,12 @@
                     console.log(response);
                     var option_html = "";
                         for(var obj of response){
-                            var post_id = obj["shop_id"];
-                            var name = obj["shop_name"];
+                            var post_id = obj["vipinfo_group_id"];
+                            var name = obj["vipinfo_group_name"];
                             option_html+=`<option value="${post_id}">${name}</option>`;
                         }
                         post.innerHTML =  option_html;
-                        document.getElementById("id_shop_id_err").innerHTML='';
+     
                 }
             })
 

@@ -7,11 +7,13 @@ class CrmQueryData():
 
     #此系統查詢資料的主要4種方式>欄位 = 值  , 欄位 like %值%  , 欄位 < 上限值 and 欄位 > 下限值  , 欄位 between 起始日 and 截止日
     fieldQueryRule = {
-	"equals":[],
-	"like":[],
-	'date_range':[],
-	'number_range':[],
+    "equals":[],
+    "like":[],
+    'date_range':[],
+    'number_range':[],
     }
+
+    bool_field_attrs = []
 
     def crmQdata(self,queryDict,fk_list={}):
         qs_result = self.__class__
@@ -31,34 +33,60 @@ class CrmQueryData():
                     qdict = {}
                     try:
                         if queryType=='equals':
+                            
                             queryValue = queryDict.get(field)
-                            print(f'queryValue:{queryValue}')
-                            if len(queryValue)>0:
-                                if field in fk_list:
-                                    field = fk_list[field]
-                                qdict[field]=queryValue
+                            
+                            if isinstance(queryValue, str) and len(queryValue)>0:
+                            
+                                if len(self.bool_field_attrs)>0:
+                                    if field in self.bool_field_attrs:
+                                        print(f'bool_field_attrs queryValue:{queryValue}')
+                                        if queryValue =="on":
+                                            queryValue = True
+                                        else:
+                                            queryValue = False
 
-                        if queryType=='like':
-                            queryValue = queryDict.get(field)
-                            print(f'queryValue:{queryValue}')
-                            if len(queryValue)>0:
-                                if field in fk_list:
-                                    field = fk_list[field]
-                                qdict[field+'__icontains']=queryValue
-                        if queryType=='date_range':
-                            sdate = queryDict.get(field+"_sdate")
-                            edate = queryDict.get(field+"_edate")
-                            if len(sdate)>0 or len(edate)>0:
-                                if field in fk_list:
-                                    field = fk_list[field]
-                                qdict[field+'__range']=[sdate,edate]
-                        if queryType=='number_range':
-                            upperVal = queryDict.get(field+"_upperVal")
-                            lowerVal = queryDict.get(field+"_lowerVal")
-                            if len(upperVal)>0 or len(lowerVal)>0:
-                                if field in fk_list:
-                                    field = fk_list[field]
-                                qdict[field+'__range']=[lowerVal,upperVal]
+                                if queryValue is not None :
+                                    if field in fk_list:
+                                        field = fk_list[field]
+                                    qdict[field]=queryValue
+                            else:
+                                continue
+                        if isinstance(queryValue, str) and len(queryValue)>0:
+                            if queryType=='like':
+                                queryValue = queryDict.get(field)
+                                print(f'queryValue:{queryValue}')
+                                if queryValue is not None:
+                                    if field in fk_list:
+                                        field = fk_list[field]
+                                    qdict[field+'__icontains']=queryValue
+                        else:
+                            continue
+                        if isinstance(queryValue, str) and len(queryValue)>0:
+                            if queryType=='date_range':
+                                sdate = queryDict.get(field+"_sdate")
+                                edate = queryDict.get(field+"_edate")
+                                if sdate  is not None or edate is not None:
+                                    if sdate=='' and edate =='':
+                                        continue
+                                    if field in fk_list:
+                                        field = fk_list[field]
+                                    qdict[field+'__range']=[sdate,edate]
+                        else:
+                            continue
+                        
+                        if isinstance(queryValue, str) and len(queryValue)>0:
+
+                            if queryType=='number_range':
+                                upperVal = queryDict.get(field+"_upperVal")
+                                lowerVal = queryDict.get(field+"_lowerVal")
+                                if upperVal  is not None or lowerVal  is not None:
+
+                                    if field in fk_list:
+                                        field = fk_list[field]
+                                    qdict[field+'__range']=[lowerVal,upperVal]
+                        else:
+                            continue
                     except Exception as err:
                         print(f'查詢時的例外訊息:{str(err)}')
                         continue
@@ -313,12 +341,12 @@ class VIPINFO(models.Model,CrmQueryData):
     vip_name = models.CharField(max_length=50,db_column='vip_name',verbose_name="會員姓名")
     cpnyid = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
     shop_id = models.ForeignKey(to="SHOP",to_field="shop_id",on_delete=models.CASCADE,db_column='shop_id',verbose_name='申請分店')
-    vipinfo_group_id = models.ForeignKey(to="VIPINFO_GROUP",to_field='vipinfo_group_id',db_column='vipinfo_group_id',verbose_name='會員群組',on_delete=models.CASCADE)
+    vipinfo_group_id = models.ForeignKey(to="VIPINFO_GROUP",to_field='vipinfo_group_id',db_column='vipinfo_group_id',verbose_name='會員群組',on_delete=models.CASCADE,blank=True,null=True)
     county_id = models.ForeignKey(blank=True,null=True,to='County',to_field='county_id',verbose_name='居住縣市',db_column="county_id",on_delete=models.CASCADE)
     post_id   = models.ForeignKey(blank=True,null=True,to='Area',to_field='post_id',verbose_name='居住地區',db_column="post_id",on_delete=models.CASCADE)    
-    apply_date =  models.DateField(db_column="apply_date",verbose_name="申請日期")
+    apply_date =  models.DateField(db_column="apply_date",verbose_name="申請日期",default=timezone.now)
     telno     =  models.CharField(blank=True,null=True,max_length=20,db_column='telno',verbose_name='電話號碼')
-    black = models.BooleanField(blank=True,null=True,db_column='black',verbose_name='黑名單')
+    black = models.BooleanField(default=False,db_column='black',verbose_name='黑名單')
     sex_choices = [("0","女"),("1","男")]
     sex = models.CharField(max_length=2,db_column="sex",verbose_name="性別",blank=True,null=True,choices=sex_choices)  
     birthday = models.DateField(db_column="birthday",verbose_name="出生日期",blank=True,null=True)
@@ -365,8 +393,10 @@ class VIPINFO(models.Model,CrmQueryData):
     # fk_list 紀錄該model中對應的外鍵欄位
     fk_list = {
         'cpnyid':'cpnyid__cpnyid',
-		'vipinfo_group_id':'vipinfo_group_id__vipinfo_group_id',
+        'vipinfo_group_id':'vipinfo_group_id__vipinfo_group_id',
         'shop_id':"shop_id__shop_id",
         'county_id':"county_id__county_id",
         "post_id":"post_id__post_id"
     }
+
+    bool_field_attrs = ["black","ispromote"]
