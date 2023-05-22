@@ -52,17 +52,43 @@
                     {% for obj in objs %}
                     {% if forloop.counter == 1 %}
                     <tr v-if="tr_show" class="selected">
-                        {% for field in obj.values %}
+                        {% for key,field in obj.items %}
+                                              
                         <td @click="showShop($event)">
+                            {% if key == 'cpnyid' %}
+                                  <select name="cpnyid">
+                                    {% for op in cpny_options_list %}
+                                        {% if field == op.value %}
+                                        <option value="{{op.value}}" selected>{{op.label}}</option>
+                                        {% else %}
+                                        <option value="{{op.value}}">{{op.label}}</option>
+                                        {% endif %}                                  
+                                    {% endfor %}
+                                  </select>
+                            {% else %}
                             {{field}}
+                            {% endif %}
                         </td>
                         {% endfor %}
                     </tr>
                     {% else %}
                     <tr v-if="tr_show" >
-                        {% for field in obj.values %}
+                        {% for key,field in obj.items %}
+                                              
                         <td @click="showShop($event)">
+                            {% if key == 'cpnyid' %}
+                                  <select name="cpnyid">
+                                    {% for op in cpny_options_list %}
+                                        {% if field == op.value %}
+                                        <option value="{{op.value}}" selected>{{op.label}}</option>
+                                        {% else %}
+                                        <option value="{{op.value}}">{{op.label}}</option>
+                                        {% endif %}                                  
+                                    {% endfor %}
+                                  </select>
+                            {% else %}
                             {{field}}
+                            {% endif %}
                         </td>
                         {% endfor %}
                     </tr>

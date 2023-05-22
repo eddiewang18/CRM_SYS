@@ -495,7 +495,9 @@ class VIPINFO_QModelForm(ModelForm):
     birthday_edate = forms.DateField(label="出生日期迄")
     end_date_sdate = forms.DateField(label="有效日期起")
     end_date_edate = forms.DateField(label="有效日期迄")
-    
+    familysize_lowerVal = forms.IntegerField(label="家庭人數下限")
+    familysize_upperVal = forms.IntegerField(label="家庭人數上限")
+
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.fields["apply_date_sdate"].widget = forms.widgets.DateInput(
@@ -565,4 +567,6 @@ class VIPINFO_QModelForm(ModelForm):
         "county_id","post_id","birthday_sdate","birthday_edate","apply_date_sdate","apply_date_edate"
         ,"telno","black",
         "edu_lv","email","mobilno","job_cat","vip_cpny","end_date_sdate","end_date_edate",
-        "vip_position","familysize","ispromote","vip_FB","vip_IG","vip_LINE"] 
+        "vip_position","ispromote","familysize_lowerVal","familysize_upperVal","vip_FB","vip_IG","vip_LINE",
+
+] 

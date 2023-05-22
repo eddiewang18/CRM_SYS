@@ -389,9 +389,15 @@ class A06View(Fn2View):
         cpny_options = []
         for cpny_data in list(CRM_COMPANY.objects.all().values("cpnyid","cocname")):
             cpny_options.append({"value":cpny_data["cpnyid"],"label":cpny_data["cocname"]})
+
+        context['cpny_options_list']= cpny_options
         context['cpny_options']= json.dumps(cpny_options,ensure_ascii=False) 
         print(context['cpny_options'])
         print(type(context['cpny_options']))
+        print(context['objs'])
+        
+
+
         return render(request,self.html_file,context)
 
 dataCuser(VIPINFO_GROUP)

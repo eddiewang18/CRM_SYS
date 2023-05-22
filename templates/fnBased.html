@@ -37,8 +37,8 @@
             <button type="submit" id="query"  name="query" class="query funcbtn">查詢</button>
             <button @click="update" type="button" id="update" name="update" class="update funcbtn" v-if="onquery">修改</button>
             <button  @click="del"  type="button" id="delete" name="delete" class="delete funcbtn" v-if="onquery">刪除</button>
-
         </div> -->
+        
         {% include 'share/btnArea.html' %}
         <div class="formArea ablock">
             {% for field in form %}
@@ -300,7 +300,19 @@
                     var input_field_list  = document.querySelectorAll('.qfield');
                     var request_data = {};
                     for(var i of input_field_list){
-                        request_data[i.name]=i.value;
+                        var tmp_value = i.value;
+                        if(i.type==="checkbox")
+                        {
+                            if(i.checked)
+                            {
+                                tmp_value="on";
+                            }
+                            else
+                            {
+                                tmp_value="off";
+                            }
+                        }
+                        request_data[i.name]=tmp_value;
                     }
                     console.log(request_data);
 

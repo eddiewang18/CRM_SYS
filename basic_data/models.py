@@ -16,9 +16,9 @@ class CrmQueryData():
     bool_field_attrs = []
 
     def crmQdata(self,queryDict,fk_list={}):
-        qs_result = self.__class__
-        count = 0 # 用來輔助判斷最後查詢的結果是否為全查
-        count1 = 0
+        qs_result = self.__class__.objects.all()
+        # count = 0 # 用來輔助判斷最後查詢的結果是否為全查
+        # count1 = 0
         print("================查詢數據開始=====================")
         print(f'查詢條件(queryDict):{queryDict}\n')
         for queryType, fields in self.fieldQueryRule.items():
@@ -33,79 +33,65 @@ class CrmQueryData():
                     qdict = {}
                     try:
                         if queryType=='equals':
-                            
                             queryValue = queryDict.get(field)
-                            
-                            if isinstance(queryValue, str) and len(queryValue)>0:
-                            
+
+                            print(f'queryValue:{queryValue}')
+                            if len(queryValue)>0:
+                                if field in fk_list:
+                                    field = fk_list[field]
                                 if len(self.bool_field_attrs)>0:
                                     if field in self.bool_field_attrs:
-                                        print(f'bool_field_attrs queryValue:{queryValue}')
                                         if queryValue =="on":
                                             queryValue = True
                                         else:
                                             queryValue = False
+                                qdict[field]=queryValue
 
-                                if queryValue is not None :
-                                    if field in fk_list:
-                                        field = fk_list[field]
-                                    qdict[field]=queryValue
-                            else:
-                                continue
-                        if isinstance(queryValue, str) and len(queryValue)>0:
-                            if queryType=='like':
-                                queryValue = queryDict.get(field)
-                                print(f'queryValue:{queryValue}')
-                                if queryValue is not None:
-                                    if field in fk_list:
-                                        field = fk_list[field]
-                                    qdict[field+'__icontains']=queryValue
-                        else:
-                            continue
-                        if isinstance(queryValue, str) and len(queryValue)>0:
-                            if queryType=='date_range':
-                                sdate = queryDict.get(field+"_sdate")
-                                edate = queryDict.get(field+"_edate")
-                                if sdate  is not None or edate is not None:
-                                    if sdate=='' and edate =='':
-                                        continue
-                                    if field in fk_list:
-                                        field = fk_list[field]
-                                    qdict[field+'__range']=[sdate,edate]
-                        else:
-                            continue
-                        
-                        if isinstance(queryValue, str) and len(queryValue)>0:
-
-                            if queryType=='number_range':
-                                upperVal = queryDict.get(field+"_upperVal")
-                                lowerVal = queryDict.get(field+"_lowerVal")
-                                if upperVal  is not None or lowerVal  is not None:
-
-                                    if field in fk_list:
-                                        field = fk_list[field]
+                        if queryType=='like':
+                            queryValue = queryDict.get(field)
+                            print(f'queryValue:{queryValue}')
+                            if len(queryValue)>0:
+                                if field in fk_list:
+                                    field = fk_list[field]
+                                qdict[field+'__icontains']=queryValue
+                        if queryType=='date_range':
+                            sdate = queryDict.get(field+"_sdate")
+                            edate = queryDict.get(field+"_edate")
+                            if len(sdate)>0 or len(edate)>0:
+                                if field in fk_list:
+                                    field = fk_list[field]
+                                qdict[field+'__range']=[sdate,edate]
+                        if queryType=='number_range':
+                            upperVal = queryDict.get(field+"_upperVal")
+                            lowerVal = queryDict.get(field+"_lowerVal")
+                            if len(upperVal)>0 or len(lowerVal)>0:
+                                if field in fk_list:
+                                    field = fk_list[field]
+                                upperVal = None if upperVal=="" else int(upperVal)
+                                lowerVal = None if lowerVal=="" else int(lowerVal)
+                                if upperVal and lowerVal :
                                     qdict[field+'__range']=[lowerVal,upperVal]
-                        else:
-                            continue
+                                elif upperVal:
+                                    qdict[field+'__lte']=upperVal
+                                elif lowerVal:
+                                    qdict[field+'__gte']=lowerVal
+
                     except Exception as err:
                         print(f'查詢時的例外訊息:{str(err)}')
                         continue
                     print(f"下的查詢條件:{qdict}")
-                    if count1==0:
-                        qs_result = qs_result.objects.filter(**qdict)
-                        count1+=1
-                    else :
-                        qs_result = qs_result.filter(**qdict)
+                    qs_result = qs_result.filter(**qdict)
+                    # if count1==0:
+                    #     qs_result = qs_result.objects.filter(**qdict)
+                    #     count1+=1
+                    # else :
+                    #     qs_result = qs_result.filter(**qdict)
                     print(f"依條件查詢的返回結果:{qs_result}")
                     # print(f'queryType:{queryType}')
                     # print(f'qdict:{qdict}')
                     # print(f'qs_result:{qs_result}')
                     print("#####################")
-
-            print(f"查詢類型 {queryType} 結束!")                
-        print(f"最終的查詢結果:\n{qs_result}")
-        print("================查詢數據結束=====================")
-        return qs_result
+        return  qs_result       
 
 
 
