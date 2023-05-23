@@ -126,6 +126,7 @@ class CRM_COMPANY(models.Model,CrmQueryData):
 class SHOPGROUP(models.Model,CrmQueryData):
     shopgroup_id = models.CharField(primary_key=True,max_length=10,db_column="shopgroup_id",verbose_name="群組編號")
     shopgroup_name = models.CharField(max_length=50,db_column="shopgroup_name",verbose_name="群組名稱",unique=True)
+    cpnyid  = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
     cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
     cdate = models.DateField(db_column="cdate",verbose_name='創立日期',auto_now_add=True)
     ctime = models.TimeField(db_column="ctime",verbose_name='創立時間',auto_now_add=True)
@@ -225,6 +226,7 @@ class SHOP(models.Model,CrmQueryData):
 class HRUSER_GROUP(models.Model):
     group_id   = models.CharField(primary_key=True,max_length=10,db_column='group_id',verbose_name="員工群組編號")
     group_name = models.CharField(max_length=20,db_column="group_name",verbose_name="員工群組名稱")
+    cpnyid  = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
     cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
     cdate = models.DateField(db_column="cdate",verbose_name='創立日期',auto_now_add=True)
     ctime = models.TimeField(db_column="ctime",verbose_name='創立時間',auto_now_add=True)
