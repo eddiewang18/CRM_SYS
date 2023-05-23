@@ -294,7 +294,7 @@ class CRM_HRUSER(models.Model,CrmQueryData):
     }
 
 
-class VIPINFO_GROUP(models.Model):
+class VIPINFO_GROUP(models.Model,CrmQueryData):
     vipinfo_group_id = models.CharField(primary_key=True,max_length=10,verbose_name="會員群組編號",db_column='vipinfo_group_id')
     vipinfo_group_name = models.CharField(max_length=20,verbose_name="會員群組名稱",db_column='vipinfo_group_name')
     cpnyid = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
@@ -386,3 +386,24 @@ class VIPINFO(models.Model,CrmQueryData):
     }
 
     bool_field_attrs = ["black","ispromote"]
+
+# class ProductType(models.Model):
+#     prod_type_id = models.CharField(primary_key=True,max_length=20,db_column="prod_type_id",verbose_name="商品類別編號")
+#     prod_type_name = models.CharField(max_length=40,db_column="prod_type_name",verbose_name="商品類別名稱")
+#     cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
+#     cdate = models.DateField(db_column="cdate",verbose_name='創立日期',auto_now_add=True)
+#     ctime = models.TimeField(db_column="ctime",verbose_name='創立時間',auto_now_add=True)
+#     muser = models.CharField(max_length=20,db_column="muser",verbose_name='異動者') 
+#     mdate = models.DateField(db_column="mdate",verbose_name='異動日期',auto_now=True)
+#     mtime = models.TimeField(db_column="mtime",verbose_name='異動時間',auto_now=True)
+
+#     def __str__(self):
+#         return  self.vipinfo_group_name   
+
+    
+
+# class Product(models.Model,CrmQueryData):
+#     cpnyid = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
+#     prod_id = models.CharField(primary_key=True,max_length=20,db_column="prod_id",verbose_name="商品編號")
+#     prod_name = models.CharField(max_length=40,db_column="商品名稱",verbose_name="商品名稱")
+    

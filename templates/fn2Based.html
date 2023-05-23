@@ -513,7 +513,7 @@ var input_type_config1 = {
             queryFunc(){
                 //queryFunc開始                        
                 // 2.先將查詢的欄位輸入框的name屬性 作為 json物件的key , value屬性 作為 json物件的value屬性
-                var input_field_list  = document.querySelectorAll('.qmodal_field input');
+                var input_field_list  = document.querySelectorAll('.qmodal_field > *');
                 var request_data = {};
                 for(var i of input_field_list){
                     request_data[i.name]=i.value;
