@@ -1,11 +1,15 @@
 from django.shortcuts import render,redirect
 from django.views import View
-from .models import (CRM_COMPANY,SHOPGROUP,SHOP,County,Area,HRUSER_GROUP,CRM_HRUSER,VIPINFO_GROUP,VIPINFO)
+from .models import (CRM_COMPANY,SHOPGROUP,SHOP,County,
+Area,HRUSER_GROUP,CRM_HRUSER,VIPINFO_GROUP,VIPINFO,
+ProductType,Product)
 from .forms import (
     CRM_COMPANY_ModelForm,SHOPGROUP_ModelForm,SHOP_ModelForm,SHOP_QModelForm
     ,CRM_COMPANY_QModelForm,HRUSER_GROUP_ModelForm,CRM_HRUSER_ModelForm,CRM_HRUSER_QModelForm,VIPINFO_GROUP_ModelForm,
     VIPINFO_ModelForm,VIPINFO_QModelForm,VIPINFO_GROUP_QModelForm,
-    SHOPGROUP_QModelForm,HRUSER_GROUP_QModelForm
+    SHOPGROUP_QModelForm,HRUSER_GROUP_QModelForm,
+    ProductType_ModelForm,ProductType_QModelForm,
+    Product_ModelForm,Product_QModelForm
 )
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
@@ -188,6 +192,10 @@ def cpny_vipgrp(request):
     #     vipgrp_objs = list(VIPINFO_GROUP.objects.filter(cpnyid=cpnyid).values("vipinfo_group_id","vipinfo_group_name"))
     #     return JsonResponse(vipgrp_objs,safe=False)
     return selectFieldChangeLinkage(request,"cpnyid",VIPINFO_GROUP,"vipinfo_group_id","vipinfo_group_name")
+
+def cpny_prodtype(request):
+
+    return selectFieldChangeLinkage(request,"cpnyid",ProductType,"prod_type_id","prod_type_name")
 
 
 class A01View(FnView):
@@ -375,10 +383,6 @@ class A06View(Fn2View):
 dataCuser(VIPINFO_GROUP)
 
 
-
-
-
-
 class A07View(FnView):
     model = VIPINFO
     model_form = VIPINFO_ModelForm
@@ -388,3 +392,28 @@ class A07View(FnView):
     return_query_cols = model_form().return_query_cols
 
 dataCuser(VIPINFO)
+
+
+class A08View(Fn2View):
+    model = ProductType
+    model_form = ProductType_ModelForm
+    query_model_form = ProductType_QModelForm   
+    html_file = 'basic_data/A08.html'
+    fk_attr = 'product_set'
+    fk_cols_show_list = ['prod_id','prod_name','price']
+    choice2readableInfos =  []
+    cols_show_list = ['prod_type_id','prod_type_name']
+    pk_key = 'prod_type_id'
+    query_order = 'prod_type_id'
+
+dataCuser(ProductType)
+
+class A09View(FnView):
+    model = Product
+    model_form = Product_ModelForm
+    query_model_form = Product_QModelForm
+    verbose_name_fields = model_form().verbose_name_fields
+    html_file = 'basic_data/A09.html'
+    return_query_cols = model_form().return_query_cols
+
+dataCuser(Product)

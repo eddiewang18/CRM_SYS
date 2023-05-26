@@ -1,4 +1,8 @@
-from .models import CRM_COMPANY,SHOPGROUP,SHOP,Area,HRUSER_GROUP,CRM_HRUSER,VIPINFO_GROUP,VIPINFO
+from .models import (
+    CRM_COMPANY,SHOPGROUP,SHOP,Area,HRUSER_GROUP,
+    CRM_HRUSER,VIPINFO_GROUP,VIPINFO,ProductType,
+    Product
+)
 from django.forms import ModelForm
 from django import forms
 from django.core.exceptions import ValidationError
@@ -447,7 +451,6 @@ class VIPINFO_GROUP_QModelForm(ModelForm):
 
 class VIPINFO_ModelForm(ModelForm):
 
-
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.fields["apply_date"].widget = forms.widgets.DateInput(
@@ -604,6 +607,92 @@ class VIPINFO_QModelForm(ModelForm):
         "county_id","post_id","birthday_sdate","birthday_edate","apply_date_sdate","apply_date_edate"
         ,"telno","black",
         "edu_lv","email","mobilno","job_cat","vip_cpny","end_date_sdate","end_date_edate",
-        "vip_position","ispromote","familysize_lowerVal","familysize_upperVal","vip_FB","vip_IG","vip_LINE",
+        "vip_position","ispromote","familysize_lowerVal","familysize_upperVal","vip_FB","vip_IG","vip_LINE",] 
 
-] 
+
+class ProductType_ModelForm(ModelForm):
+
+    class Meta :
+        model=ProductType
+        fields = ["prod_type_id","prod_type_name","cpnyid"]
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.errList = []
+    def clean_prod_type_id(self):
+        return clean_fieldName_id(self,"prod_type_id","商品類別編號",ProductType)
+
+
+class ProductType_QModelForm(ModelForm):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        set_class_attr2_fields(self.fields,"qfield")
+    class Meta :
+        model=ProductType
+        fields = ["prod_type_id","prod_type_name","cpnyid"]
+
+
+class Product_ModelForm(ModelForm):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        set_class_attr2_fields(self.fields,'form_field',{"prod_id":{"class":"pkField"}})
+        self.errList = []
+        self.fields["prod_type_id"].queryset= ProductType.objects.none()
+
+
+        if "cpnyid" in self.data:
+            try:
+                cpnyid = self.data.get("cpnyid")
+                self.fields["prod_type_id"].queryset= ProductType.objects.filter(cpnyid=cpnyid)
+            except:
+                pass
+        elif self.instance.pk:
+            self.fields["prod_type_id"].queryset= self.instance.cpnyid.producttype_set.all()   
+
+
+        self.verbose_name_fields = []
+        self.return_query_cols = []
+        for i in Product._meta.get_fields(): 
+            try:
+                self.verbose_name_fields.append(i.verbose_name)
+                self.return_query_cols.append(i.name)
+            except:
+                continue
+
+    class Meta :
+        model=Product
+        fields = ["cpnyid","prod_id","prod_name","prod_type_id",
+            "prod_unit","price","cost_price","return_price",
+            "fixed_price","emp_price","discount_price",
+            "discount_rate","origin","barcode","note"
+        ] 
+
+    def clean_prod_id(self):
+        return clean_fieldName_id(self,"prod_id","商品編號",Product)
+
+
+class Product_QModelForm(ModelForm):
+
+
+    price_lowerVal = forms.IntegerField(label="售價下限")
+    price_upperVal = forms.IntegerField(label="售價上限")
+
+
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        set_class_attr2_fields(self.fields,"qfield")
+        self.fields["prod_type_id"].queryset= ProductType.objects.none()
+        if "cpnyid" in self.data:
+            try:
+                cpnyid = self.data.get("cpnyid")
+                self.fields["prod_type_id"].queryset= ProductType.objects.filter(cpnyid=cpnyid)
+            except:
+                pass
+        elif self.instance.pk:
+            self.fields["prod_type_id"].queryset= self.instance.cpnyid.producttype_set.all()   
+
+
+    class Meta :
+        model=Product
+        fields = ["cpnyid","prod_id","prod_name","prod_type_id",
+            "prod_unit","price_lowerVal","price_upperVal","origin","barcode"
+        ] 

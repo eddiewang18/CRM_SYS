@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def home(request):
 
-    return render(request,"home.html")
+    return redirect('basic_data/a01/')
 
 
 def login_view(request):

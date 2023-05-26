@@ -1,0 +1,91 @@
+{% extends 'fnBased.html' %}
+{% load static %}
+
+
+{% block title %}
+A09維護商品基本資料
+{% endblock title %}
+
+
+{% block functitle %}
+A09維護商品基本資料
+{% endblock functitle %}
+
+
+{% block field_examine %}
+
+    var prod_id = new FieldExamine("id_prod_id","id_prod_id_label",false,true,1,20,'id_prod_id_err',[checkEngNumCombination]);
+    var cpnyid = new FieldExamine("id_cpnyid","id_cpnyid_label",false,false,0,0,'id_cpnyid_err',[]);
+    var prod_name = new FieldExamine("id_prod_name","id_prod_name_label",false,true,1,20,'id_prod_name_err',[]);
+
+    prod_id.executeField();
+    cpnyid.executeField();
+    prod_name.executeField();
+
+{% endblock field_examine %}
+
+{% block redirecHomeURL %}
+'{%  url "basic_data:a09" %}'
+{% endblock redirecHomeURL %}
+
+
+
+{% block intoCreateURL %}
+'{%  url "basic_data:a09" %}'
+{% endblock intoCreateURL %}
+
+{% block putURL %}
+'{%  url "basic_data:a09" %}'
+{% endblock putURL %}
+
+{% block postURL %}
+'{%  url "basic_data:a09" %}'
+{% endblock postURL %}
+
+{% block qPostURL %}
+'{%  url "basic_data:a09" %}'
+{% endblock qPostURL %}
+
+<!-- 針對a09查詢資料後，如何讓地區正確的顯示在欄位上進行操作 -->
+{% block do_other_showQuery_thing %}
+    fieldChangeLinkage(data,"cpnyid","prod_type_id","#id_prod_type_id","{% url 'basic_data:cpny_prodtype' %}","prod_type_id","prod_type_name");
+
+{% endblock do_other_showQuery_thing %}
+
+{% block do_other_queryFunc_nextTick_thing %}
+fieldChangeLinkage(data,"cpnyid","prod_type_id","#id_prod_type_id","{% url 'basic_data:cpny_prodtype' %}","prod_type_id","prod_type_name");
+
+{% endblock do_other_queryFunc_nextTick_thing %}
+
+
+{% block do_other_queryModal_script_thing %}
+
+{% endblock do_other_queryModal_script_thing %}
+
+{% block do_other_queryFunc_thing %}
+//查詢框欄位檢核
+
+var ok = true;
+
+if(!ok)
+{
+    this.exec_queryFunc = false;
+}else
+{   
+    this.exec_queryFunc = true;
+}
+{% endblock do_other_queryFunc_thing %}
+
+{% block other_content %}
+
+    <!-- 針對縣市/鄉鎮連動關係操作 -->
+<!-- 針對縣市/鄉鎮連動關係操作 -->
+<script>
+    selectFieldChangeLinkage("id_cpnyid","#id_prod_type_id","{% url 'basic_data:cpny_prodtype' %}","prod_type_id","prod_type_name","id_prod_type_id_err");
+
+</script>
+
+    
+{% endblock other_content %}
+
+

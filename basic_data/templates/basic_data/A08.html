@@ -1,0 +1,144 @@
+{% extends 'fn2Based_special.html' %}
+{% block title %}
+維護商品類別資料
+{% endblock title %}
+
+{% block funcTitle %}
+A08維護商品類別資料
+{% endblock funcTitle %}
+
+
+{% block titleRow %}
+<td class="pkField" name="prod_type_id">
+    商品類別編號
+</td>
+<td name="prod_type_name">
+    商品類別名稱
+</td>
+<!-- <td name="cpnyid">
+    公司品牌
+</td> -->
+{% endblock titleRow %}
+
+
+{% block subtable_titleRow %}
+<td >
+    商品編號
+</td>
+<td>
+    商品名稱
+</td>
+<td >
+    售價
+</td>
+
+{% endblock subtable_titleRow %}
+
+
+{% block main_table_fields_input_typpe %}
+<script>
+
+
+// var input_type_config1 = {
+//     "vipinfo_group_id":{
+//         inputType : "input",
+//     },
+//     "vipinfo_group_name":{
+//         inputType : "input",
+//     },
+// 	"cpnyid" :{
+// 		inputType : "select",
+// 		name:'cpnyid',
+// 		option : {{cpny_options|safe}}
+// 	},
+// };
+var input_type_config1 = {
+    "prod_type_id":{
+        inputType : "input",
+    },
+    "prod_type_name":{
+        inputType : "input",
+    },
+
+};
+
+
+
+</script>
+{% endblock main_table_fields_input_typpe %}
+
+
+{% block dynamic_table_settings %}
+dynamic_table("table1","add1","del1",pkList=['prod_type_id'],titleRow=true,input_type_config1,false);
+{% endblock dynamic_table_settings %}
+
+{% block vm_successModal_redirectURL %}
+"{% url 'basic_data:a08' %}"
+{% endblock vm_successModal_redirectURL %}
+
+{% block input_type_config_settings %}
+    
+    "prod_type_id":{
+        inputType : "input",
+    },
+    "prod_type_name":{
+        inputType : "input",
+    }
+{% endblock input_type_config_settings %}
+
+
+{% block field_check_rule_settings %}
+    prod_type_id:{
+        checkStrLen:[1,20],
+        checkEngNumCombination:true,
+        repeatness : true,
+        required:true
+    },
+    prod_type_name:{
+        checkStrLen:[0,40],
+        checkEngNumCombination:false,
+        repeatness : true,
+        required:true
+    }
+{% endblock field_check_rule_settings %}
+
+{% block showShop_ajax_url %}
+'{% url "basic_data:a08" %}'
+{% endblock showShop_ajax_url %}
+
+{% block queryFunc_ajax_url %}
+'{% url "basic_data:a08" %}'
+{% endblock queryFunc_ajax_url %}
+
+{% block update_ajax_url %}
+'{% url "basic_data:a08" %}'
+{% endblock update_ajax_url %}
+
+{% block do_other_queryFunc_thing %}
+//查詢框欄位檢核
+var ok=true;
+var cpnyid_q = document.querySelector("select.qfield#id_cpnyid");
+var cpnyid_errmsg = cpnyid_q.parentNode.parentNode.querySelector("#id_cpnyid_err");
+if(cpnyid_q.value.length===0)
+{
+    
+    cpnyid_errmsg.innerHTML = "公司品牌 不可空白";
+    ok=false;
+}
+
+if(!ok)
+{
+    this.exec_queryFunc = false;
+}else
+{   
+    this.exec_queryFunc = true;
+    cpnyid_errmsg.innerHTML="";
+    document.querySelector("span.fk_style select#id_cpnyid").value =  cpnyid_q.value;
+}
+
+
+{% endblock do_other_queryFunc_thing %}
+
+{% block cpnyid_select_ajax_url %}
+'{% url "basic_data:a08" %}'
+{% endblock cpnyid_select_ajax_url %}

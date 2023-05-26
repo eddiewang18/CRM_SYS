@@ -81,15 +81,7 @@ class CrmQueryData():
                         continue
                     print(f"下的查詢條件:{qdict}")
                     qs_result = qs_result.filter(**qdict)
-                    # if count1==0:
-                    #     qs_result = qs_result.objects.filter(**qdict)
-                    #     count1+=1
-                    # else :
-                    #     qs_result = qs_result.filter(**qdict)
                     print(f"依條件查詢的返回結果:{qs_result}")
-                    # print(f'queryType:{queryType}')
-                    # print(f'qdict:{qdict}')
-                    # print(f'qs_result:{qs_result}')
                     print("#####################")
         return  qs_result       
 
@@ -392,23 +384,71 @@ class VIPINFO(models.Model,CrmQueryData):
 
     bool_field_attrs = ["black","ispromote"]
 
-# class ProductType(models.Model):
-#     prod_type_id = models.CharField(primary_key=True,max_length=20,db_column="prod_type_id",verbose_name="商品類別編號")
-#     prod_type_name = models.CharField(max_length=40,db_column="prod_type_name",verbose_name="商品類別名稱")
-#     cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
-#     cdate = models.DateField(db_column="cdate",verbose_name='創立日期',auto_now_add=True)
-#     ctime = models.TimeField(db_column="ctime",verbose_name='創立時間',auto_now_add=True)
-#     muser = models.CharField(max_length=20,db_column="muser",verbose_name='異動者') 
-#     mdate = models.DateField(db_column="mdate",verbose_name='異動日期',auto_now=True)
-#     mtime = models.TimeField(db_column="mtime",verbose_name='異動時間',auto_now=True)
+class ProductType(models.Model):
+    prod_type_id = models.CharField(primary_key=True,max_length=20,db_column="prod_type_id",verbose_name="商品類別編號")
+    prod_type_name = models.CharField(max_length=40,db_column="prod_type_name",verbose_name="商品類別名稱")
+    cpnyid = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
+    cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
+    cdate = models.DateField(db_column="cdate",verbose_name='創立日期',auto_now_add=True)
+    ctime = models.TimeField(db_column="ctime",verbose_name='創立時間',auto_now_add=True)
+    muser = models.CharField(max_length=20,db_column="muser",verbose_name='異動者') 
+    mdate = models.DateField(db_column="mdate",verbose_name='異動日期',auto_now=True)
+    mtime = models.TimeField(db_column="mtime",verbose_name='異動時間',auto_now=True)
 
-#     def __str__(self):
-#         return  self.vipinfo_group_name   
+    def __str__(self):
+        return  self.prod_type_name   
 
+    class Meta:
+        db_table = "ProductType"      
+    fieldQueryRule = {
+        "equals":["cpnyid"],
+        "like":['prod_type_id',"prod_type_name"],
+        'date_range':[],
+        'number_range':[],
+        }  
+    fk_list = {
+        'cpnyid':'cpnyid__cpnyid',
+    }    
+
+class Product(models.Model,CrmQueryData):
+    cpnyid = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
+    prod_id = models.CharField(primary_key=True,max_length=20,db_column="prod_id",verbose_name="商品編號")
+    prod_name = models.CharField(max_length=40,db_column="商品名稱",verbose_name="商品名稱")
+    prod_type_id = models.ForeignKey(to="ProductType",to_field='prod_type_id',db_column='prod_type_id',verbose_name='所屬商品類別編號',on_delete=models.CASCADE,null=True,blank=True)
+    prod_unit = models.CharField(db_column='prod_unit',verbose_name="商品單位",max_length=10,blank=True,null=True)
+    price = models.PositiveIntegerField(db_column='price',verbose_name="售價")
+    cost_price = models.PositiveIntegerField(db_column='cost_price',verbose_name="成本價",blank=True,null=True)
+    return_price = models.PositiveIntegerField(db_column='return_price',verbose_name="退貨成本價",blank=True,null=True)
+    fixed_price =  models.PositiveIntegerField(db_column='fixed_price',verbose_name="定價",blank=True,null=True)
+    emp_price = models.PositiveIntegerField(db_column='emp_price',verbose_name="員工價",blank=True,null=True)
+    discount_price = models.PositiveIntegerField(db_column='discount_price',verbose_name="折扣價",blank=True,null=True)
+    discount_rate =  models.DecimalField(max_digits = 5,decimal_places = 2,db_column='discount_rate',verbose_name="折扣率",blank=True,null=True)
+    origin = models.CharField(db_column='origin',verbose_name="產地",max_length=10,blank=True,null=True)
+    barcode = models.CharField(db_column='barcode',verbose_name="條碼",max_length=50,blank=True,null=True)
+    note = models.TextField(max_length=255,db_column='note',verbose_name="備註",blank=True,null=True)
+    cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
+    cdate = models.DateField(db_column="cdate",verbose_name='創立日期',auto_now_add=True)
+    ctime = models.TimeField(db_column="ctime",verbose_name='創立時間',auto_now_add=True)
+    muser = models.CharField(max_length=20,db_column="muser",verbose_name='異動者') 
+    mdate = models.DateField(db_column="mdate",verbose_name='異動日期',auto_now=True)
+    mtime = models.TimeField(db_column="mtime",verbose_name='異動時間',auto_now=True)
+
+    def __str__(self):
+        return f"{self.cpnyid.cocname}-{self.prod_id}-{self.prod_name}"
     
+    class Meta:
+        db_table = "Product"
 
-# class Product(models.Model,CrmQueryData):
-#     cpnyid = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
-#     prod_id = models.CharField(primary_key=True,max_length=20,db_column="prod_id",verbose_name="商品編號")
-#     prod_name = models.CharField(max_length=40,db_column="商品名稱",verbose_name="商品名稱")
-    
+    fieldQueryRule = {
+        "equals":['cpnyid',"prod_type_id",],
+        "like":["prod_id","prod_name","prod_unit","origin","barcode"],
+        'date_range':[],
+        'number_range':["price","cost_price","return_price","fixed_price","emp_price","discount_price","discount_rate"],
+        }  
+    # fk_list 紀錄該model中對應的外鍵欄位
+    fk_list = {
+        'cpnyid':'cpnyid__cpnyid',
+        'prod_type_id':'prod_type_id__prod_type_id',
+    }
+
+    bool_field_attrs = []
