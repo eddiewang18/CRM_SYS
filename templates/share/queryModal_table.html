@@ -18,10 +18,11 @@
 
 				<div  id="modalLowerBody">
 					<div class="modal-body formArea" >
-						{% for field in form  %}
+						{% for field in qform  %}
 							<span class="field">
 								<span id="{{ field.auto_id }}_label" class="input_label qmodal_label">{{field.label}}</span>
 								<span class="input_field qmodal_field">{{field}}</span>
+								<span id="{{ field.auto_id }}_err" class="errMsg"></span>
 							</span>
 						{% endfor %}
 	

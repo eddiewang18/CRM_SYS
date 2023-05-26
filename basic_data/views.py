@@ -4,7 +4,8 @@ from .models import (CRM_COMPANY,SHOPGROUP,SHOP,County,Area,HRUSER_GROUP,CRM_HRU
 from .forms import (
     CRM_COMPANY_ModelForm,SHOPGROUP_ModelForm,SHOP_ModelForm,SHOP_QModelForm
     ,CRM_COMPANY_QModelForm,HRUSER_GROUP_ModelForm,CRM_HRUSER_ModelForm,CRM_HRUSER_QModelForm,VIPINFO_GROUP_ModelForm,
-    VIPINFO_ModelForm,VIPINFO_QModelForm
+    VIPINFO_ModelForm,VIPINFO_QModelForm,VIPINFO_GROUP_QModelForm,
+    SHOPGROUP_QModelForm,HRUSER_GROUP_QModelForm
 )
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
@@ -153,18 +154,41 @@ class FnView(View):
 
         return JsonResponse({"update":"fail","wrongMsg":wrongMsg})
 
-def county_area(request):
-    if 'county_id' in request.GET:
-        county_id = request.GET.get('county_id')
-        post_objs = list(Area.objects.filter(county_id=county_id).values("post_id","post_name"))
-        return JsonResponse(post_objs,safe=False)
+def selectFieldChangeLinkage(request,filterCol,effect_model,effectEleActualField,effectEleShowField):
+    if 'changed_ele_name' in request.GET:
+        changed_ele_val = request.GET.get('changed_ele_name')
+        col_dict ={filterCol:changed_ele_val}
+        effect_objs = list(effect_model.objects.filter(**col_dict).values(effectEleActualField,effectEleShowField))
+        return JsonResponse(effect_objs,safe=False)
 
-# def county_area(request):
-#     if 'change_select_ele' in request.GET:
-#         print("\nchange_select_ele\n")
-#         county_id = request.GET.get('change_select_ele')
-#         post_objs = list(Area.objects.filter(county_id=county_id).values("post_id","post_name"))
-#         return JsonResponse(post_objs,safe=False)
+def county_area(request):
+    # if 'county_id' in request.GET:
+    #     county_id = request.GET.get('county_id')
+    #     post_objs = list(Area.objects.filter(county_id=county_id).values("post_id","post_name"))
+    #     return JsonResponse(post_objs,safe=False)
+    return selectFieldChangeLinkage(request,"county_id",Area,"post_id","post_name")
+
+def cpnyid_shop(request):
+    # if 'cpnyid' in request.GET:
+    #     cpnyid = request.GET.get('cpnyid')
+    #     shop_objs = list(SHOP.objects.filter(cpnyid=cpnyid).values("shop_id","shop_name"))
+    #     return JsonResponse(shop_objs,safe=False)
+    return selectFieldChangeLinkage(request,"cpnyid",SHOP,"shop_id","shop_name")
+
+def cpnyid_hrgrp(request):
+    # if 'cpnyid' in request.GET:
+    #     cpnyid = request.GET.get('cpnyid')
+    #     vipgrp_objs = list(VIPINFO_GROUP.objects.filter(cpnyid=cpnyid).values("vipinfo_group_id","vipinfo_group_name"))
+    #     return JsonResponse(vipgrp_objs,safe=False)
+    return selectFieldChangeLinkage(request,"cpnyid",HRUSER_GROUP,"group_id","group_name")
+
+def cpny_vipgrp(request):
+    # if 'cpnyid' in request.GET:
+    #     cpnyid = request.GET.get('cpnyid')
+    #     vipgrp_objs = list(VIPINFO_GROUP.objects.filter(cpnyid=cpnyid).values("vipinfo_group_id","vipinfo_group_name"))
+    #     return JsonResponse(vipgrp_objs,safe=False)
+    return selectFieldChangeLinkage(request,"cpnyid",VIPINFO_GROUP,"vipinfo_group_id","vipinfo_group_name")
+
 
 class A01View(FnView):
     model = CRM_COMPANY
@@ -196,54 +220,52 @@ class Fn2View(View):
     屬性:
         model :  開發功能對應的 Model
         model_form : 開發功能對應的 ModelForm
+        query_model_form : 開發功能按查尋按鈕時跳出來對應的查詢表單欄位
         html_file :  開發功能對應的html頁面
         fk_attr : str類型,主表對應副表的相關資料集合，以 副表小寫_set 的形式表現 
         fk_cols_show_list : list類型，儲存前台畫面中副表要呈現的欄位
         choice2readableInfos : list類型，將副表中為下拉選單的欄位依依轉換為易讀的值，一個下拉選單的欄位以dict型態分別存入在choice2readableInfos中
         cols_show_list : list類型，儲存前台畫面中主表要呈現的欄位
+        query_order : 查詢後的資料以什麼欄位進行排序
     """
     def get(self,request):
         
         if 'switch' in request.GET :
             requestData = json.loads(request.GET.get('postData')) 
-            # shopgroup_id = requestData.get('pk')
             primary_key =  requestData.get('pk')
-            # shopgroup_obj = SHOPGROUP.objects.get(pk = shopgroup_id)
             main_obj = self.model.objects.get(pk = primary_key)
             included_fk_objs = getattr(main_obj,self.fk_attr).all().values(*self.fk_cols_show_list)
-            # included_shop_objs =  shopgroup_obj.shop_set.all().values('shop_id','shop_name','shop_kind','cpnyid__cocname')
-            # choice2readableInfos = [{'choices_belong_model':SHOP,"choices_attr_name":"shop_kind_choices","choices_field_name":'shop_kind'}]
-            # turnChoiceField2readable(included_shop_objs,choice2readableInfos)
             turnChoiceField2readable(included_fk_objs,self.choice2readableInfos)
-
-            # print(included_shop_objs)
             return JsonResponse(list(included_fk_objs),safe=False)
 
         if 'query_condition' in request.GET :
-            print('\nquery_condition\n')
             requestData = json.loads(request.GET.get('postData')) 
-            print(f'\nrequestData:{requestData}|type : {type(requestData)}\n')
-            # qs_result = list(SHOPGROUP().crmQdata(requestData,self.model.fk_list).values("shopgroup_id","shopgroup_name"))
             qs_result = list(self.model().crmQdata(requestData,self.model.fk_list).values(*self.cols_show_list))
-
-            print(f'\nqs_result:{qs_result}\n')
             return JsonResponse(qs_result,safe=False)
 
-        # form = SHOPGROUP_ModelForm()
-        form = self.model_form()
-        # objs = SHOPGROUP.objects.all()
+        cpnyid_1st_obj = CRM_COMPANY.objects.all().first()
+        print(f'cpnyid_1st_obj={cpnyid_1st_obj}')
+        data_instance = self.model.objects.filter(cpnyid=cpnyid_1st_obj).first()
+        print(f'data_instance={data_instance}')
+        if "cpnyid_select_change" in request.GET :
+            print("cpnyid_select_change")
+            requestData = json.loads(request.GET.get('postData')) 
+            cpnyid = requestData.get("cpnyid")
+            objs = list(self.model.objects.filter(cpnyid=cpnyid).order_by(self.query_order).values(*self.cols_show_list))
+            print(f"objs={objs}")
+            print("-----------------")
+            return JsonResponse(objs,safe=False)
 
-        objs = self.model.objects.all().order_by(self.query_order)
+        form = self.model_form(instance=data_instance)
+        objs = self.model.objects.filter(cpnyid=cpnyid_1st_obj).order_by(self.query_order)
         included_fk_objs=[]
         if len(objs)>0:
             first_obj = objs.first()
-        # cpnyid__cocname > 使用 foreignkey__關聯model某屬性 可以讓該屬性做為顯示的資料
-        # included_shop_objs = first_obj.shop_set.all().values('shop_id','shop_name','shop_kind','cpnyid__cocname')
+            # cpnyid__cocname > 使用 foreignkey__關聯model某屬性 可以讓該屬性做為顯示的資料
+            # included_shop_objs = first_obj.shop_set.all().values('shop_id','shop_name','shop_kind','cpnyid__cocname')
             included_fk_objs = getattr(first_obj,self.fk_attr).all().values(*self.fk_cols_show_list)
-        # choice2readableInfos = [{'choices_belong_model':SHOP,"choices_attr_name":"shop_kind_choices","choices_field_name":'shop_kind'}]
+            # choice2readableInfos = [{'choices_belong_model':SHOP,"choices_attr_name":"shop_kind_choices","choices_field_name":'shop_kind'}]
             turnChoiceField2readable(included_fk_objs,self.choice2readableInfos)
-        # print()
-        # print(included_shop_objs)
             objs = objs.values(*self.cols_show_list).order_by(self.query_order)
         context = {
             'form':form,
@@ -252,8 +274,10 @@ class Fn2View(View):
         }
 
         if 'query' in request.GET :
+            qform = self.query_model_form()
             context['queryModal']=True
-        # return render(request,'basic_data/A02.html',context)
+            context["qform"]=qform
+
         return render(request,self.html_file,context)
 
     def post(self,request):
@@ -279,8 +303,8 @@ class Fn2View(View):
                     table_data.save()
                     print(f'\ncreate a new row\n')
                 else:
-                    pass
-                    print(f'\nform.errors :{form.errors}\n')
+                    print(f'invalid reason : {form.errors}')
+                    return JsonResponse({"update":"reject","errMsg":form.errList[0]})
         
         if len(update_data)>0:
             for data_row in update_data:
@@ -290,16 +314,17 @@ class Fn2View(View):
                     table_data = form.save(commit=False)
                     table_data.muser = request.user.username
                     table_data.save()
-                    # print(f'\nupdate a row\n')
                 else:
-                    # print(f'\nform.errors :{form.errors}\n')
-                    pass
+                    print(f'invalid reason : {form.errors}')
+                    return JsonResponse({"update":"reject","errMsg":form.errList[0]})
+
         return JsonResponse({"update":"ok"})
 
 class A02View(Fn2View):
     model = SHOPGROUP
     model_form = SHOPGROUP_ModelForm
     html_file = 'basic_data/A02.html'
+    query_model_form = SHOPGROUP_QModelForm   
     fk_attr = 'shop_set'
     fk_cols_show_list = ['shop_id','shop_name','shop_kind','cpnyid__cocname']
     choice2readableInfos =  [{'choices_belong_model':SHOP,"choices_attr_name":"shop_kind_choices","choices_field_name":'shop_kind'}]
@@ -311,6 +336,7 @@ dataCuser(SHOPGROUP)
 class A04View(Fn2View):
     model = HRUSER_GROUP
     model_form = HRUSER_GROUP_ModelForm
+    query_model_form = HRUSER_GROUP_QModelForm   
     html_file = 'basic_data/A04.html'
     fk_attr = 'crm_hruser_set'
     fk_cols_show_list = ['empid','cname','shop_id__shop_name','cpnyid__cocname']
@@ -319,14 +345,6 @@ class A04View(Fn2View):
     pk_key = 'group_id'
     query_order = 'group_id'
 dataCuser(HRUSER_GROUP)
-
-
-
-def cpnyid_shop(request):
-    if 'cpnyid' in request.GET:
-        cpnyid = request.GET.get('cpnyid')
-        shop_objs = list(SHOP.objects.filter(cpnyid=cpnyid).values("shop_id","shop_name"))
-        return JsonResponse(shop_objs,safe=False)
 
 
 
@@ -342,71 +360,21 @@ class A05View(FnView):
 class A06View(Fn2View):
     model = VIPINFO_GROUP
     model_form = VIPINFO_GROUP_ModelForm
+    query_model_form = VIPINFO_GROUP_QModelForm   
     html_file = 'basic_data/A06.html'
     fk_attr = 'vipinfo_set'
     fk_cols_show_list = ['vip_id','vip_name','shop_id__shop_name']
     choice2readableInfos =  []
-    cols_show_list = ['vipinfo_group_id','vipinfo_group_name',"cpnyid"]
+    cols_show_list = ['vipinfo_group_id','vipinfo_group_name']
     pk_key = 'vipinfo_group_id'
     query_order = 'vipinfo_group_id'
 
 
-    def get(self,request):
-        
-        if 'switch' in request.GET :
-            requestData = json.loads(request.GET.get('postData')) 
-            primary_key =  requestData.get('pk')
-            main_obj = self.model.objects.get(pk = primary_key)
-            included_fk_objs = getattr(main_obj,self.fk_attr).all().values(*self.fk_cols_show_list)
-            turnChoiceField2readable(included_fk_objs,self.choice2readableInfos)
-            return JsonResponse(list(included_fk_objs),safe=False)
 
-        if 'query_condition' in request.GET :
-            print('\nquery_condition\n')
-            requestData = json.loads(request.GET.get('postData')) 
-            print(f'\nrequestData:{requestData}|type : {type(requestData)}\n')
-            qs_result = list(self.model().crmQdata(requestData,self.model.fk_list).values(*self.cols_show_list))
-
-            print(f'\nqs_result:{qs_result}\n')
-            return JsonResponse(qs_result,safe=False)
-        form = self.model_form()
-        objs = self.model.objects.all().order_by(self.query_order)
-        included_fk_objs=[]
-        if len(objs)>0:
-            first_obj = objs.first()
-            included_fk_objs = getattr(first_obj,self.fk_attr).all().values(*self.fk_cols_show_list)
-            turnChoiceField2readable(included_fk_objs,self.choice2readableInfos)
-            objs = objs.values(*self.cols_show_list).order_by(self.query_order)
-        context = {
-            'form':form,
-            'objs':objs,
-            'included_fk_objs':included_fk_objs
-        }
-
-        if 'query' in request.GET :
-            context['queryModal']=True
-
-        cpny_options = []
-        for cpny_data in list(CRM_COMPANY.objects.all().values("cpnyid","cocname")):
-            cpny_options.append({"value":cpny_data["cpnyid"],"label":cpny_data["cocname"]})
-
-        context['cpny_options_list']= cpny_options
-        context['cpny_options']= json.dumps(cpny_options,ensure_ascii=False) 
-        print(context['cpny_options'])
-        print(type(context['cpny_options']))
-        print(context['objs'])
-        
-
-
-        return render(request,self.html_file,context)
 
 dataCuser(VIPINFO_GROUP)
 
-def cpnyid_vipgrp(request):
-    if 'cpnyid' in request.GET:
-        cpnyid = request.GET.get('cpnyid')
-        vipgrp_objs = list(VIPINFO_GROUP.objects.filter(cpnyid=cpnyid).values("vipinfo_group_id","vipinfo_group_name"))
-        return JsonResponse(vipgrp_objs,safe=False)
+
 
 
 

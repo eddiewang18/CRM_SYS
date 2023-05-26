@@ -15,9 +15,9 @@ A06維護會員群組資料
 <td name="vipinfo_group_name">
     會員群組名稱
 </td>
-<td name="cpnyid">
+<!-- <td name="cpnyid">
     公司品牌
-</td>
+</td> -->
 {% endblock titleRow %}
 
 
@@ -39,6 +39,19 @@ A06維護會員群組資料
 <script>
 
 
+// var input_type_config1 = {
+//     "vipinfo_group_id":{
+//         inputType : "input",
+//     },
+//     "vipinfo_group_name":{
+//         inputType : "input",
+//     },
+// 	"cpnyid" :{
+// 		inputType : "select",
+// 		name:'cpnyid',
+// 		option : {{cpny_options|safe}}
+// 	},
+// };
 var input_type_config1 = {
     "vipinfo_group_id":{
         inputType : "input",
@@ -46,13 +59,10 @@ var input_type_config1 = {
     "vipinfo_group_name":{
         inputType : "input",
     },
-	"cpnyid" :{
-		inputType : "select",
-		name:'cpnyid',
-		option : {{cpny_options|safe}}
-	},
+
 };
-console.log(input_type_config1["cpnyid"]['option']);
+
+
 
 </script>
 {% endblock main_table_fields_input_typpe %}
@@ -67,21 +77,28 @@ dynamic_table("table1","add1","del1",pkList=['vipinfo_group_id'],titleRow=true,i
 {% endblock vm_successModal_redirectURL %}
 
 {% block input_type_config_settings %}
+// "vipinfo_group_id":{
+    //         inputType : "input",
+    //     },
+    //     "vipinfo_group_name":{
+    //         inputType : "input",
+    //     },
+    //     "cpnyid" :{
+    //         inputType : "select",
+    //     }
+    
     "vipinfo_group_id":{
         inputType : "input",
     },
     "vipinfo_group_name":{
         inputType : "input",
-    },
-    "cpnyid" :{
-        inputType : "select",
     }
 {% endblock input_type_config_settings %}
 
 
 {% block field_check_rule_settings %}
     vipinfo_group_id:{
-        checkStrLen:[4,10],
+        checkStrLen:[1,20],
         checkEngNumCombination:true,
         repeatness : true,
         required:true
@@ -105,3 +122,32 @@ dynamic_table("table1","add1","del1",pkList=['vipinfo_group_id'],titleRow=true,i
 {% block update_ajax_url %}
 '{% url "basic_data:a06" %}'
 {% endblock update_ajax_url %}
+
+{% block do_other_queryFunc_thing %}
+//查詢框欄位檢核
+var ok=true;
+var cpnyid_q = document.querySelector("select.qfield#id_cpnyid");
+var cpnyid_errmsg = cpnyid_q.parentNode.parentNode.querySelector("#id_cpnyid_err");
+if(cpnyid_q.value.length===0)
+{
+    
+    cpnyid_errmsg.innerHTML = "公司品牌 不可空白";
+    ok=false;
+}
+
+if(!ok)
+{
+    this.exec_queryFunc = false;
+}else
+{   
+    this.exec_queryFunc = true;
+    cpnyid_errmsg.innerHTML="";
+    document.querySelector("span.fk_style select#id_cpnyid").value =  cpnyid_q.value;
+}
+
+
+{% endblock do_other_queryFunc_thing %}
+
+{% block cpnyid_select_ajax_url %}
+'{% url "basic_data:a06" %}'
+{% endblock cpnyid_select_ajax_url %}

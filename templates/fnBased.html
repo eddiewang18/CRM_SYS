@@ -343,7 +343,7 @@
 
                     //     })         
                     
-                axios.defaults.headers.common["X-CSRFToken"]=csrftoken;
+                    axios.defaults.headers.common["X-CSRFToken"]=csrftoken;
 
                     axios.post({% block qPostURL %}{% endblock qPostURL %},
                         {

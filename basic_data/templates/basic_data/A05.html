@@ -14,7 +14,7 @@ A05維護員工基本資料
 
 {% block field_examine %}
 
-var empid = new FieldExamine("id_empid","id_empid_label",false,true,5,10,'id_empid_err',[checkEngNumCombination]);
+var empid = new FieldExamine("id_empid","id_empid_label",false,true,1,20,'id_empid_err',[checkEngNumCombination]);
 var cpnyid = new FieldExamine("id_cpnyid","id_cpnyid_label",false,false,0,0,'id_cpnyid_err',[]);
 var shop_id = new FieldExamine("id_shop_id","id_shop_id_label",false,false,0,0,'id_shop_id_err',[]);
 var pwd = new FieldExamine("id_pwd","id_pwd_label",false,true,5,20,'id_pwd_err',[]);
@@ -54,13 +54,21 @@ emp_type.executeField();
 
 <!-- 針對a05查詢資料後，如何讓地區正確的顯示在欄位上進行操作 -->
 {% block do_other_showQuery_thing %}
-    county_area_ajax(data,"{% url 'basic_data:county_area' %}");
-    cpny_shop_ajax(data,"{% url 'basic_data:cpnyid_shop' %}");
+    //county_area_ajax(data,"{% url 'basic_data:county_area' %}");
+    //cpny_shop_ajax(data,"{% url 'basic_data:cpnyid_shop' %}");
+    fieldChangeLinkage(data,"county_id","post_id","#id_post_id","{% url 'basic_data:county_area' %}","post_id","post_name");
+    fieldChangeLinkage(data,"cpnyid","shop_id","#id_shop_id","{% url 'basic_data:cpnyid_shop' %}","shop_id","shop_name");
+
+   
 {% endblock do_other_showQuery_thing %}
 
 {% block do_other_queryFunc_nextTick_thing %}
-    county_area_ajax(data,"{% url 'basic_data:county_area' %}");
-    cpny_shop_ajax(data,"{% url 'basic_data:cpnyid_shop' %}");
+    //county_area_ajax(data,"{% url 'basic_data:county_area' %}");
+    //cpny_shop_ajax(data,"{% url 'basic_data:cpnyid_shop' %}");
+
+    fieldChangeLinkage(data,"county_id","post_id","#id_post_id","{% url 'basic_data:county_area' %}","post_id","post_name");
+    fieldChangeLinkage(data,"cpnyid","shop_id","#id_shop_id","{% url 'basic_data:cpnyid_shop' %}","shop_id","shop_name");
+
 {% endblock do_other_queryFunc_nextTick_thing %}
 
 
@@ -69,14 +77,40 @@ emp_type.executeField();
 {% endblock do_other_queryModal_script_thing %}
 
 {% block do_other_queryFunc_thing %}
+    //查詢框欄位檢核
+    // 針對[出生日期起][出生日期訖]輸入的規則進行操作
+    // 針對[離職日期起][離職日期訖]輸入的規則進行操作
+    // 針對[到職日期起][到職日期訖]輸入的規則進行操作
+    var ok = true;
+    var c1 = dateIntervalExamine(".qmodal_field > #id_birthday_sdate",".qmodal_field > #id_birthday_edate","#id_birthday_edate_err","出生日期");
+    var c2 = dateIntervalExamine(".qmodal_field > #id_indate_sdate",".qmodal_field > #id_indate_edate","#id_indate_edate_err","到職日期");
+    var c3 = dateIntervalExamine(".qmodal_field > #id_quitdate_sdate",".qmodal_field > #id_quitdate_edate","#id_quitdate_edate_err","離職日期");
 
+
+    if(!c1 || !c2 || !c3)
+    {
+        ok= false;
+    }
+
+    if(!ok)
+    {
+        this.exec_queryFunc = false;
+    }else
+    {   
+        this.exec_queryFunc = true;
+    }
 {% endblock do_other_queryFunc_thing %}
 
 {% block other_content %}
 
 <!-- 針對縣市/鄉鎮連動關係操作 -->
-{% include 'share/county_area_ajax.html' %}
-{% include 'share/cpny_shop_ajax.html' %}
+<script>
+    selectFieldChangeLinkage("id_county_id","#id_post_id","{% url 'basic_data:county_area' %}","post_id","post_name");
+    selectFieldChangeLinkage("id_cpnyid","#id_shop_id","{% url 'basic_data:cpnyid_shop' %}","shop_id","shop_name","id_shop_id_err");
+    selectFieldChangeLinkage("id_cpnyid","#id_group_id","{% url 'basic_data:cpnyid_hrgrp' %}","group_id","group_name");
+
+</script>
+  
 {% endblock other_content %}
 
 

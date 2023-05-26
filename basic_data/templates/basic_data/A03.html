@@ -14,7 +14,7 @@ A03維護分店基本資料
 
 {% block field_examine %}
 
-var shop_id = new FieldExamine("id_shop_id","id_shop_id_label",false,true,5,10,'id_shop_id_err',[checkEngNumCombination]);
+var shop_id = new FieldExamine("id_shop_id","id_shop_id_label",false,true,1,20,'id_shop_id_err',[checkEngNumCombination]);
 var shop_name = new FieldExamine("id_shop_name","id_shop_name_label",false,true,1,255,'id_shop_name_err',[]);
 var cpnyid = new FieldExamine("id_cpnyid","id_cpnyid_label",false,false,0,0,'id_cpnyid_err',[]);
 var shop_kind = new FieldExamine("id_shop_kind","id_shop_kind_label",false,false,0,0,'id_shop_kind_err',[]);
@@ -52,11 +52,13 @@ shop_chief.executeField();
 
 <!-- 針對a03查詢資料後，如何讓地區正確的顯示在欄位上進行操作 -->
 {% block do_other_showQuery_thing %}
-    county_area_ajax(data,"{% url 'basic_data:county_area' %}");
+    fieldChangeLinkage(data,"county_id","post_id","#id_post_id","{% url 'basic_data:county_area' %}","post_id","post_name");
+
 {% endblock do_other_showQuery_thing %}
 
 {% block do_other_queryFunc_nextTick_thing %}
-    county_area_ajax(data,"{% url 'basic_data:county_area' %}");
+    fieldChangeLinkage(data,"county_id","post_id","#id_post_id","{% url 'basic_data:county_area' %}","post_id","post_name");
+
 {% endblock do_other_queryFunc_nextTick_thing %}
 
 
@@ -89,45 +91,28 @@ shop_chief.executeField();
 
 {% block do_other_queryFunc_thing %}
 // 針對[停業日期起][停業日期訖]輸入的規則進行操作
-var shop_disable_sdate = document.querySelector(".qmodal_field > #id_shop_disable_date_sdate");
-var shop_disable_edate = document.querySelector(".qmodal_field > #id_shop_disable_date_edate");
-var shop_disable_date_err =  document.querySelector("#id_shop_disable_date_edate_err");
 var ok = true;
-if(shop_disable_sdate.value.length>0 || shop_disable_edate.value.length>0)
+var c1 = dateIntervalExamine(".qmodal_field > #id_shop_disable_date_sdate",".qmodal_field > #id_shop_disable_date_edate","#id_shop_disable_date_edate_err","停業日期");
+if(!c1)
 {
-    if(!(shop_disable_sdate.value.length>0 && shop_disable_edate.value.length>0))
-    {
-        shop_disable_date_err.innerHTML="欄位 停業日期起 及 停業日期訖 均需輸入條件";
-        ok = false;
-    }
-
+    ok= false;
 }
 
-if(shop_disable_sdate.value.length>0 && shop_disable_edate.value.length>0)
-{
-    if(shop_disable_sdate.value>shop_disable_edate.value)
-    {
-        shop_disable_date_err.innerHTML="欄位 停業日期起 需小於 停業日期訖 均需輸入條件";
-        ok=false;
-
-    }
-
-}
 if(!ok)
 {
     this.exec_queryFunc = false;
 }else
 {   
     this.exec_queryFunc = true;
-    shop_disable_date_err.innerHTML="";
 }
 
 {% endblock do_other_queryFunc_thing %}
 
 {% block other_content %}
 <!-- 針對縣市/鄉鎮連動關係操作 -->
-{% include 'share/county_area_ajax.html' %}
-
+<script>
+    selectFieldChangeLinkage("id_county_id","#id_post_id","{% url 'basic_data:county_area' %}","post_id","post_name");
+</script>
 <script>
 
 

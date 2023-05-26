@@ -33,6 +33,11 @@
 
         </form>
     </div>
+
+    <div id="fk_area"  class="ablock fk" >
+      <span class="fk_style">{{form.cpnyid.label}}</span>
+      <span @change="changeCpny($event)" class="fk_style">{{form.cpnyid}}</span>
+    </div>
     
     <div class="tableArea ablock">
         <div class="c1">
@@ -50,49 +55,23 @@
                     </tr>
 
                     {% for obj in objs %}
-                    {% if forloop.counter == 1 %}
-                    <tr v-if="tr_show" class="selected">
-                        {% for key,field in obj.items %}
-                                              
-                        <td @click="showShop($event)">
-                            {% if key == 'cpnyid' %}
-                                  <select name="cpnyid">
-                                    {% for op in cpny_options_list %}
-                                        {% if field == op.value %}
-                                        <option value="{{op.value}}" selected>{{op.label}}</option>
-                                        {% else %}
-                                        <option value="{{op.value}}">{{op.label}}</option>
-                                        {% endif %}                                  
-                                    {% endfor %}
-                                  </select>
-                            {% else %}
-                            {{field}}
-                            {% endif %}
-                        </td>
-                        {% endfor %}
-                    </tr>
-                    {% else %}
-                    <tr v-if="tr_show" >
-                        {% for key,field in obj.items %}
-                                              
-                        <td @click="showShop($event)">
-                            {% if key == 'cpnyid' %}
-                                  <select name="cpnyid">
-                                    {% for op in cpny_options_list %}
-                                        {% if field == op.value %}
-                                        <option value="{{op.value}}" selected>{{op.label}}</option>
-                                        {% else %}
-                                        <option value="{{op.value}}">{{op.label}}</option>
-                                        {% endif %}                                  
-                                    {% endfor %}
-                                  </select>
-                            {% else %}
-                            {{field}}
-                            {% endif %}
-                        </td>
-                        {% endfor %}
-                    </tr>
-                    {% endif %}
+                        {% if forloop.counter == 1 %}
+                            <tr v-if="tr_show" class="selected">
+                                {% for field in obj.values %}
+                                <td @click="showShop($event)">
+                                    {{field}}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                        {% else %}
+                            <tr v-if="tr_show" >
+                                {% for field in obj.values %}
+                                <td @click="showShop($event)">
+                                    {{field}}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                        {% endif %}
                     {% endfor %}
 
                     <tr v-if="!tr_show" v-for=" (item,index) in responseData1">
@@ -314,14 +293,11 @@ var input_type_config1 = {
             getFrontEndData(){                
                 var table = document.getElementById('table1');
                 var firstTrTd= table.querySelector(".firstRow").querySelectorAll("td");
-                console.log("firstTrTd");
-                console.log(firstTrTd);
                 var fieldNameList = [];
+                var cpnyid_val = document.querySelector("select#id_cpnyid").value;
                 for(var i of firstTrTd){
                     fieldNameList.push(i.getAttribute("name"));
                 }
-                console.log("fieldNameList");
-                console.log(fieldNameList);
                 
                 var frontEndData ={
                 "insert":[],
@@ -333,7 +309,6 @@ var input_type_config1 = {
 
                 for(var action in frontEndData){
                     var table_tr ;
-                    console.log(`action: ${action}`);
                     if(action==="insert"){
                         table_tr = document.querySelectorAll(".newRow");
                     }else if(action==="update"){
@@ -343,23 +318,16 @@ var input_type_config1 = {
                     }else{
                         table_tr =  document.querySelectorAll("#table1 tr:not(.deletedRow):not(.titleRow)");
                     }
-                    console.log(`table_tr: `);
-                    console.log(table_tr);
+
                     
                     for(var tr of table_tr){
                         var obj_data={};
                         var tr_td = tr.querySelectorAll("td");
-                        console.log(`tr_td: `);
-                        console.log(tr_td);
                         for(var i=0;i<tr_td.length;i++){
                             var key = fieldNameList[i];
-                            console.log(`key : ${key}`);
                             var values;
                             tr_td_name_attr = tr_td[i].getAttribute("belong_field");
-                            console.log("tr_td_name_attr");
-                            console.log(tr_td_name_attr);
                             input_type = this.input_type_config[tr_td_name_attr]['inputType'];
-                            console.log(`input_type : ${input_type}`);
                             if(input_type==='checkbox'){
                                 values = tr_td[i].querySelector("input").value.trim();
                             }
@@ -370,14 +338,12 @@ var input_type_config1 = {
                             }
                             
                             obj_data[key]=values;
-                            console.log("obj_data");
-                            console.log(obj_data);
                         }
+                        obj_data['cpnyid']=cpnyid_val;
                         frontEndData[action].push(obj_data);
-                        console.log("frontEndData");
-                        console.log(frontEndData);
+
                     }
-                    console.log("=======");
+
                 }
                 console.log("前台資料:");
                 console.log(frontEndData);
@@ -470,8 +436,12 @@ var input_type_config1 = {
 
                 }	
 
-
+                var cpnyid_val = document.querySelector("select#id_cpnyid").value;
                 check_front_end_data(all_visible_data,self);
+                if(cpnyid_val.length===0)
+                {
+                    this.colErrorMsg.push("公司品牌 不可空白");
+                }
                 console.log(`colErrorMsg :`);
                 console.log(this.colErrorMsg);
                 if(this.colErrorMsg.length>0)
@@ -506,10 +476,21 @@ var input_type_config1 = {
                             
                         },
                         success:function(response){
-                            console.log("OK");
-                            vm_successModal.successMsg="資料異動成功";
-                            $('#successMsg_vue').modal('show');
-                            vm_successModal.isUpdate = false;
+                            console.log("資料更新回傳");
+                            console.log(response);
+                            var update_status = response['update'];
+                            if(update_status==="ok")
+                            {
+                                console.log("OK");
+                                vm_successModal.successMsg="資料異動成功";
+                                $('#successMsg_vue').modal('show');
+                                vm_successModal.isUpdate = false;                                
+                            }
+                            else
+                            {   
+                                vm_wrongModal.wrongMsg = response['errMsg'];
+                                $('#wrongMsg_vue').modal('show');
+                            }
                         }
 
 
@@ -532,58 +513,64 @@ var input_type_config1 = {
         data:{
             responseData:[],
             showMsg:false,
-            data_index:0
+            data_index:0,
+            exec_queryFunc:true
         },
         methods:{
             //當在modal查詢框中按下送出btn會觸發此函數
             queryFunc(){
-                //queryFunc開始                        
-                // 2.先將查詢的欄位輸入框的name屬性 作為 json物件的key , value屬性 作為 json物件的value屬性
-                var input_field_list  = document.querySelectorAll('.qmodal_field > *');
-                var request_data = {};
-                for(var i of input_field_list){
-                    request_data[i.name]=i.value;
-                }
-                console.log(request_data);
-
-                const csrftoken = getCookie('csrftoken');
-                var self = this;
-                $.ajax({
-
-                    url:{% block queryFunc_ajax_url %}{% endblock queryFunc_ajax_url %},
-                    method:"GET",
-                    dataType:"json",
-                    headers: {'X-CSRFToken': csrftoken}, //在headers中要提供csrftoken，讓client發送請求時攜帶csrftoken資訊
-                    data:{
-                        postData:JSON.stringify(request_data),
-                        query_condition:true
-                        
-                    },
-                    success:function(response){
-                        $('#queryModal').modal('hide');
-                        console.log("switch OK");
-                        console.log(response);
-                        if(response.length>0){
-                            self.$nextTick(function () {
-                            vm_tableArea.tr_show = false;
-                            vm_tableArea.responseData1 = response;
-                            self.$nextTick(function () {
-                                self.query_init_table()
-                                // 
-                                var firstData = document.querySelectorAll("#table1 tr")[1].querySelector("td");
-                                firstData.click();
-                            })
-                         });
-                        }else
-                        {
-
-                        $('#noDataMsg').modal('show'); 
-                        }
-            
+                {% block do_other_queryFunc_thing %}
+                {% endblock do_other_queryFunc_thing %}
+                if(this.exec_queryFunc)
+                {
+                    //queryFunc開始                        
+                    // 2.先將查詢的欄位輸入框的name屬性 作為 json物件的key , value屬性 作為 json物件的value屬性
+                    var input_field_list  = document.querySelectorAll('.qfield');
+                    var cpnyid_q_field_val = document.querySelector('#id_cpnyid.qfield').value;
+                    var request_data = {};
+                    for(var i of input_field_list){
+                        request_data[i.name]=i.value;
                     }
+                    console.log(request_data);
+
+                    const csrftoken = getCookie('csrftoken');
+                    var self = this;
+                    $.ajax({
+
+                        url:{% block queryFunc_ajax_url %}{% endblock queryFunc_ajax_url %},
+                        method:"GET",
+                        dataType:"json",
+                        headers: {'X-CSRFToken': csrftoken}, //在headers中要提供csrftoken，讓client發送請求時攜帶csrftoken資訊
+                        data:{
+                            postData:JSON.stringify(request_data),
+                            query_condition:true
+                            
+                        },
+                        success:function(response){
+                            $('#queryModal').modal('hide');
+                            console.log("switch OK");
+                            console.log(response);
+                            if(response.length>0){
+                                self.$nextTick(function () {
+                                vm_tableArea.tr_show = false;
+                                vm_tableArea.responseData1 = response;
+                                self.$nextTick(function () {
+                                    self.query_init_table()
+                                    var firstData = document.querySelectorAll("#table1 tr")[1].querySelector("td");
+                                    firstData.click();
+                                })
+                            });
+                            }else
+                            {
+
+                            $('#noDataMsg').modal('show'); 
+                            }
+                
+                        }
 
 
-                })
+                    })
+                }
             },
             moveModal(){
                 //moveModal開始
@@ -614,8 +601,74 @@ var input_type_config1 = {
                 init_table(firstTds);
             }
         }
-    })
+    });
 </script>
 
+<script>
+    var vm_fk_area = new Vue({
+        el:"#fk_area",
+        methods:{
+            changeCpny(event)
+            {
+                if(event.target.tagName.toLowerCase()==="select")
+                {
+                    var cpnyid = event.target.value;
+                    const csrftoken = getCookie('csrftoken');
+                    var self = this;
+                    var request_data = {
+                        "cpnyid":cpnyid,
+                    };
+                    $.ajax({
+
+                        url:{% block cpnyid_select_ajax_url %}{% endblock cpnyid_select_ajax_url %},
+                        method:"GET",
+                        dataType:"json",
+                        headers: {'X-CSRFToken': csrftoken}, //在headers中要提供csrftoken，讓client發送請求時攜帶csrftoken資訊
+                        data:{
+                            postData:JSON.stringify(request_data),
+                            cpnyid_select_change:true
+                        },
+                        success:function(response){
+                            
+                            self.$nextTick(function () {
+                                        vm_tableArea.tr_show = false;
+                                        vm_tableArea.responseData1 = response;
+                                        var newRowLists = document.querySelectorAll("#table1 tr.newRow");
+                                        for(var newTr of newRowLists)
+                                        {
+                                            newTr.parentNode.removeChild(newTr);
+                                        }
+                                        self.$nextTick(function () {
+                                            self.query_init_table()
+                                            if(response.length>0)
+                                            {
+                                                var firstData = document.querySelectorAll("#table1 tr")[1].querySelector("td");
+                                                firstData.click();
+                                            }
+                                            else
+                                            {
+                                                vm_tableArea.switchData = true;
+
+                                                vm_tableArea.responseData=[];
+                                            }
+
+                                        })
+                                    });
+                        }
+
+
+                    })
+                }
+            },
+            query_init_table(){
+                var table = document.getElementById("table1");
+                var firstTr = table.querySelectorAll("tr")[0];
+                var firstTds = firstTr.querySelectorAll("td"); 
+                init_table(firstTds);
+            }
+        }
+    }); 
+
+</script>
 
 {% endblock content %}

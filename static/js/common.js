@@ -66,54 +66,113 @@ function getCookie(name) {
 
 
 
-function county_area_ajax(data,url){
-	var county_id_val = data['county_id'];
-	var post_id_val = data['post_id'];
-	
+//檢核日期區間查詢欄位
+
+function dateIntervalExamine(sdate_selector,edate_selector,edate_err_selector,date_field_cname)
+{	
+	// sdate_selector 日期起欄位的css selector
+	// edate_selector 日期迄欄位的css selector
+	// edate_err_selector 顯示日期迄錯誤訊息欄位的css selector > 當檢核沒過時，要顯示msg的地方
+	// date_field_cname 日期龍味的中文顯示名稱
+	var sdate = document.querySelector(sdate_selector);
+	var edate = document.querySelector(edate_selector);
+	var date_err =  document.querySelector(edate_err_selector);
+	if(sdate.value.length>0 || edate.value.length>0)
+	{
+		if(!(sdate.value.length>0 && edate.value.length>0))
+		{
+			date_err.innerHTML=`欄位 ${date_field_cname}起 及 ${date_field_cname}訖 均需輸入`;
+			return false;
+		}
+	}
+	if(sdate.value.length>0 && edate.value.length>0)
+	{
+		if(sdate.value>edate.value)
+		{
+			date_err.innerHTML=`欄位 ${date_field_cname}起 需小於 ${date_field_cname}訖`;
+			return false;
+
+		}
+
+	}
+	date_err.innerHTML='';
+	return true;
+}
+
+function fieldChangeLinkage(data,targetFieldName,effectEleName,effectEleId,ajax_url,effectEleIdActualVal,effectEleIdShowVal){
+	var changed_ele_val = data[targetFieldName];
+	var effeted_id_val = data[effectEleName];
 	$.ajax({
-		url:url,
+		url:ajax_url,
 		method:"GET",
 		dataType:"json",
 		data:{
-			county_id:county_id_val
+			changed_ele_name:changed_ele_val
 		},
-		success:function(response){
+		success:function(response)
+		{
 			console.log(response);
 			var option_html = "";
-				for(var obj of response){
-					var post_id = obj["post_id"];
-					var name = obj["post_name"];
-					option_html+=`<option value="${post_id}">${name}</option>`;
-				}
-				$("#id_post_id").html(option_html); 
-				$("#id_post_id").val(post_id_val);
+			for(var obj of response)
+			{
+				var effect_ele_actual_val = obj[effectEleIdActualVal];
+				var effect_ele_show_val = obj[effectEleIdShowVal];
+				option_html+=`<option value="${effect_ele_actual_val}">${effect_ele_show_val}</option>`;
+			}
+			$(effectEleId).html(option_html); 
+			$(effectEleId).val(effeted_id_val);
 		}
 		})	
 }
 
 
-function cpny_shop_ajax(data,url){
-	var cpnyid_val = data['cpnyid'];
-	var post_id_val = data['shop_id'];
-	
-	$.ajax({
-		url:url,
-		method:"GET",
-		dataType:"json",
-		data:{
-			cpnyid:cpnyid_val
-		},
-		success:function(response){
-			console.log(response);
-			var option_html = "";
-				for(var obj of response){
-					var post_id = obj["shop_id"];
-					var name = obj["shop_name"];
-					option_html+=`<option value="${post_id}">${name}</option>`;
-				}
-				$("#id_shop_id").html(option_html); 
-				$("#id_shop_id").val(post_id_val);
-		}
-		})	
-}
+// 下拉選單欄位連動
+function selectFieldChangeLinkage(targetFieldId,effectEleId,ajax_url,effectEleIdActualVal,effectEleIdShowVal,effectEleErrId)
+    {
+      // targetFieldId > 觸發欄位連鎖的欄位id
+      // effectEleId > 受連動影響的欄位id
+      // ajax_url> 發送的目的url
+      // effectEleIdActualVal > 受連動影響的欄位實際值
+      // effectEleIdShowVal > 受連動影響的欄位顯示值
+      // effectEleErrId >受連動影響的欄位錯誤訊息區塊id
+      document.addEventListener("change",function(e)
+      {
+        if(e.target.id===targetFieldId)
+        {
+          
+            var changed_ele = e.target;
+            var changed_ele_parent = e.target.parentNode.parentNode.parentNode;
+            var effect_ele = changed_ele_parent.querySelector(effectEleId); //受連動影響的欄位元素
+            var changed_ele_val = changed_ele.value;
+            $.ajax(
+              {
+                url:ajax_url,
+                method:"GET",
+                dataType:"json",
+                data:
+                {
+                  changed_ele_name:changed_ele_val
+                },
+                success:function(response)
+                {
+                    console.log(response);
+                    var option_html = "";
+                        for(var obj of response)
+                        {
+                            var effect_ele_actual_val = obj[effectEleIdActualVal];
+                            var effect_ele_show_val = obj[effectEleIdShowVal];
+                            option_html+=`<option value="${effect_ele_actual_val}">${effect_ele_show_val}</option>`;
+                        }
+                        effect_ele.innerHTML =  option_html;
+						if(effectEleErrId!==undefined)
+						{
+							document.getElementById(effectEleErrId).innerHTML='';
+						}
+                        
+                }
+              })
 
+            console.log("-------------------");
+        }
+      })
+    }

@@ -63,3 +63,16 @@ select , option{
 select:focus {
     outline: none;
 }
+
+.fk{
+    width: 25%;
+}
+
+span.fk_style{
+    display: inline-block;
+    margin: 5px;
+}
+
+.fk_style > select{
+    border: 1px solid black;
+}

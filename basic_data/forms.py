@@ -23,7 +23,50 @@ def set_class_attr2_fields(fields:dict,general_attrs:str,specific_fields_attrs=N
                     else:
                         field.widget.attrs[k] +=" "+v 
 
+def clean_fieldName_id(this,fieldName_id:str,fieldName_id_cname,model):
+    """
+    檢核表單中的資料的編號(primary key)是否有重複寫入
+    this > ModelForm物件
+    fieldName_id > table中編號的欄位名稱
+    fieldName_id_cname >table中編號對應的中文名稱
+    
+    """
+    fieldName_id_val = this.cleaned_data.get(fieldName_id)
+    data_exists = None
+    if not this.instance.pk :
+        data_exists = model.objects.filter(**{fieldName_id:fieldName_id_val}).exists()
+    else:
+        data_exists = model.objects.filter(**{fieldName_id:fieldName_id_val}).exclude(**{fieldName_id:fieldName_id_val}).exists()
+    if data_exists :
+        errMsg = f"{fieldName_id_cname} {fieldName_id_val} 已存在 不可重複輸入"
+        this.errList.append(errMsg)
+        raise ValidationError(errMsg)
+    else:
+        return fieldName_id_val
 
+def clean_fieldName(this,fieldName_id,fieldName,fieldName_cname,model):
+    """
+    檢核表單中的資料的顯示名稱是否有重複寫入
+    this > ModelForm物件
+    fieldName_id > table中編號的欄位名稱
+    fieldName_cname >table中對應顯示的中文名稱
+    
+    """
+    fieldName_val = this.cleaned_data.get(fieldName)
+    fieldName_id_val = this.cleaned_data.get(fieldName_id)
+    data_exists = None
+    if not this.instance.pk :
+        data_exists = model.objects.filter(**{fieldName:fieldName_val}).exists()
+    else:
+        data_exists = model.objects.filter(**{fieldName:fieldName_val}).exclude(**{fieldName_id:fieldName_id_val}).exists()
+    print(f'data_exists={data_exists}')
+
+    if data_exists :
+        errMsg = f"{fieldName_cname} {fieldName_val} 已存在 不可重複輸入"
+        this.errList.append(errMsg)
+        raise ValidationError(errMsg)
+    else:
+        return fieldName_val 
 
 class CRM_COMPANY_ModelForm(ModelForm):
 
@@ -44,35 +87,37 @@ class CRM_COMPANY_ModelForm(ModelForm):
                 continue
 
     def clean_cpnyid(self):
-        cpnyid = self.cleaned_data.get("cpnyid")
-        data_exists = None
-        if not self.instance.pk :
-            data_exists = CRM_COMPANY.objects.filter(cpnyid=cpnyid).exists()
-        else:
-            data_exists = CRM_COMPANY.objects.filter(cpnyid=cpnyid).exclude(cpnyid=cpnyid).exists()
-        if data_exists :
-            errMsg = f"公司編號 {cpnyid} 已存在 不可重複輸入"
-            self.errList.append(errMsg)
-            raise ValidationError(errMsg)
-        else:
-            return cpnyid
+        return clean_fieldName_id(self,"cpnyid","公司編號",CRM_COMPANY)
+        # cpnyid = self.cleaned_data.get("cpnyid")
+        # data_exists = None
+        # if not self.instance.pk :
+        #     data_exists = CRM_COMPANY.objects.filter(cpnyid=cpnyid).exists()
+        # else:
+        #     data_exists = CRM_COMPANY.objects.filter(cpnyid=cpnyid).exclude(cpnyid=cpnyid).exists()
+        # if data_exists :
+        #     errMsg = f"公司編號 {cpnyid} 已存在 不可重複輸入"
+        #     self.errList.append(errMsg)
+        #     raise ValidationError(errMsg)
+        # else:
+        #     return cpnyid
 
     def clean_cocname(self):
-        cocname = self.cleaned_data.get("cocname")
-        cpnyid = self.cleaned_data.get("cpnyid")
-        data_exists = None
-        if not self.instance.pk :
-            data_exists = CRM_COMPANY.objects.filter(cocname=cocname).exists()
-        else:
-            data_exists = CRM_COMPANY.objects.filter(cocname=cocname).exclude(cpnyid=cpnyid).exists()
+        return clean_fieldName(self,"cpnyid","cocname","公司中文名稱",CRM_COMPANY)
+        # cocname = self.cleaned_data.get("cocname")
+        # cpnyid = self.cleaned_data.get("cpnyid")
+        # data_exists = None
+        # if not self.instance.pk :
+        #     data_exists = CRM_COMPANY.objects.filter(cocname=cocname).exists()
+        # else:
+        #     data_exists = CRM_COMPANY.objects.filter(cocname=cocname).exclude(cpnyid=cpnyid).exists()
 
 
-        if data_exists :
-            errMsg = f"公司中文名稱 {cocname} 已存在 不可重複輸入"
-            self.errList.append(errMsg)
-            raise ValidationError(errMsg)
-        else:
-            return cocname 
+        # if data_exists :
+        #     errMsg = f"公司中文名稱 {cocname} 已存在 不可重複輸入"
+        #     self.errList.append(errMsg)
+        #     raise ValidationError(errMsg)
+        # else:
+        #     return cocname 
         
 class CRM_COMPANY_QModelForm(ModelForm):
     class Meta :
@@ -87,12 +132,26 @@ class CRM_COMPANY_QModelForm(ModelForm):
 class SHOPGROUP_ModelForm(ModelForm):
     class Meta :
         model=SHOPGROUP
-        fields = ["shopgroup_id","shopgroup_name"]
+        fields = ["shopgroup_id","shopgroup_name","cpnyid"]
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.errList = []
+    def clean_shopgroup_id(self):
+        return clean_fieldName_id(self,"shopgroup_id","分店群組編號",SHOPGROUP)
 
+    def clean_shopgroup_name(self):
+        return clean_fieldName(self,"shopgroup_id","shopgroup_name","分店群組名稱",SHOPGROUP)
+  
 
+class SHOPGROUP_QModelForm(ModelForm):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        set_class_attr2_fields(self.fields,"qfield")
+    class Meta :
+        model=SHOPGROUP
+        fields = ["shopgroup_id","shopgroup_name","cpnyid"]
 
 class SHOP_ModelForm(ModelForm):
-
 
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
@@ -134,38 +193,11 @@ class SHOP_ModelForm(ModelForm):
          "fax","telno"] 
 
     def clean_shop_id(self):
-        shop_id = self.cleaned_data.get("shop_id")
-        data_exists = None
-        if not self.instance.pk :
-            data_exists = SHOP.objects.filter(shop_id=shop_id).exists()
-        else:
-            data_exists = SHOP.objects.filter(shop_id=shop_id).exclude(shop_id=shop_id).exists()
-        if data_exists :
-            errMsg = f"分店編號 {shop_id} 已存在 不可重複輸入"
-            self.errList.append(errMsg)
-            raise ValidationError(errMsg)
-        else:
-            return shop_id
+        return clean_fieldName_id(self,"shop_id","分店編號",SHOP)
 
-
-    
     def clean_shop_name(self):
-        shop_name = self.cleaned_data.get("shop_name")
-        shop_id = self.cleaned_data.get("shop_id")
-        data_exists = None
-        if not self.instance.pk :
-            data_exists = SHOP.objects.filter(shop_name=shop_name).exists()
-        else:
-            data_exists = SHOP.objects.filter(shop_name=shop_name).exclude(shop_id=shop_id).exists()
+        return clean_fieldName(self,"shop_id","shop_name","分店名稱",SHOP)
 
-
-        if data_exists :
-            errMsg = f"分店名稱 {shop_name} 已存在 不可重複輸入"
-            self.errList.append(errMsg)
-
-            raise ValidationError(errMsg)
-        else:
-            return shop_name 
 
 
 
@@ -218,8 +250,23 @@ class SHOP_QModelForm(ModelForm):
 class HRUSER_GROUP_ModelForm(ModelForm):
     class Meta :
         model=HRUSER_GROUP
-        fields = ["group_id","group_name"]
+        fields = ["group_id","group_name","cpnyid"]
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.errList = []
+    def clean_group_id(self):
+        return clean_fieldName_id(self,"group_id","員工群組編號",HRUSER_GROUP)
 
+    def clean_group_name(self):
+        return clean_fieldName(self,"group_id","group_name","員工群組名稱",HRUSER_GROUP)
+
+class HRUSER_GROUP_QModelForm(ModelForm):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        set_class_attr2_fields(self.fields,"qfield")
+    class Meta :
+        model=HRUSER_GROUP
+        fields =  ["group_id","group_name","cpnyid"]
 #####################################################
 
 class CRM_HRUSER_ModelForm(ModelForm):
@@ -260,8 +307,6 @@ class CRM_HRUSER_ModelForm(ModelForm):
                 pass
         elif self.instance.pk:
             self.fields["post_id"].queryset= self.instance.county_id.area_set.all()        
-
-######################################################################################
         self.fields["shop_id"].queryset= SHOP.objects.none()
         if "cpnyid" in self.data:
             try:
@@ -291,21 +336,7 @@ class CRM_HRUSER_ModelForm(ModelForm):
         ] 
 
     def clean_empid(self):
-        empid = self.cleaned_data.get("empid")
-        data_exists = None
-        if not self.instance.pk :
-            data_exists = CRM_HRUSER.objects.filter(empid=empid).exists()
-        else:
-            data_exists = CRM_HRUSER.objects.filter(empid=empid).exclude(empid=empid).exists()
-        if data_exists :
-            errMsg = f"員工編號 {empid} 已存在 不可重複輸入"
-            self.errList.append(errMsg)
-            raise ValidationError(errMsg)
-        else:
-            return empid
-
-
-
+        return clean_fieldName_id(self,"empid","員工編號",CRM_HRUSER)
 
 
 class CRM_HRUSER_QModelForm(ModelForm):
@@ -369,7 +400,6 @@ class CRM_HRUSER_QModelForm(ModelForm):
         elif self.instance.pk:
             self.fields["post_id"].queryset= self.instance.county_id.area_set.all()    
 
-######################################################################################
         self.fields["shop_id"].queryset= SHOP.objects.none()
         if "cpnyid" in self.data:
             try:
@@ -391,12 +421,29 @@ class CRM_HRUSER_QModelForm(ModelForm):
 
 
 class VIPINFO_GROUP_ModelForm(ModelForm):
+
+    class Meta :
+        model=VIPINFO_GROUP
+        fields = ["vipinfo_group_id","vipinfo_group_name","cpnyid"]
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.errList = []
+    def clean_vipinfo_group_id(self):
+        return clean_fieldName_id(self,"vipinfo_group_id","會員群組編號",VIPINFO_GROUP)
+
+    def clean_vipinfo_group_name(self):
+        return clean_fieldName(self,"vipinfo_group_id","vipinfo_group_name","會員群組名稱",VIPINFO_GROUP)
+
+
+class VIPINFO_GROUP_QModelForm(ModelForm):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        set_class_attr2_fields(self.fields,"qfield")
     class Meta :
         model=VIPINFO_GROUP
         fields = ["vipinfo_group_id","vipinfo_group_name","cpnyid"]
 
 
-##################################################################
 
 class VIPINFO_ModelForm(ModelForm):
 
@@ -471,18 +518,8 @@ class VIPINFO_ModelForm(ModelForm):
         "vip_position","familysize","ispromote","vip_FB","vip_IG","vip_LINE","note"] 
 
     def clean_vip_id(self):
-        vip_id = self.cleaned_data.get("vip_id")
-        data_exists = None
-        if not self.instance.pk :
-            data_exists = VIPINFO.objects.filter(vip_id=vip_id).exists()
-        else:
-            data_exists = VIPINFO.objects.filter(vip_id=vip_id).exclude(vip_id=vip_id).exists()
-        if data_exists :
-            errMsg = f"會員編號 {vip_id} 已存在 不可重複輸入"
-            self.errList.append(errMsg)
-            raise ValidationError(errMsg)
-        else:
-            return vip_id
+        return clean_fieldName_id(self,"vip_id","會員編號",VIPINFO)
+
 
 
 

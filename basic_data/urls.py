@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (A01View,A02View,A03View,
-A04View,A05View,cpnyid_shop,cpnyid_vipgrp,
+A04View,A05View,cpnyid_shop,cpnyid_hrgrp,cpny_vipgrp,
 county_area,A06View,A07View)
 app_name = "basic_data"
 
@@ -14,5 +14,7 @@ urlpatterns = [
     path('a07/',A07View.as_view(),name="a07"),
     path('county_area/',county_area,name="county_area"),
     path('cpnyid_shop/',cpnyid_shop,name="cpnyid_shop"),
-    path('cpnyid_vipgrp/',cpnyid_vipgrp,name="cpnyid_vipgrp"),
+    path('cpnyid_hrgrp/',cpnyid_hrgrp,name="cpnyid_hrgrp"),
+    path('cpny_vipgrp/',cpny_vipgrp,name="cpny_vipgrp"),
+
 ]

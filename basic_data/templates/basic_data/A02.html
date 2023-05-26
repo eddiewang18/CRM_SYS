@@ -1,4 +1,4 @@
-{% extends 'fn2Based.html' %}
+{% extends 'fn2Based_special.html' %}
 {% block title %}
 維護分店群組資料
 {% endblock title %}
@@ -68,7 +68,7 @@ dynamic_table("table1","add1","del1",pkList=['shopgroup_id'],titleRow=true,input
 
 {% block field_check_rule_settings %}
     shopgroup_id:{
-        checkStrLen:[4,10],
+        checkStrLen:[1,20],
         checkEngNumCombination:true,
         repeatness : true,
         required:true
@@ -92,3 +92,33 @@ dynamic_table("table1","add1","del1",pkList=['shopgroup_id'],titleRow=true,input
 {% block update_ajax_url %}
 '{% url "basic_data:a02" %}'
 {% endblock update_ajax_url %}
+
+{% block do_other_queryFunc_thing %}
+//查詢框欄位檢核
+var ok=true;
+var cpnyid_q = document.querySelector("select.qfield#id_cpnyid");
+var cpnyid_errmsg = cpnyid_q.parentNode.parentNode.querySelector("#id_cpnyid_err");
+if(cpnyid_q.value.length===0)
+{
+    
+    cpnyid_errmsg.innerHTML = "公司品牌 不可空白";
+    ok=false;
+}
+
+if(!ok)
+{
+    this.exec_queryFunc = false;
+}else
+{   
+    this.exec_queryFunc = true;
+    cpnyid_errmsg.innerHTML="";
+    document.querySelector("span.fk_style select#id_cpnyid").value =  cpnyid_q.value;
+}
+
+
+{% endblock do_other_queryFunc_thing %}
+
+
+{% block cpnyid_select_ajax_url %}
+'{% url "basic_data:a02" %}'
+{% endblock cpnyid_select_ajax_url %}

@@ -96,7 +96,7 @@ class CrmQueryData():
 
 
 class CRM_COMPANY(models.Model,CrmQueryData):
-    cpnyid = models.CharField(primary_key=True,max_length=10,db_column="cpnyid",verbose_name="公司別")
+    cpnyid = models.CharField(primary_key=True,max_length=20,db_column="cpnyid",verbose_name="公司別")
     cocname = models.CharField(max_length=255,db_column="cocname",verbose_name='公司中文名稱')
     coename = models.CharField(max_length=255,db_column="coename",verbose_name='公司英文名稱',blank=True,null=True)    
     coscname = models.CharField(max_length=255,db_column="coscname",verbose_name='公司中文簡稱',blank=True,null=True)
@@ -124,8 +124,8 @@ class CRM_COMPANY(models.Model,CrmQueryData):
 
 
 class SHOPGROUP(models.Model,CrmQueryData):
-    shopgroup_id = models.CharField(primary_key=True,max_length=10,db_column="shopgroup_id",verbose_name="群組編號")
-    shopgroup_name = models.CharField(max_length=50,db_column="shopgroup_name",verbose_name="群組名稱",unique=True)
+    shopgroup_id = models.CharField(primary_key=True,max_length=20,db_column="shopgroup_id",verbose_name="分店群組編號")
+    shopgroup_name = models.CharField(max_length=50,db_column="shopgroup_name",verbose_name="分店群組名稱",unique=True)
     cpnyid  = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
     cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
     cdate = models.DateField(db_column="cdate",verbose_name='創立日期',auto_now_add=True)
@@ -141,12 +141,13 @@ class SHOPGROUP(models.Model,CrmQueryData):
         db_table = "SHOPGROUP"  
 
     fieldQueryRule = {
-        "equals":[],
+        "equals":["cpnyid"],
         "like":['shopgroup_id',"shopgroup_name"],
         'date_range':[],
         'number_range':[],
         }  
     fk_list = {
+         'cpnyid':'cpnyid__cpnyid',
     }
 
 class County(models.Model):
@@ -179,7 +180,7 @@ class Area(models.Model):
 
 class SHOP(models.Model,CrmQueryData):
     cpnyid               = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
-    shop_id              = models.CharField(primary_key=True,max_length=10,db_column='shop_id',verbose_name='分店編號')
+    shop_id              = models.CharField(primary_key=True,max_length=20,db_column='shop_id',verbose_name='分店編號')
     shop_name            = models.CharField(max_length=30,db_column='shop_name',verbose_name='分店名稱',unique=True)
     shop_scname          = models.CharField(blank=True,null=True,max_length=10,db_column='shop_scname',verbose_name='分店簡稱')
     shop_kind_choices = [("0","總店"),("1","直營店"),("2","加盟店")]
@@ -224,7 +225,7 @@ class SHOP(models.Model,CrmQueryData):
 
 
 class HRUSER_GROUP(models.Model):
-    group_id   = models.CharField(primary_key=True,max_length=10,db_column='group_id',verbose_name="員工群組編號")
+    group_id   = models.CharField(primary_key=True,max_length=20,db_column='group_id',verbose_name="員工群組編號")
     group_name = models.CharField(max_length=20,db_column="group_name",verbose_name="員工群組名稱")
     cpnyid  = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
     cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
@@ -242,12 +243,14 @@ class HRUSER_GROUP(models.Model):
   
 
     fieldQueryRule = {
-        "equals":[],
+        "equals":["cpnyid"],
         "like":['group_id',"group_name"],
         'date_range':[],
         'number_range':[],
         }  
     fk_list = {
+        'cpnyid':'cpnyid__cpnyid',
+
     }
 
 
@@ -297,7 +300,7 @@ class CRM_HRUSER(models.Model,CrmQueryData):
 
 
 class VIPINFO_GROUP(models.Model,CrmQueryData):
-    vipinfo_group_id = models.CharField(primary_key=True,max_length=10,verbose_name="會員群組編號",db_column='vipinfo_group_id')
+    vipinfo_group_id = models.CharField(primary_key=True,max_length=20,verbose_name="會員群組編號",db_column='vipinfo_group_id')
     vipinfo_group_name = models.CharField(max_length=20,verbose_name="會員群組名稱",db_column='vipinfo_group_name')
     cpnyid = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
     cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
