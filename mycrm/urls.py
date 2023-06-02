@@ -23,4 +23,5 @@ urlpatterns = [
     path('logout/',logout_view,name='logout'),
     path("",home,name='home'),
     path('basic_data/', include('basic_data.urls')),
+    path("label_data/",include("label_data.urls")),
 ]

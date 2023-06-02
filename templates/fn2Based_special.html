@@ -52,6 +52,7 @@
                             群組名稱
                         </td> -->
                         {% endblock titleRow %}
+
                     </tr>
 
                     {% for obj in objs %}
@@ -290,64 +291,11 @@ var input_type_config1 = {
 
         },
         methods:{
-            getFrontEndData(){                
-                var table = document.getElementById('table1');
-                var firstTrTd= table.querySelector(".firstRow").querySelectorAll("td");
-                var fieldNameList = [];
-                var cpnyid_val = document.querySelector("select#id_cpnyid").value;
-                for(var i of firstTrTd){
-                    fieldNameList.push(i.getAttribute("name"));
-                }
-                
-                var frontEndData ={
-                "insert":[],
-                "update":[],
-                "delete":[],
-                "all_visible_data":[]
-                };
-        
-
-                for(var action in frontEndData){
-                    var table_tr ;
-                    if(action==="insert"){
-                        table_tr = document.querySelectorAll(".newRow");
-                    }else if(action==="update"){
-                        table_tr = document.querySelectorAll(".updateRow");
-                    }else  if(action==="delete"){
-                        table_tr = document.querySelectorAll(".deletedRow");
-                    }else{
-                        table_tr =  document.querySelectorAll("#table1 tr:not(.deletedRow):not(.titleRow)");
-                    }
-
-                    
-                    for(var tr of table_tr){
-                        var obj_data={};
-                        var tr_td = tr.querySelectorAll("td");
-                        for(var i=0;i<tr_td.length;i++){
-                            var key = fieldNameList[i];
-                            var values;
-                            tr_td_name_attr = tr_td[i].getAttribute("belong_field");
-                            input_type = this.input_type_config[tr_td_name_attr]['inputType'];
-                            if(input_type==='checkbox'){
-                                values = tr_td[i].querySelector("input").value.trim();
-                            }
-                            else if(input_type==='select'){
-                                values = tr_td[i].querySelector("select").value.trim();
-                            }else{
-                                values = tr_td[i].textContent.trim();
-                            }
-                            
-                            obj_data[key]=values;
-                        }
-                        obj_data['cpnyid']=cpnyid_val;
-                        frontEndData[action].push(obj_data);
-
-                    }
-
-                }
-                console.log("前台資料:");
-                console.log(frontEndData);
-                return frontEndData;
+            getFrontEndData(){             
+                // 取得動態表格中的資料   
+                {% block getFrontEndDataFunc %}
+                // return getFrontEndDataFunc({'cpnyid':"select#id_cpnyid"},this.input_type_config);
+                {% endblock getFrontEndDataFunc %}
             },
             examine_field(){
                 console.log("test exec");

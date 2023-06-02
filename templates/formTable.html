@@ -1,0 +1,579 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+<!-- 網頁上功能的名稱 -->
+{% block title %}
+{% endblock title %}
+
+
+
+{% block style2 %}
+<!-- 
+    載入 成功 查無資料 錯誤 的 modal css樣式
+ -->
+<link rel="stylesheet" href="{%	static 'css/noData_modal.css' %}">
+<link rel="stylesheet" href="{%	static 'css/success_modal.css' %}">
+<link rel="stylesheet" href="{%	static 'css/wrong_modal.css' %}">
+<link rel="stylesheet" href="{% static 'css/crmFormTable1.css' %}">
+
+{% endblock style2 %}
+
+
+
+{% block content %}
+
+<div class="wrap">
+    <div class="funcTitle ablock">
+        <!-- 設定功能頁面的標題 -->
+        {% block functitle %}
+        {% endblock functitle %}
+    </div>
+    <div class=" ablock">
+        <div class="c1">
+		<form action="" method="POST"  novalidate="novalidate">
+			{% csrf_token %}			
+            <div  class="btnArea ablock">
+                <button @click="intoCreate" type="button" id="intoCreate" name="intoCreate" class="intoCreate funcbtn" v-if="onquery">進入新增模式</button>
+                <button @click="create" type="button" id="create" name="create" class="create funcbtn" v-if="! onquery">新增</button>
+                <button type="submit" id="query"  name="query" class="query funcbtn">查詢</button>
+                <button @click="update" type="button" id="update" name="update" class="update funcbtn" v-if="onquery">修改</button>
+                <button  @click="del"  type="button" id="delete" name="delete" class="delete funcbtn" v-if="onquery">刪除</button>
+            </div>
+			<div class="formArea ablock">
+				{% for field in form %}
+				<span class="field">
+					<span id="{{ field.auto_id }}_label" class="input_label">{{field.label}}</span>
+					<span class="input_field field1">{{field}}</span>
+					<span id="{{ field.auto_id }}_err" class="errMsg"></span>
+				</span>
+
+				{% endfor %}
+
+			</div>
+
+		</form>
+        </div>
+        <div class="tableArea c1">
+            <div class="table">
+                <table class="tableData" id="table1">
+                    <tr class="titleRow">
+                    {% block titleRow %}
+                    {% endblock titleRow %}
+                    </tr>
+                </table>
+            </div>
+            <div class="tableBtn">
+                <button id="add1">新增資料</button>
+                <button id="del1">刪除資料</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/common.js' %}"></script>
+<script src="{% static 'js/vue.js' %}"></script>
+<script src="{% static 'js/examine_col.js' %}"></script>
+<script>
+    // 這個tag用來填寫那些欄位要做基本的檢核(輸入字串的長度,是否必填,英數字組合....)
+    {% block field_examine %}
+    {% endblock field_examine %}
+</script>
+<!--Jquery-->
+<script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+<script src="{% static 'js/dynamicTable.js' %}"></script>
+<!--引入可由vue實例所控制文字訊息的錯誤modal -->
+{% include 'share/wrong_modal_vue.html' %}
+
+<!--引入可由vue實例所控制文字訊息的成功modal -->
+{% include 'share/success_modal_vue.html' %}
+
+
+
+<!-- 若收到後台傳回的相關成功訊息 則引入成功訊息的modal 並顯示 -->
+{% if success	%}
+    {% include 'share/success_modal.html' %}
+	{% include 'share/show_success_msg.html' %}
+{% endif %}
+<!-- 若收到後台傳回的相關錯誤訊息 則引入錯誤訊息的modal 並顯示 -->
+{% if wrong	%}
+    {% include 'share/wrong_modal.html' %}
+	{% include 'share/show_wrong_msg.html' %}
+{% endif %}
+{% include 'share/noData_modal.html' %}
+<!-- 則引入查詢欄位條件的modal 並顯示 -->
+{% include 'share/queryModal.html' %}
+{% if queryModal %}
+	{% include 'share/show_queryModal.html' %}
+{% endif %}
+{% include 'share/bootstrap_script.html' %}
+{% block main_table_fields_input_typpe %}
+{% endblock main_table_fields_input_typpe %}
+<script src="{% static 'js/testB1Field.js' %}"></script>
+
+<script>
+    var vm_btnArea = new Vue({
+        el:".btnArea",
+        delimiters: ['%%%', '%%%'],
+        data: {
+            onquery:false,
+            wrongMsg:"",
+            input_type_config:
+            {
+                {% block input_type_config_settings %}
+                {% endblock input_type_config_settings %}
+            },
+            colErrorMsg:[],
+            field_check_rule:{
+                {% block field_check_rule_settings %}
+                {% endblock field_check_rule_settings %}
+            }
+        },
+        methods:{
+            examine_front_end_col(){
+                // 在按下新增按鈕時會先檢查所有欄位是否已符合基本的欄位檢核 
+                var errs = document.querySelectorAll(".errMsg");
+                for(var ele of errs){
+                    if(ele.textContent.trim().length>0){
+                        // 若有欄位未符合檢核，則不會發送表單
+                        return false;
+                    }
+                }
+                return true;
+            },
+            getFrontEndData(){             
+                // 取得動態表格中的資料   
+                {% block getFrontEndDataFunc %}
+                {% endblock getFrontEndDataFunc %}
+            }, 
+            examine_field(){
+                console.log("test exec");
+                this.colErrorMsg = [];
+                var frontEndData =  this.getFrontEndData();
+                var all_visible_data = frontEndData['all_visible_data'];
+                var field_label_dict = {};
+                var first_tr_tds = document.querySelector("tr.firstRow").querySelectorAll("td");
+                for(var td of first_tr_tds)
+                {
+                    field_label_dict[td.getAttribute('name')]=td.textContent.trim();
+                }
+
+                // field_label_dict = {shopgroup_id:"群組編號",shopgroup_name:"群組名稱"}
+
+                var self = this;
+                function check_front_end_data(typeOfdata,self)
+                {
+                    if(typeOfdata.length>0)
+                    {
+                        for(var i=0;i<typeOfdata.length;i++)
+                        {
+                            var current_data = typeOfdata[i] ; //當前取出的data
+                            for(var k in current_data)
+                            {  // k 為欄位
+                                var check_rule = self.field_check_rule[k]; //取出某一欄位的檢核規則
+                                // 依序對欄位k進檢核
+                                for(var r in check_rule)
+                                {
+                                    if(check_rule[r])
+                                    {
+                                        var wrong_txt1 = `第${i+1}列 `;
+                                        var wrong_txt2 ;
+                                        var field_value = current_data[k]; //field_value為當前資料列某一欄位的值
+                                        if(r==="checkStrLen")
+                                        {   
+                                            if(!checkStrLen(field_value,check_rule[r][0],check_rule[r][1])[0]){
+                                                wrong_txt2 = checkStrLen(field_value,check_rule[r][0],check_rule[r][1])[1]
+
+                                            }
+                                        }
+                                        else if(r==="checkEngNumCombination")
+                                        {
+                                            if(!checkEngNumCombination(field_value)[0]){
+                                                wrong_txt2 = checkEngNumCombination(field_value)[1]
+                                            }
+                                        }
+                                        else if(r==="repeatness")
+                                        {
+                                            for(var index=0;index<typeOfdata.length;index++)
+                                            {
+                                                if(index===i){
+                                                    continue;
+                                                }
+                                                if(field_value===typeOfdata[index][k]){
+                                                    wrong_txt2 = ` 與 第${index+1}列 ${field_label_dict[k]} 重複`;
+                                                    break;
+                                                }
+                                            }
+                                        }else if(r==="required")
+                                        {
+                                            if(!fieldRequired(field_value)[0]){
+                                                wrong_txt2 =fieldRequired(field_value)[1];
+                                            }
+                                        }
+                                        else
+                                        {
+                                        }
+                                        if(wrong_txt2!==undefined){
+                                            var wrong_msg = wrong_txt1+field_label_dict[k]+wrong_txt2;
+                                            self.colErrorMsg.push(wrong_msg);
+                                            break;
+                                        }
+                                    }
+                                }
+                                if(self.colErrorMsg.length>0)
+                                {
+                                    break;
+                                }
+                            
+                            }
+ 
+                        }
+                    }
+
+                }	
+
+                check_front_end_data(all_visible_data,self);
+                if(this.colErrorMsg.length>0)
+                {
+                    return false;
+                }
+                else
+                {
+                    return frontEndData;
+                }
+
+            },
+            intoCreate(){
+                // 當按下進入新增模式的按鈕時會重新導向新增的頁面
+                window.location.href = {% block intoCreateURL %}{% endblock intoCreateURL %};
+            },
+            create(){
+                if(!this.examine_front_end_col()){
+                    return ;
+                }
+                var cleaned_data = this.examine_field();
+                if(!cleaned_data){
+                    vm_wrongModal.wrongMsg = this.colErrorMsg[0];
+                    $('#wrongMsg_vue').modal('show');
+                    return ;
+                }
+                if(!cal_interval_check()[0])
+                {
+                    vm_wrongModal.wrongMsg = cal_interval_check()[1];
+                    $('#wrongMsg_vue').modal('show');
+                    return ;
+                }
+                var fields = document.querySelectorAll(".form_field");
+                var insertFormData = {}; // 將要修改的值存放於此
+                for(var field of fields){                   
+                    insertFormData[field.name] = field.value;
+                }
+
+                request_data = {
+                    "insertFormData":insertFormData,
+                    "tableData":cleaned_data,
+                };
+                console.log(request_data);
+                console.log("OK");
+                // 發送ajax請求時須加上上面這段程式碼來通過django的csrf_token驗證機制
+                const csrftoken = getCookie('csrftoken');
+                $.ajax({
+
+                    url:"{% url 'label_data:b01' %}",
+                    method:"POST",
+                    dataType:"json",
+                    headers: {'X-CSRFToken': csrftoken}, //在headers中要提供csrftoken，讓client發送請求時攜帶csrftoken資訊
+                    data:{
+                        requestData:JSON.stringify(request_data) ,
+                        create:'true'
+                        
+                    },
+                    success:function(response){
+                        console.log("打印成功請求後回傳的資料");//
+
+                        console.log(response);//打印成功請求後回傳的資料
+                        var status = response['insert'];
+                        if(status==='fail')
+                        {
+                            vm_wrongModal.wrongMsg = response['errMsg'];
+                            $('#wrongMsg_vue').modal('show');
+                            return ;                            
+                        }
+                        if(status==='ok')
+                        {
+                            vm_successModal.successMsg = "成功新增";
+                            $('#successMsg_vue').modal('show');
+                            vm_successModal.isUpdate = false;                
+                        }
+                    }
+
+
+                    })           
+            },
+            update(){},
+            del(){}
+        }
+    });
+    // 由vue控制顯示錯誤訊息的modal
+    var vm_wrongModal = new Vue({
+        el:"#wrongMsg_vue",
+        delimiters: ['%%%', '%%%'],
+        data:{
+            wrongMsg:""
+        }
+    });
+    
+     // 由vue控制顯示成功訊息的modal
+     var vm_successModal = new Vue({
+        el:"#successMsg_vue",
+        delimiters: ['%%%', '%%%'],
+        data:{
+            successMsg:"",
+            isUpdate:true
+        },
+        methods:{
+            redirectHomeFn(){
+                if(!this.isUpdate){
+                    // 成功刪除資料後會重新導向新增的頁面
+                    window.location.href = {% block redirecHomeURL %}{% endblock redirecHomeURL %};
+                }
+            }
+        }
+    });
+
+    var qbtn = document.querySelector("#qbtn"); // 查詢modal中的[查詢欄位]按鈕
+    var resultbtn = document.querySelector("#resultbtn");// 查詢modal中的[結果顯示]按鈕
+    var modalLowerBody = document.querySelector("#modalLowerBody");
+    var resultModaltable = document.querySelector("#resultModaltable");
+    var vm = new Vue({
+        el:"#queryModal",
+        delimiters: ['%%%', '%%%'],
+        data:{
+            responseData:[],
+            showMsg:false,
+            cls:{
+                qbtn:{
+                    gray:false,
+                    highlight:true
+                },
+                resultbtn:{
+                    gray:true,
+                    highlight:false
+                }
+            },
+            sty:{
+                qbtn:{
+                    display:"block"
+                },
+                resultbtn:{
+                    display:"none"
+                } 
+            },
+            qresultCount:"",
+            data_index:0,
+            exec_queryFunc:true
+
+        },
+        methods:{
+            queryFunc(){
+                {% block do_other_queryFunc_thing %}
+                {% endblock do_other_queryFunc_thing %}
+                if(this.exec_queryFunc)
+                {
+                    //queryFunc開始                        
+                    // 2.先將查詢的欄位輸入框的name屬性 作為 json物件的key , value屬性 作為 json物件的value屬性
+                    var input_field_list  = document.querySelectorAll('.qfield');
+                    var request_data = {};
+                    for(var i of input_field_list){
+                        var tmp_value = i.value;
+                        if(i.type==="checkbox")
+                        {
+                            if(i.checked)
+                            {
+                                tmp_value="on";
+                            }
+                            else
+                            {
+                                tmp_value="off";
+                            }
+                        }
+                        request_data[i.name]=tmp_value;
+                    }
+                    console.log(request_data);
+
+                    //發送ajax請求時須加上下列這段程式碼來通過django的csrf_token驗證機制
+                    const csrftoken = getCookie('csrftoken');
+     
+                    
+                    axios.defaults.headers.common["X-CSRFToken"]=csrftoken;
+
+                    axios.post({% block qPostURL %}{% endblock qPostURL %},
+                        {
+                            params:{
+                                requestData:JSON.stringify(request_data) ,
+                                querySubmit:'true'
+                            }
+                        }
+                    ).then(response => {
+
+                        this.responseData=response.data;
+                        console.log("回傳的資料:")
+                        console.log(response.data);
+                        console.log("---------------");
+                        var count = this.responseData.length;
+                        // console.log(count);
+                        //若有查詢的資料有結果，則做以下事情:
+                        if(count>0){
+                            // 1.將顯示結果的圖示亮起來，並顯示查詢到幾筆
+                            this.qresultCount=count+'筆';
+                            this.showResult();
+                            vm_btnArea.onquery = true;
+
+                            //2.將查出來的第一筆資料列代入form表單中
+                            var data = this.responseData[0];
+    
+                            var input_field1s = document.querySelectorAll('.form_field');
+
+                            for(var i of input_field1s)
+                            {   
+                                var k= i.getAttribute('name');
+                                var v = data[k];
+                                if(v==null)
+                                {
+                                    v='';
+                                }
+                                i.value = v;
+                            }
+    
+                            //3 將input元素中class含有 pkField 設為只讀
+                            var pkFields = document.querySelectorAll(".field1 input.pkField");
+                            for(var i=0 ; i<pkFields.length;i++){
+                                pkFields[i].setAttribute('disabled',"true");
+                            }
+
+
+                            //4.渲染完成後 >再默認選中第一列數據
+                            this.$nextTick(function () {
+                                var allTrs = document.querySelectorAll("#qmodal_result_table tr");
+                                allTrs[1].classList.add('selected');
+
+                                for(var i=0;i<allTrs.length;i++){
+                                    allTrs[i].setAttribute('dataRow',`${i}`);
+                                }
+                                
+                                var errListMsgs = document.querySelectorAll(".errMsg");
+                                for(var errMsg of errListMsgs){
+                                    errMsg.innerHTML='';
+                                }
+                                {% block do_other_queryFunc_nextTick_thing %}
+                                {% endblock do_other_queryFunc_nextTick_thing %}
+                            });
+
+
+                        }else{
+                            //如果查詢結果為0筆，則告知使用者查無資料
+                            $('#queryModal').modal('hide');
+                            $('#noDataMsg').modal('show');
+
+                        }
+                        
+
+                    }).catch(function(error){
+                        console.log(error);
+                    })
+                }
+
+                //queryFunc結束
+            },
+            moveModal(){
+                //moveModal開始
+                //modal移動
+                var modal = document.querySelector('#modal');
+	            modal.onmousedown= function(e){
+                var diffx = e.pageX-this.offsetLeft;
+                var diffy = e.pageY-this.offsetTop;
+
+                document.onmousemove = function(e){
+                    modal.style.left = (e.pageX-diffx)+'px';
+                    modal.style.top = (e.pageY-diffy)+'px';
+
+                }
+
+                document.onmouseup = function(){
+                    document.onmousemove = null;
+                    document.onmouseup  = null;
+                }
+
+	            }
+                //moveModal結束
+            },
+            queryCol(){
+                // 點擊[查詢欄位]btn時，將[結果顯示]btn的按鈕顏色變灰
+                //queryCol開始
+                this.cls.qbtn.gray=false;
+                this.cls.qbtn.highlight=true;
+                this.cls.resultbtn.gray=true;
+                this.cls.resultbtn.highlight=false;     
+                // 點擊[查詢欄位]btn時，將查詢欄位區塊顯示
+                this.sty.qbtn.display="block";
+                this.sty.resultbtn.display="none";
+                //queryCol結束
+            },
+            showResult(){
+                //showResult開始
+                // 點擊[結果顯示]btn時，將[查詢欄位]btn的按鈕顏色變灰
+                this.cls.resultbtn.gray=false;
+                this.cls.resultbtn.highlight=true;
+                this.cls.qbtn.gray=true;
+                this.cls.qbtn.highlight=false;  
+                // 點擊[結果顯示]btn時，將結果顯示區塊顯示
+                this.sty.qbtn.display="none";
+                this.sty.resultbtn.display="block";
+                //showResult結束
+            },
+            showQuery(e){
+                //在QueryModal查詢出來資料列中，每點選一列就動態更新form表單的資料
+                var data = this.responseData[e.target.parentNode.getAttribute('dataRow')-1];
+                var input_field1s = document.querySelectorAll('.form_field');
+                for(var i of input_field1s){
+                   var k= i.getAttribute('name');
+                   var v = data[k];
+                   if(v==null){
+                     v='';
+                   }
+                   i.value = v;
+                }
+                {% block do_other_showQuery_thing %}
+                {% endblock do_other_showQuery_thing %}
+            }
+        }
+    });
+
+    var vm_tableArea = new Vue({
+        el:".tableArea",
+        delimiters: ['%%%', '%%%'],
+        data:{
+            switchData:false,
+            responseData :[],
+            responseData1:[],
+            tr_show:true
+        },
+        methods:{
+
+        }
+    });
+    {% block dynamic_table_settings %}
+    {% endblock dynamic_table_settings %}
+</script>
+<script>
+    // modal表格> USER 只能單選一列的資料內容
+      modal_table_selected("#qmodal_result_table","selected","title_row");
+</script>
+{% if queryModal %}
+    {% block do_other_queryModal_script_thing %}
+    {% endblock do_other_queryModal_script_thing %}
+
+{% endif%}
+
+{% endblock content %}
+

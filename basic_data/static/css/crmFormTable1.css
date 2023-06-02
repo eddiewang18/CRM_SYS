@@ -1,0 +1,254 @@
+
+div.tableArea{
+    height: 400px;
+
+}
+
+.c1{
+    height: 100%;
+    width: 48%;
+    float: left;
+    margin: 0% 1%;
+}
+
+div.table{
+
+    width: 100%;
+    height: 83%;
+    margin: 1% 0%;
+    overflow: auto;
+    border: 2px solid black;
+}
+
+.tableBtn{
+
+    width: 100%;
+    height: 13%;
+    margin: 1% 0%;
+    text-align: center;
+}
+
+table{
+    width: 100%;
+    font-size: 16px;
+    border-collapse: collapse;
+
+}
+
+td,th{
+    height: 28px;
+    border: 2px solid black;
+    padding: 5px;
+}
+
+.titleRow{
+    top: 0;
+    position: sticky;
+    background-color:rgba(205, 255, 255, 0.867);
+    font-weight: 700;
+}
+
+
+
+.fk{
+    width: 25%;
+}
+
+span.fk_style{
+    display: inline-block;
+    margin: 5px;
+}
+
+.fk_style > select{
+    border: 1px solid black;
+}
+
+
+
+/*  */
+/* 功能頁面css style */
+.wrap{
+    margin: 15px 10px;
+    height: 100%;
+}
+
+.funcTitle{
+    font-size: 22px;
+}
+
+.ablock{
+    margin: 10px 0px 0px 0px;
+}
+
+button{
+    margin: 0px 20px 0px 0px;
+    padding: 5px 8px;
+    border-radius: 3px;
+}
+
+button:hover{
+    background-color: gainsboro;
+}
+
+button:active{
+    background-color: rgb(189, 189, 189);
+    color: white;
+}
+
+div.formArea{
+    margin: 25px 0px 0px 0px;
+}
+
+
+/* 功能頁面 欄位布局 */
+span{
+    display: inline-block;
+    font-size: 20px;
+    margin: 5px 0px 5px 0px;
+}
+
+span.field{
+    width: 420px;
+}
+
+span.input_label{
+   width: 150px;
+}
+
+span.input_field{
+   width: 250px;
+}
+
+.errMsg{
+    color: red;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+/* 查詢modal css */
+/* 查詢modal的欄位縮小 */
+
+.qmodal span{
+    display: inline-block;
+    font-size:16px;
+    margin: 5px 0px 5px 0px;
+}
+
+.qmodal span.field{
+    width: 290px;
+}
+
+
+.qmodal span.input_label{
+    width: 100px;
+ }
+ 
+ .qmodal span.input_field{
+    width: 170px;
+ }
+ 
+ /* 調整查詢modal的整個寬度 */
+ div.qmodal-dialog{
+    width: 400px;
+ }
+
+
+
+ #t1{
+    width:  230px;
+    height: 50px;
+
+}
+
+.queryfuncBlock{
+    width: 95px;
+    padding: 5px 0px;
+    box-sizing: border-box ;
+    margin: 5px;
+    float: left;
+    border: 1px solid black;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.gray{
+    background-color: gainsboro;
+}
+
+.highlight{
+    background-color: rgb(227, 183, 8);
+    color: white;
+    font-size: bold;
+}
+
+
+div.qmodal .modal-header{
+    height: 70px;
+}
+
+/* 結果顯示table 區塊 */
+#resultModaltable{
+    overflow-y: auto;
+    overflow-x: auto;
+    height: 300px;
+    display: None; 
+}
+
+
+#qmodal_result_table{
+    width: 98%;
+    border: 2px solid black;
+    border-collapse: collapse;
+    margin: auto;
+}
+
+#qmodal_result_table td{
+    border: 2px solid black;
+    padding: 5px;
+    font-weight: 800;
+}
+
+.title_row{
+    background-color: aliceblue;
+}
+
+/* modal 的 x按鈕大小設定 */
+button.close span{
+    font-size: 30px;
+}
+
+
+#qmodal_result_table td{
+    padding: 5px;
+    height: 25px;
+}
+
+/* 顯示查詢比數的字樣style */
+#qrscount{
+    font-weight: bold;
+    color: rgb(220, 15, 15);
+    display: inline-block;
+    margin: 0px 0px 0px  4px;
+}
+
+
+.selected{
+    background-color:gainsboro;
+  }
+  
+.btnArea a {
+    color: black;
+}
+
+
+textarea {
+    width: 300px;
+    height: 150px;
+  }
+
+
+input[type=checkbox] {
+    height: 20px;
+    width: 20px;
+}

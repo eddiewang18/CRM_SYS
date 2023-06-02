@@ -176,3 +176,82 @@ function selectFieldChangeLinkage(targetFieldId,effectEleId,ajax_url,effectEleId
         }
       })
     }
+
+
+//取得動態表格中的增刪改資料，並用js中物件作為返回值
+function getFrontEndDataFunc(extra_fields_value,input_type_cfg){               
+	// extra_fields_value 當將動態表格的資料轉成js的物件資料後，
+   //  若還想增加其他欄位資料的內容(非動態表格中的欄位內容)，
+   //  則可以在此物件的key值輸入欄位name屬性，
+   //  value輸入該欄位的css selector值。
+	   
+		var table = document.getElementById('table1');
+	   var firstTrTd= table.querySelector(".firstRow").querySelectorAll("td");
+	   var fieldNameList = [];
+	   //var cpnyid_val = document.querySelector("select#id_cpnyid").value;
+	   for(var i of firstTrTd){
+		   fieldNameList.push(i.getAttribute("name"));
+	   }
+	   
+	   var frontEndData ={
+	   "insert":[],
+	   "update":[],
+	   "delete":[],
+	   "all_visible_data":[]
+	   };
+   
+   
+	   for(var action in frontEndData){
+		   var table_tr ;
+		   if(action==="insert"){
+			   table_tr = document.querySelectorAll(".newRow");
+		   }else if(action==="update"){
+			   table_tr = document.querySelectorAll(".updateRow");
+		   }else  if(action==="delete"){
+			   table_tr = document.querySelectorAll(".deletedRow");
+		   }else{
+			   table_tr =  document.querySelectorAll("#table1 tr:not(.deletedRow):not(.titleRow)");
+		   }
+   
+		   
+		   for(var tr of table_tr){
+			   var obj_data={};
+			   var tr_td = tr.querySelectorAll("td");
+			   for(var i=0;i<tr_td.length;i++){
+				   var key = fieldNameList[i];
+				   var values;
+				   tr_td_name_attr = tr_td[i].getAttribute("belong_field");
+				   input_type = input_type_cfg[tr_td_name_attr]['inputType'];
+				   if(input_type==='checkbox'){
+					   values = tr_td[i].querySelector("input").value.trim();
+				   }
+				   else if(input_type==='select'){
+					   values = tr_td[i].querySelector("select").value.trim();
+				   }else{
+					   values = tr_td[i].textContent.trim();
+				   }
+				   
+				   obj_data[key]=values;
+			   }
+
+			   if(extra_fields_value!==undefined)
+			   {	
+				   for(var n in extra_fields_value)
+				   {	
+					   var fv = document.querySelector(extra_fields_value[n]).value;
+					   if(n!==undefined)
+					   {
+						   obj_data[n]=fv;
+					   }
+					   
+				   }
+			   }
+
+			   frontEndData[action].push(obj_data);
+   
+		   }
+   
+	   }
+
+	   return frontEndData;
+   }

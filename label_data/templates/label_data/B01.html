@@ -1,0 +1,148 @@
+{% extends 'formTable.html' %}
+{% load static %}
+
+
+{% block title %}
+B01維護標籤資料
+{% endblock title %}
+
+
+{% block functitle %}
+B01維護標籤資料
+{% endblock functitle %}
+
+{% block titleRow %}
+    <td class="pkField" name="label_id">
+        標籤代號
+    </td>
+    <td name="label_name">
+        標籤名稱
+    </td>
+    <td name="calmin">
+        計算區間起
+    </td>
+    <td name="calmax">
+        計算區間迄
+    </td>
+    <td name="label_enable">
+        停用
+    </td>
+{% endblock titleRow %}
+{% block field_examine %}
+
+    var label_gid = new FieldExamine("id_label_gid","id_label_gid_label",false,true,1,20,'id_label_gid_err',[checkEngNumCombination]);
+    var label_gname = new FieldExamine("id_label_gname","id_label_gname_label",false,true,1,50,'id_label_gname_err',[]);
+    var cpnyid = new FieldExamine("id_cpnyid","id_cpnyid_label",false,false,0,0,'id_cpnyid_err',[]);
+    var formula_id = new FieldExamine("id_formula_id","id_formula_id_label",false,false,0,0,'id_formula_id_err',[]);
+
+    formula_id.executeField();
+    label_gid.executeField();
+    label_gname.executeField();
+    cpnyid.executeField();
+
+
+{% endblock field_examine %}
+
+{% block redirecHomeURL %}
+'{%  url "label_data:b01" %}'
+{% endblock redirecHomeURL %}
+
+{% block input_type_config_settings %}
+label_id:{
+    inputType : "input",
+},
+label_name:{
+    inputType : "input",
+},
+calmin:{
+    inputType : "input",
+},
+calmax:{
+    inputType : "input",
+},
+label_enable:{
+    inputType : "checkbox",
+    name:"label_enable",
+    value:'0'
+}
+{% endblock input_type_config_settings %}
+
+{% block field_check_rule_settings %}
+ label_id:{
+     checkStrLen:[1,20],
+     checkEngNumCombination:true,
+     repeatness : true,
+     required:true
+ },
+ label_name:{
+     checkStrLen:[1,20],
+     checkEngNumCombination:false,
+     repeatness : true,
+     required:true
+ },
+
+ calmin:{
+    checkStrLen:[1,10],
+    checkEngNumCombination:false,
+    repeatness : false,
+    required:true
+},
+
+calmax:{
+    checkStrLen:[1,10],
+    checkEngNumCombination:false,
+    repeatness : false,
+    required:true
+}
+{% endblock field_check_rule_settings %}
+
+
+{% block getFrontEndDataFunc %}
+ return getFrontEndDataFunc({'label_gid':"span.field1 > #id_label_gid"},this.input_type_config);
+{% endblock getFrontEndDataFunc %}
+
+{% block intoCreateURL %}
+'{%  url "label_data:b01" %}'
+{% endblock intoCreateURL %}
+
+{% block do_other_queryFunc_thing %}
+{% endblock do_other_queryFunc_thing %}
+
+{% block qPostURL %}
+'{%  url "label_data:b01" %}'
+{% endblock qPostURL %}
+
+
+{% block do_other_queryFunc_nextTick_thing %}
+{% endblock do_other_queryFunc_nextTick_thing %}
+
+{% block do_other_showQuery_thing %}
+{% endblock do_other_showQuery_thing %}
+
+{% block dynamic_table_settings %}
+    dynamic_table("table1","add1","del1",pkList=['label_id'],titleRow=true,input_type_config1,false);
+{% endblock dynamic_table_settings %}
+
+{% block main_table_fields_input_typpe %}
+<script>
+var input_type_config1 = {
+    "label_id":{
+        inputType : "input",
+    },
+    "label_name":{
+        inputType : "input",
+    },
+    "calmin":{
+        inputType : "input",
+    },
+    "calmax":{
+        inputType : "input",
+    },
+    "label_enable":{
+        inputType : "checkbox",
+        name:"label_enable",
+        value:'0'
+    },    
+}
+</script>
+{% endblock main_table_fields_input_typpe %}

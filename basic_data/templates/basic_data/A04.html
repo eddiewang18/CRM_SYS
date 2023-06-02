@@ -94,6 +94,11 @@ dynamic_table("table1","add1","del1",pkList=['group_id'],titleRow=true,input_typ
 '{% url "basic_data:a04" %}'
 {% endblock update_ajax_url %}
 
+{% block getFrontEndDataFunc %}
+   return getFrontEndDataFunc({'cpnyid':"select#id_cpnyid"},this.input_type_config);
+
+{% endblock getFrontEndDataFunc %}
+
 {% block do_other_queryFunc_thing %}
 //查詢框欄位檢核
 var ok=true;

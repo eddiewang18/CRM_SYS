@@ -18,6 +18,15 @@ function createSelect(select_name_attr,options_config){
     
     }
     
+
+
+function updateValue(checkbox) {
+    if (checkbox.checked) {
+        checkbox.value = 1;
+    } else {
+        checkbox.value = 0;
+    }
+    }    
 function createCheckbox(checkbox_name_attr,value_attr){
 //  checkbox_name_attr > 為 <input type="checkbox"> 標籤的 name屬性
 
@@ -28,6 +37,7 @@ function createCheckbox(checkbox_name_attr,value_attr){
     checkboxEle.setAttribute('name',checkbox_name_attr);
     checkboxEle.setAttribute('value',value_attr);
     checkboxEle.setAttribute('type',"checkbox");
+    checkboxEle.setAttribute("onchange", "updateValue(this)");
     return checkboxEle;
 }
     
@@ -36,21 +46,25 @@ function init_table(firstTds){
 
       // 如果載入網頁時，當前table中有除索引列以外的各個資料列
     if(currentTrs.length>0)
-    {
+    {   
         // 依序對那些列的各個儲存格欄位設置 belong_field(自訂屬性，用來標示此儲存格對應到db table中的哪個欄位) 與 id
         for(var i=0;i<currentTrs.length;i++){
             
             var tr_tds= currentTrs[i].querySelectorAll("td");
-
-            for(var j=0;j<firstTds.length;j++){
-                var firstTdEle = firstTds[j]; 
-                //取得td元素的name屬性
-                var name_attr = firstTdEle.getAttribute("name");
-                tr_tds[j].setAttribute("name",name_attr);
-                tr_tds[j].setAttribute("belong_field",name_attr);
-                tr_tds[j].setAttribute("id","td"+(i+1)+(j+1));
-    
+            if(tr_tds.length>0 && tr_tds[0].parentNode.parentNode.parentNode.id!=='qmodal_result_table')
+            {   
+             
+                for(var j=0;j<firstTds.length;j++){
+                    var firstTdEle = firstTds[j]; 
+                    //取得td元素的name屬性
+                    var name_attr = firstTdEle.getAttribute("name");
+                    tr_tds[j].setAttribute("name",name_attr);
+                    tr_tds[j].setAttribute("belong_field",name_attr);
+                    tr_tds[j].setAttribute("id","td"+(i+1)+(j+1));
+        
+                }
             }
+
 
         }
     }  
@@ -128,9 +142,9 @@ multiple_selected > 判斷動態表格支不支持多重選中資料列 , true :
             td.setAttribute("belong_field",name_attr);
             td.setAttribute("id","td"+(current_rowsLen)+(i+1));
 
-            console.log(input_type_config);
-            console.log(`name_attr:${name_attr}`);
-            console.log(input_type_config[name_attr]);
+            // console.log(input_type_config);
+            // console.log(`name_attr:${name_attr}`);
+            // console.log(input_type_config[name_attr]);
             var input_type = input_type_config[name_attr]['inputType'];
             if(input_type==="checkbox"){
                 td.appendChild(createCheckbox(input_type_config[name_attr]['name'],input_type_config[name_attr]['value']));
@@ -146,6 +160,7 @@ multiple_selected > 判斷動態表格支不支持多重選中資料列 , true :
         }
 
         table.appendChild(tr);
+        console.log("add new row!");
     });
 
 
@@ -195,15 +210,33 @@ multiple_selected > 判斷動態表格支不支持多重選中資料列 , true :
 					
 					
                     ele.addEventListener('click',function(){
-                    //表格中欄位可被編輯的條件為: 你是一個新增列 或是 你不是pk的欄位
-                    if(ele.parentNode.classList.contains("newRow") || !pkList.includes(ele.getAttribute("belong_field")) || ele.childNodes[0].tagName!=="SELECT"){
-                        ele.setAttribute("contenteditable","true");
-                        ele.addEventListener("keypress",function(e){
-                            if(e.key=="Enter"){
-                                e.preventDefault();
-                            }
-                        })
-                      }
+
+
+                    //判斷哪些欄位可被編輯
+                    ele.setAttribute("contenteditable","true");
+                    ele.addEventListener("keypress",function(e){
+                        if(e.key=="Enter"){
+                            e.preventDefault();
+                        }
+                    })
+                    try {
+                        if((pkList.includes(ele.getAttribute("belong_field")) && !(ele.parentNode.classList.contains("newRow"))))
+                        {
+                            ele.setAttribute("contenteditable","false");
+                        }
+                        if(ele.childNodes[0].tagName==="SELECT")
+                        {
+                            ele.setAttribute("contenteditable","false");
+                        }
+                        if( ele.childNodes[0].type==="checkbox")
+                        {
+                            ele.setAttribute("contenteditable","false");
+                        }
+                    } catch (e) {
+                        
+                    }
+
+
                     })
 
                     //當使用者對一個原有數據列進行修改，則標記該列已被更改
