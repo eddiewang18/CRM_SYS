@@ -61,6 +61,11 @@
                     {% block titleRow %}
                     {% endblock titleRow %}
                     </tr>
+                    <tr v-if="!tr_show" v-for=" (item,index) in responseData1">
+                        <td  v-for="(item1,key,index1) in item">
+                            %%%item1%%%
+                        </td>
+                    </tr>
                 </table>
             </div>
             <div class="tableBtn">
@@ -378,6 +383,7 @@
             queryFunc(){
                 {% block do_other_queryFunc_thing %}
                 {% endblock do_other_queryFunc_thing %}
+                var self=this;
                 if(this.exec_queryFunc)
                 {
                     //queryFunc開始                        
@@ -465,9 +471,16 @@
                                 for(var errMsg of errListMsgs){
                                     errMsg.innerHTML='';
                                 }
+
+                                var main_table_pkfield_val = document.querySelector("span.field1 > .pkField").value;
+
+                                this.get_sub_table_data({% block get__1st_sub_table_data_send_url %}{% endblock get__1st_sub_table_data_send_url %},main_table_pkfield_val,self);
+                                
                                 {% block do_other_queryFunc_nextTick_thing %}
                                 {% endblock do_other_queryFunc_nextTick_thing %}
                             });
+                            
+
 
 
                         }else{
@@ -531,6 +544,33 @@
                 this.sty.resultbtn.display="block";
                 //showResult結束
             },
+            get_sub_table_data(sendURL,main_table_pkfield_val,self){
+                    $.ajax({
+                        url:sendURL,
+                        method:"GET",
+                        dataType:"json",
+                        data:{
+                            main_table_pkfield_val: main_table_pkfield_val,
+                            get_subtable_data:"true"
+                        },
+                        success:function(response){
+                            console.log("回傳資料:");
+                            console.log(response);
+                            console.log("===========");
+                            if(response.length>0){
+                                    self.$nextTick(function () {
+                                    vm_tableArea.tr_show = false;
+                                    vm_tableArea.responseData1 = response;
+                                    self.$nextTick(function () {
+                                        self.query_init_table();
+                                        {% block get_sub_table_data_nextTick %}
+                                        {% endblock get_sub_table_data_nextTick %}
+
+                                    })
+                                });
+                                }
+                    }})  
+            },
             showQuery(e){
                 //在QueryModal查詢出來資料列中，每點選一列就動態更新form表單的資料
                 var data = this.responseData[e.target.parentNode.getAttribute('dataRow')-1];
@@ -543,8 +583,43 @@
                    }
                    i.value = v;
                 }
+                var self = this;
+                var main_table_pkfield_val = document.querySelector("span.field1 > .pkField").value;// 主表的pk值，副表的外鍵值
+
+                // $.ajax({
+
+                //     url:"{% url 'label_data:b01' %}",
+                //     method:"GET",
+                //     dataType:"json",
+                //     data:{
+                //         main_table_pkfield_val: main_table_pkfield_val,
+                //         get_subtable_data:"true"
+                //     },
+                //     success:function(response){
+                //         if(response.length>0){
+                //                 self.$nextTick(function () {
+                //                 vm_tableArea.tr_show = false;
+                //                 vm_tableArea.responseData1 = response;
+                //                 self.$nextTick(function () {
+                //                     self.query_init_table();
+                //                 })
+                //             });
+                //             }
+
+
+                //     }})  
+
+                this.get_sub_table_data({% block get_sub_table_data_send_url %}{% endblock get_sub_table_data_send_url %},main_table_pkfield_val,self);
+
                 {% block do_other_showQuery_thing %}
                 {% endblock do_other_showQuery_thing %}
+            },           
+ 
+            query_init_table(){
+                var table = document.getElementById("table1");
+                var firstTr = table.querySelectorAll("tr")[0];
+                var firstTds = firstTr.querySelectorAll("td"); 
+                init_table(firstTds);
             }
         }
     });

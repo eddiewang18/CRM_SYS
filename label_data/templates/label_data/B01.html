@@ -114,10 +114,12 @@ calmax:{
 
 
 {% block do_other_queryFunc_nextTick_thing %}
+reform_field_feat([{'checkbox':{"name":"label_enable","check":{"1":true,"0":false}}}],vm_tableArea.responseData1);
 {% endblock do_other_queryFunc_nextTick_thing %}
 
-{% block do_other_showQuery_thing %}
-{% endblock do_other_showQuery_thing %}
+{% block get_sub_table_data_nextTick %}
+reform_field_feat([{'checkbox':{"name":"label_enable","check":{"1":true,"0":false}}}],vm_tableArea.responseData1);
+{% endblock get_sub_table_data_nextTick %}
 
 {% block dynamic_table_settings %}
     dynamic_table("table1","add1","del1",pkList=['label_id'],titleRow=true,input_type_config1,false);
@@ -146,3 +148,11 @@ var input_type_config1 = {
 }
 </script>
 {% endblock main_table_fields_input_typpe %}
+
+{% block get_sub_table_data_send_url %}
+"{% url 'label_data:b01' %}"
+{% endblock get_sub_table_data_send_url %}
+
+{% block get__1st_sub_table_data_send_url %}
+"{% url 'label_data:b01' %}"
+{% endblock get__1st_sub_table_data_send_url %}

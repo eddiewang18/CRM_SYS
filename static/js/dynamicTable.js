@@ -1,6 +1,7 @@
 function createSelect(select_name_attr,options_config){
     //  select_name_attr > 為 <select> 標籤 name屬性
-    // options_config > 為一個陣列，型態如下 [{value:"",label:""}] > value用來表示選項option的name屬性,label用來表示選項的提示文字，有幾個選項就傳幾個物件
+    // options_config > 為一個陣列，型態如下 [{value:"",label:""}] 
+    // > value用來表示選項option的name屬性,label用來表示選項的提示文字，有幾個選項就傳幾個物件
     
         // 1.建立select
         var selectEle = document.createElement("select");
@@ -40,7 +41,62 @@ function createCheckbox(checkbox_name_attr,value_attr){
     checkboxEle.setAttribute("onchange", "updateValue(this)");
     return checkboxEle;
 }
-    
+
+// 如果某些欄位用的是select 或 下拉選單那些欄位在查詢資料後可能就失去原本的輸入特性
+// 為解決此問題，我們必須將其原本輸入的欄位特性給找回，並賦給他們原本的值
+
+function reform_field_feat(field_feat,response_data){
+	// field_feat 為一個物件，物件的key存select或checkbox field的name屬性，物件的
+    // 值則須依欄位的輸入類別來做決定
+    // e.g. field_feat=[{checkbox:{name:"label_enable",check:{"1":true,"0":false}}},{select:{name:"",value_label:[{value:"",label:""}] }}]
+    console.log("reform_field_feat");
+    for(var input of field_feat)
+    {
+        for(var input_type in input)
+        {
+            var name_attr = input[input_type].name;
+            var currentTds = document.querySelectorAll(`td[belong_field='${name_attr}']`);
+            for(var i =0 ;i<currentTds.length;i++)
+            {   
+                var input_ele ;
+                var td_ele = currentTds[i];
+                // var content = td_ele.textContent.trim();
+                var content =response_data[i][input[input_type]['name']]
+                // console.log("======================");
+                // console.log(`td_ele:${td_ele.id}`);
+                // console.log(`content:${content}`);
+                // console.log("======================");
+                if(input_type==="checkbox")
+                {
+                    input_ele =  createCheckbox(name_attr,content);
+                    td_ele.textContent="";
+                    if(input[input_type]['check'][content])
+                    {
+                        input_ele.checked=true;
+                    }else{
+                        input_ele.checked=false;
+                    }
+                    td_ele.appendChild(input_ele);
+                }
+                if(input_type==="select")
+                {
+                    input_ele =  createSelect(name_attr,input.value_label);
+                    td_ele.textContent="";
+                    input_ele.value=content;
+                    td_ele.appendChild(input_ele);
+                }
+                
+
+            }
+        }
+    }
+
+
+}
+
+
+
+
 function init_table(firstTds){
     var currentTrs = document.querySelectorAll("tr:not(.firstRow)"); //取得載入網頁時當前table中除索引列以外的各個資料列
 
@@ -113,19 +169,12 @@ multiple_selected > 判斷動態表格支不支持多重選中資料列 , true :
         var len = table.querySelectorAll("tr").length;
         return len;
     }
-
-
     if(titleRow){
         // 若第一列為索引則為其添加樣式
         firstTr.classList.add("firstRow");
 
     }
-
-
     init_table(firstTds);
-  
-
-
     // 新增table列的相關操作
     add.addEventListener("click",function(){
         var tr = document.createElement("tr");

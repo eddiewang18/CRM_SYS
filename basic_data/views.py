@@ -198,6 +198,13 @@ def cpny_prodtype(request):
     return selectFieldChangeLinkage(request,"cpnyid",ProductType,"prod_type_id","prod_type_name")
 
 
+def cpny_shopgrp(request):
+    # if 'county_id' in request.GET:
+    #     county_id = request.GET.get('county_id')
+    #     post_objs = list(Area.objects.filter(county_id=county_id).values("post_id","post_name"))
+    #     return JsonResponse(post_objs,safe=False)
+    return selectFieldChangeLinkage(request,"cpnyid",SHOPGROUP,"shopgroup_id","shopgroup_name")
+
 class A01View(FnView):
     model = CRM_COMPANY
     model_form = CRM_COMPANY_ModelForm

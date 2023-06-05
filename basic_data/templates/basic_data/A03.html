@@ -112,6 +112,7 @@ if(!ok)
 <!-- 針對縣市/鄉鎮連動關係操作 -->
 <script>
     selectFieldChangeLinkage("id_county_id","#id_post_id","{% url 'basic_data:county_area' %}","post_id","post_name");
+    selectFieldChangeLinkage("id_cpnyid","#id_shopgroup_id","{% url 'basic_data:cpny_shopgrp' %}","shopgroup_id","shopgroup_name");
 </script>
 <script>
 

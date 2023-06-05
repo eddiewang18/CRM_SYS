@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (A01View,A02View,A03View,
 A04View,A05View,cpnyid_shop,cpnyid_hrgrp,cpny_vipgrp,
-county_area,A06View,A07View,A08View,A09View,cpny_prodtype)
+county_area,A06View,A07View,A08View,A09View,cpny_prodtype,
+cpny_shopgrp)
 app_name = "basic_data"
 
 urlpatterns = [
@@ -19,4 +20,6 @@ urlpatterns = [
     path('cpnyid_hrgrp/',cpnyid_hrgrp,name="cpnyid_hrgrp"),
     path('cpny_vipgrp/',cpny_vipgrp,name="cpny_vipgrp"),
     path('cpny_prodtype/',cpny_prodtype,name="cpny_prodtype"),
+    path('cpny_shopgrp/',cpny_shopgrp,name="cpny_shopgrp"),
+
 ]
