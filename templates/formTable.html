@@ -253,21 +253,26 @@
                 window.location.href = {% block intoCreateURL %}{% endblock intoCreateURL %};
             },
             create(){
+                // 檢查主表中表單欄位是否有通過檢核
                 if(!this.examine_front_end_col()){
                     return ;
                 }
+                // 檢查副表中的表格欄位是否有通過基本的檢核
                 var cleaned_data = this.examine_field();
                 if(!cleaned_data){
                     vm_wrongModal.wrongMsg = this.colErrorMsg[0];
                     $('#wrongMsg_vue').modal('show');
                     return ;
                 }
+                // 檢核[計算區間起訖]的邏輯
                 if(!cal_interval_check()[0])
                 {
                     vm_wrongModal.wrongMsg = cal_interval_check()[1];
                     $('#wrongMsg_vue').modal('show');
                     return ;
                 }
+                // 上面檢核均通過後，才會執行以下程序
+                // 蒐集主表欄位的值
                 var fields = document.querySelectorAll(".form_field");
                 var insertFormData = {}; // 將要修改的值存放於此
                 for(var field of fields){                   
@@ -306,7 +311,7 @@
                         }
                         if(status==='ok')
                         {
-                            vm_successModal.successMsg = "成功新增";
+                            vm_successModal.successMsg = "新增成功";
                             $('#successMsg_vue').modal('show');
                             vm_successModal.isUpdate = false;                
                         }
@@ -315,8 +320,118 @@
 
                     })           
             },
-            update(){},
-            del(){}
+            update(){
+                // 檢查主表中表單欄位是否有通過檢核
+                if(!this.examine_front_end_col()){
+                    return ;
+                }
+                // 檢查副表中的表格欄位是否有通過基本的檢核
+                var cleaned_data = this.examine_field();
+                if(!cleaned_data){
+                    vm_wrongModal.wrongMsg = this.colErrorMsg[0];
+                    $('#wrongMsg_vue').modal('show');
+                    return ;
+                }
+                // 檢核[計算區間起訖]的邏輯
+                if(!cal_interval_check()[0])
+                {
+                    vm_wrongModal.wrongMsg = cal_interval_check()[1];
+                    $('#wrongMsg_vue').modal('show');
+                    return ;
+                }
+                // 上面檢核均通過後，才會執行以下程序
+                // 蒐集主表欄位的值
+                var fields = document.querySelectorAll(".form_field");
+                var insertFormData = {}; // 將要修改的值存放於此
+                for(var field of fields){                   
+                    insertFormData[field.name] = field.value;
+                }
+
+                request_data = {
+                    "updateData":insertFormData,
+                    "tableData":cleaned_data,
+                   
+                };
+                console.log(request_data);
+                console.log("OK");
+                // // 發送ajax請求時須加上上面這段程式碼來通過django的csrf_token驗證機制
+                const csrftoken = getCookie('csrftoken');
+                $.ajax({
+
+                    url:"{% url 'label_data:b01' %}",
+                    method:"POST",
+                    dataType:"json",
+                    headers: {'X-CSRFToken': csrftoken}, //在headers中要提供csrftoken，讓client發送請求時攜帶csrftoken資訊
+                    data:{
+                        requestData:JSON.stringify(request_data) ,
+                        "update":true
+                        
+                    },
+                    success:function(response){
+                        console.log("打印成功請求後回傳的資料");//
+
+                        console.log(response);//打印成功請求後回傳的資料
+                        var status = response['update'];
+                        if(status==='fail')
+                        {
+                            vm_wrongModal.wrongMsg = response['errMsg'];
+                            $('#wrongMsg_vue').modal('show');
+                            return ;                            
+                        }
+                        if(status==='ok')
+                        {
+                            vm_successModal.successMsg = "修改成功";
+                            $('#successMsg_vue').modal('show');
+                            delDeletedRow();
+                        }
+                    }
+
+
+                    })                           
+            },
+            del(){
+                // 先判斷副表是否還有資料列
+                //  有 資料列>顯示msg:請先把子標籤全數刪除 才可刪除群組標籤
+                var subTableData = document.querySelectorAll("table#table1 tr:not(.titleRow)");
+                if(subTableData.length>0)
+                {
+                    vm_wrongModal.wrongMsg = "請先把子標籤全數刪除 才可刪除群組標籤";
+                    $('#wrongMsg_vue').modal('show');
+                    return ;  
+                }else{
+                    // 沒有 資料列> 
+                    // 1.取得主表的pk值
+                    var mainPkField_val = document.querySelector("span.field1 .pkField").value;
+
+                    // 2.發送ajax，將該資料刪除
+                    const csrftoken = getCookie('csrftoken');
+                    $.ajax({
+
+                        url:"{% url 'label_data:b01' %}",
+                        method:"POST",
+                        dataType:"json",
+                        headers: {'X-CSRFToken': csrftoken}, //在headers中要提供csrftoken，讓client發送請求時攜帶csrftoken資訊
+                        data:{
+                            "mainPkField_val":mainPkField_val ,
+                            "delete":true
+                            
+                        },
+                        success:function(response){
+                            var status = response['delete'];
+                            vm_successModal.successMsg = "刪除成功";
+                            $('#successMsg_vue').modal('show');
+                            vm_successModal.isUpdate = false;                           
+                        }
+
+
+                    }) 
+                // 3.刪除成功後返回 刪除成功msg
+                // 4.跳轉至新增畫面
+                }
+
+
+
+            }
         }
     });
     // 由vue控制顯示錯誤訊息的modal
@@ -557,18 +672,18 @@
                             console.log("回傳資料:");
                             console.log(response);
                             console.log("===========");
-                            if(response.length>0){
-                                    self.$nextTick(function () {
-                                    vm_tableArea.tr_show = false;
-                                    vm_tableArea.responseData1 = response;
-                                    self.$nextTick(function () {
-                                        self.query_init_table();
-                                        {% block get_sub_table_data_nextTick %}
-                                        {% endblock get_sub_table_data_nextTick %}
 
-                                    })
-                                });
-                                }
+                            self.$nextTick(function () {
+                            vm_tableArea.tr_show = false;
+                            vm_tableArea.responseData1 = response;
+                            self.$nextTick(function () {
+                                self.query_init_table();
+                                {% block get_sub_table_data_nextTick %}
+                                {% endblock get_sub_table_data_nextTick %}
+
+                            })
+                        });
+                                
                     }})  
             },
             showQuery(e){
@@ -585,29 +700,6 @@
                 }
                 var self = this;
                 var main_table_pkfield_val = document.querySelector("span.field1 > .pkField").value;// 主表的pk值，副表的外鍵值
-
-                // $.ajax({
-
-                //     url:"{% url 'label_data:b01' %}",
-                //     method:"GET",
-                //     dataType:"json",
-                //     data:{
-                //         main_table_pkfield_val: main_table_pkfield_val,
-                //         get_subtable_data:"true"
-                //     },
-                //     success:function(response){
-                //         if(response.length>0){
-                //                 self.$nextTick(function () {
-                //                 vm_tableArea.tr_show = false;
-                //                 vm_tableArea.responseData1 = response;
-                //                 self.$nextTick(function () {
-                //                     self.query_init_table();
-                //                 })
-                //             });
-                //             }
-
-
-                //     }})  
 
                 this.get_sub_table_data({% block get_sub_table_data_send_url %}{% endblock get_sub_table_data_send_url %},main_table_pkfield_val,self);
 

@@ -13,9 +13,8 @@ function isNumber(value) {
 }
 
 function cal_interval_check(){
-    var calmin_eles = document.querySelectorAll('[belong_field="calmin"]');
-    var calmax_eles = document.querySelectorAll('[belong_field="calmax"]');
-
+    var calmin_eles = document.querySelectorAll('tr:not(.deletedRow) [belong_field="calmin"]');
+    var calmax_eles =  document.querySelectorAll('tr:not(.deletedRow) [belong_field="calmax"]');
     for (var i = 0; i < calmin_eles.length; i++) {
 
         var calmin_ele = calmin_eles[i]; // 計算區間起元素
@@ -61,3 +60,10 @@ function cal_interval_check(){
 }
 
                 
+function delDeletedRow(){
+    var del_rows = document.querySelectorAll("tr.deletedRow");
+    for(var del_row of del_rows)
+    {
+        del_row.parentNode.removeChild(del_row);
+    }
+}

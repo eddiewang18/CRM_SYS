@@ -304,7 +304,15 @@ multiple_selected > 判斷動態表格支不支持多重選中資料列 , true :
                     })
             }
     })
-
+    // 當動態表格中的欄位輸入為checkbox時，修改動作的相關處理
+    document.addEventListener('change',function (e) {
+        if(e.target.tagName.toLowerCase()==="input" && e.target.type==="checkbox")
+        {
+            if(!e.target.parentNode.parentNode.classList.contains("updateRow") && !(e.target.parentNode.parentNode.classList.contains("newRow"))){
+                e.target.parentNode.parentNode.classList.add("updateRow");
+            }
+        }
+      })
 }
 
 
