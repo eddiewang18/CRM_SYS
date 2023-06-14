@@ -1,7 +1,9 @@
 from django.contrib import admin
 from .models import (
     VIP_LABEL_GROUP,
-    VIP_LABEL
+    VIP_LABEL,
+    Sales00,
+    Sale01,
 )
 # Register your models here.
 class VIP_LABEL_GROUPModelAdmin(admin.ModelAdmin):
@@ -16,3 +18,16 @@ class VIP_LABELModelAdmin(admin.ModelAdmin):
 
 
 admin.site.register(VIP_LABEL,VIP_LABELModelAdmin)
+
+
+class Sales00ModelAdmin(admin.ModelAdmin):
+    list_display = ['sale00_id']
+
+
+admin.site.register(Sales00,Sales00ModelAdmin)
+
+class Sales01ModelAdmin(admin.ModelAdmin):
+    list_display = ['sale01_id']
+
+
+admin.site.register(Sale01,Sales01ModelAdmin)

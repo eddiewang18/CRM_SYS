@@ -413,7 +413,7 @@ class ProductType(models.Model):
 class Product(models.Model,CrmQueryData):
     cpnyid = models.ForeignKey(to="CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
     prod_id = models.CharField(primary_key=True,max_length=20,db_column="prod_id",verbose_name="商品編號")
-    prod_name = models.CharField(max_length=40,db_column="商品名稱",verbose_name="商品名稱")
+    prod_name = models.CharField(max_length=40,db_column="prod_name",verbose_name="商品名稱")
     prod_type_id = models.ForeignKey(to="ProductType",to_field='prod_type_id',db_column='prod_type_id',verbose_name='所屬商品類別編號',on_delete=models.CASCADE,null=True,blank=True)
     prod_unit = models.CharField(db_column='prod_unit',verbose_name="商品單位",max_length=10,blank=True,null=True)
     price = models.PositiveIntegerField(db_column='price',verbose_name="售價")

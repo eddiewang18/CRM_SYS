@@ -1,6 +1,7 @@
 from .models import (
     VIP_LABEL_GROUP,
-    VIP_LABEL
+    VIP_LABEL,
+    VIP_LABEL_STAT,
 )
 
 from basic_data.forms import (
@@ -66,4 +67,8 @@ class VIP_LABEL_ModelForm(ModelForm):
 
     def clean_label_name(self):
         return clean_fieldName(self,"label_id","label_name","標籤名稱",VIP_LABEL)
-  
+
+class VIP_LABEL_STATModelForm(ModelForm):
+    class Meta:
+        model = VIP_LABEL_STAT
+        fields = ['cpnyid']

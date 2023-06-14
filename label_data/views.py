@@ -6,12 +6,14 @@ from basic_data.views import (
 from django.views import View
 from .models import (
     VIP_LABEL_GROUP,
-    VIP_LABEL
+    VIP_LABEL,
+    VIP_LABEL_STAT
 )
 from .forms import (
     VIP_LABEL_GROUP_ModelForm,
     VIP_LABEL_GROUP_QModelForm,
-    VIP_LABEL_ModelForm
+    VIP_LABEL_ModelForm,
+    VIP_LABEL_STATModelForm
 )
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
@@ -214,3 +216,63 @@ class B01View(FnTableView):
     sub_table_show_cols = ["label_id","label_name","calmin","calmax","label_enable"]
 
 dataCuser(VIP_LABEL_GROUP)
+
+from pymysql import *
+
+db_settings = {
+"host":"127.0.0.1",
+"port":3306,
+"user":'root',
+"password":'eddieWANG#183120880215',
+'db':'crm01',
+}
+
+
+from django.core.paginator import Paginator, EmptyPage
+
+class B02View(View):
+    def get(self,request):
+        form = VIP_LABEL_STATModelForm()
+        return render(request,'label_data/B02.html',{'form':form})
+    def post(self,request):
+        print(f'b02傳送資料:{request.POST}')
+        print()
+        cpnyid = request.POST.get('cpnyid')
+        print(f'cpnyid:{cpnyid}\n')
+        sql = f"""select v.vip_id, v.vip_name,vl.label_name,vlg.color from vipinfo as v
+join vip_label_stat as vs on v.vip_id = vs.vip_id
+join vip_label as vl on vl.label_id = vs.label_id
+join VIP_LABEL_GROUP vlg on vlg.label_gid = vl.label_gid  
+where v.cpnyid='{cpnyid}' order by v.vip_id, vlg.label_gid ;"""
+        conn = connect(**db_settings)
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        vip_label_data = {}
+        for i in cursor:
+            vip_id_name = i[0]+" "+i[1]
+            if vip_id_name not in vip_label_data:
+                vip_label_data[vip_id_name]=[]
+
+            rows_data = {
+                "label_name" : i[2],
+                "color":i[3]
+            }   
+            vip_label_data[vip_id_name].append(rows_data)
+
+        cursor.close()
+        conn.close()
+        vip_label_stat_obj=None
+        context = {}
+
+        vip_label_stat_obj = VIP_LABEL_STAT.objects.filter(cpnyid=cpnyid).first()
+        if vip_label_stat_obj is None:
+            context['no_data'] = True
+            context['form'] = VIP_LABEL_STATModelForm()
+            print(f'\ncontext:{context}\n')
+        else:
+            cpnyname = vip_label_stat_obj.cpnyid.cocname
+            form = VIP_LABEL_STATModelForm(instance=vip_label_stat_obj)
+            context = {'form':form,"vip_label_data":vip_label_data,'cpnyname':cpnyname}
+
+        return render(request,'label_data/B02.html',context)
+

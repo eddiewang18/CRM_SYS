@@ -80,7 +80,7 @@ function FieldExamine(field_ele_id,field_name_ele_id,blank,is_input_field,min,ma
     this.executeField = function(){
         var msg='';
         var msg_list = examine(self.field_ele,self.field_name_ele,self.field_name,self.field_tag_name);
-        // console.log(msg_list);
+        console.log("執行executeField");
         if(msg_list.length>0){
             for(var i=0;i<msg_list.length;i++){
                 msg+=msg_list[i];

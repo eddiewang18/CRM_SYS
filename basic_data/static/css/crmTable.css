@@ -75,3 +75,6 @@ span.fk_style{
 .fk_style > select{
     border: 1px solid black;
 }
+#qrscount{
+    font-size: 12px;
+}
