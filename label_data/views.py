@@ -276,3 +276,67 @@ where v.cpnyid='{cpnyid}' order by v.vip_id, vlg.label_gid ;"""
 
         return render(request,'label_data/B02.html',context)
 
+class B03View(View):
+    vip_grp_form = VIP_LABEL_GROUP_ModelForm
+    def get(self,request):
+        
+        context ={
+            "vip_grp_form":self.vip_grp_form()
+        }
+        return render(request,'label_data/B03.html',context)
+    def post(self,request):
+        print(f'b03傳送資料:{request.POST}')
+        print()
+
+        label_grp_btn = False
+        send_data = dict(request.POST)
+        del send_data['csrfmiddlewaretoken']
+        del send_data['cpnyid']
+        if len(send_data)>0:
+            label_grp_btn = list(send_data.keys())[0]
+
+        cpnyid = request.POST.get('cpnyid')
+        lab_grp_objs = VIP_LABEL_GROUP.objects.filter(cpnyid=cpnyid)
+        if lab_grp_objs.count()==0:
+            context ={
+            "vip_grp_form":self.vip_grp_form(),
+            "no_data":True
+            }
+            return render(request,'label_data/B03.html',context) 
+
+        print(f'lab_grp_objs:{lab_grp_objs}\n')
+        print(f'send_data:{send_data}\n')
+        lab_grp_data = VIP_LABEL_GROUP.objects.filter(cpnyid=cpnyid).first()
+        if label_grp_btn :
+            lab_grp_data = VIP_LABEL_GROUP.objects.filter(cpnyid=cpnyid,label_gid=label_grp_btn).first()
+
+        context ={
+            "vip_grp_form":self.vip_grp_form(instance=lab_grp_data)
+        }
+        print(f'cpnyid:{cpnyid}\n')
+
+        # 畫面顯示品牌對應的標籤群組
+
+        context["lab_grp_objs"] = lab_grp_objs
+
+        first_lab_grp_objs = None
+        if label_grp_btn :
+            first_lab_grp_objs = list(lab_grp_objs.filter(label_gid=label_grp_btn))[0]
+        else:
+            first_lab_grp_objs = list(lab_grp_objs)[0]
+        
+        print(f'first_lab_grp_objs:{first_lab_grp_objs}\n')
+        first_lab_objs = list(first_lab_grp_objs.vip_label_set.all())
+        labels = []
+        data = []
+        print(f'first_lab_objs:{first_lab_objs}\n')
+        for lab in first_lab_objs:
+            labels.append(lab.label_name)
+            data.append(lab.vip_label_stat_set.count())
+        print(f'labels:{labels}\n')
+        print(f'data:{data}\n')
+        context["lab_labels"]=labels
+        context["lab_data"]=data
+        
+
+        return render(request,'label_data/B03.html',context)

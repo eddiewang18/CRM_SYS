@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+<!-- 網頁上功能的名稱 -->
+{% block title %}
+{% endblock title %}
+
+
+
+{% block style2 %}
+<!-- 
+    載入 成功 查無資料 錯誤 的 modal css樣式
+ -->
+<link rel="stylesheet" href="{%	static 'css/noData_modal.css' %}">
+<link rel="stylesheet" href="{%	static 'css/success_modal.css' %}">
+<link rel="stylesheet" href="{%	static 'css/wrong_modal.css' %}">
+<link rel="stylesheet" href="{% static 'css/crmForm.css' %}">
+<link rel="stylesheet" href="{% static 'css/b02.css' %}">
+<link rel="stylesheet" href="{% static 'css/b03.css' %}">
+{% endblock style2 %}
+
+
+
+{% block content %}
+
+
+<div class="wrap">
+    <div class="funcTitle ablock">
+        <!-- 設定功能頁面的標題 -->
+        B03貼標統計    
+    </div>
+    <form action="" method="POST"  novalidate="novalidate">
+        {% csrf_token %}
+        <span class="field">
+            <span id="{{ vip_grp_form.cpnyid.auto_id }}_label" class="input_label">{{vip_grp_form.cpnyid.label}}</span>
+            <span class="input_field field1">{{vip_grp_form.cpnyid}}</span>
+            <span id="{{ vip_grp_form.cpnyid.auto_id }}_err" class="errMsg"></span>
+        </span>
+
+        <div class="btnArea ablock">
+
+            <button type="submit" @click="examine_front_end_col">查詢</button>
+        </div>
+        {% if no_data %}
+            {% include 'share/noData_modal.html' %}
+            {% include 'share/show_noData_msg.html' %}
+        {% else %}
+            {% if  lab_grp_objs %}
+            <div class="labelArea ablock">
+                {% for lab_grp_obj in lab_grp_objs %}
+                    <button name="{{lab_grp_obj.label_gid}}" id="{{lab_grp_obj.label_gid}}" type="submit" class="labelBtn" style="background-color: {{lab_grp_obj.color}};">{{lab_grp_obj.label_gname}}</button>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endif %}
+    </form>
+    {% if no_data %}
+
+    {% else %}
+        {% if  lab_grp_objs %}
+            <div class='chart'>
+                <canvas id="myChart"></canvas>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+
+<script src="{% static 'js/examine_col.js' %}"></script>
+<script>
+    // 這個tag用來填寫那些欄位要做基本的檢核(輸入字串的長度,是否必填,英數字組合....)
+    var cpnyid = new FieldExamine("id_cpnyid","id_cpnyid_label",false,false,0,0,'id_cpnyid_err',[]);
+    cpnyid.executeField();
+</script>
+<!--Jquery-->
+<script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+
+
+
+
+
+<!--引入可由vue實例所控制文字訊息的錯誤modal -->
+{% include 'share/wrong_modal_vue.html' %}
+
+<!--引入可由vue實例所控制文字訊息的成功modal -->
+{% include 'share/success_modal_vue.html' %}
+
+
+
+<!-- 若收到後台傳回的相關成功訊息 則引入成功訊息的modal 並顯示 -->
+{% if success	%}
+    {% include 'share/success_modal.html' %}
+	{% include 'share/show_success_msg.html' %}
+{% endif %}
+
+
+
+<!-- 若收到後台傳回的相關錯誤訊息 則引入錯誤訊息的modal 並顯示 -->
+{% if wrong	%}
+    {% include 'share/wrong_modal.html' %}
+	{% include 'share/show_wrong_msg.html' %}
+{% endif %}
+
+
+{% include 'share/noData_modal.html' %}
+
+
+<!-- 則引入查詢欄位條件的modal 並顯示 -->
+{% include 'share/queryModal.html' %}
+{% if queryModal %}
+	{% include 'share/show_queryModal.html' %}
+{% endif %}
+
+
+{% include 'share/bootstrap_script.html' %}
+<script src="{% static 'js/common.js' %}"></script>
+<script src="{% static 'js/vue.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
+<script>
+    var data = [{
+        data: {{lab_data|safe}},
+        backgroundColor: [
+            "#4b77a9",
+            "#5f255f",
+            "#d21243",
+            "#B27200"
+        ],
+        borderColor: "#fff"
+        }];
+
+    var options = {
+    tooltips: {
+    enabled: true
+    },
+    plugins: {
+    datalabels: {
+    formatter: (value, ctx) => {
+
+        let sum = ctx.dataset._meta[0].total;
+        let percentage = (value * 100 / sum).toFixed(2) + "%";
+        return percentage;
+
+
+    },
+    color: '#fff',
+    }
+    }
+    };
+
+
+    var ctx = document.getElementById("myChart").getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+        labels: {{lab_labels|safe}},
+        datasets: data
+        },
+        options: options
+    });
+    var ctx_obj = document.getElementById("myChart");
+    ctx_obj.style.height='300px';
+    ctx_obj.style.weight='600px';
+</script>
+
+
+
+<script>
+    
+    // 由vue控制顯示錯誤訊息的modal
+    var vm_wrongModal = new Vue({
+        el:"#wrongMsg_vue",
+        delimiters: ['%%%', '%%%'],
+        data:{
+            wrongMsg:""
+        }
+    })
+
+
+
+// 用來控制按鈕區塊的vue實例
+    var vm_btnArea = new Vue({
+        el:".btnArea",
+        delimiters: ['%%%', '%%%'],
+        data:{
+            onquery:false,
+            wrongMsg:""
+        },
+        methods:{
+            examine_front_end_col(e){
+                // 在按下新增按鈕時會先檢查所有欄位是否已符合基本的欄位檢核 
+                var errs = document.querySelectorAll(".errMsg");
+                for(var ele of errs){
+                    if(ele.textContent.trim().length>0){
+                        // 若有欄位為符合檢核，則不會發送表單
+                        e.preventDefault();
+                    }
+                }
+                return true;
+            },
+
+
+
+        
+
+                        }
+                    })
+
+
+
+
+</script>
+
+
+
+{% endblock content %}
+
