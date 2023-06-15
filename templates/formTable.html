@@ -39,6 +39,11 @@
                 <button type="submit" id="query"  name="query" class="query funcbtn">查詢</button>
                 <button @click="update" type="button" id="update" name="update" class="update funcbtn" v-if="onquery">修改</button>
                 <button  @click="del"  type="button" id="delete" name="delete" class="delete funcbtn" v-if="onquery">刪除</button>
+                <button @click="defaultLab" name="defaultLab"  type="submit" class="funcbtn" v-if="! onquery">
+                    匯入預設標籤
+                </button>
+                {% block otherbtn %}
+                {% endblock otherbtn %}
             </div>
 			<div class="formArea ablock">
 				{% for field in form %}
@@ -245,6 +250,18 @@
                 else
                 {
                     return frontEndData;
+                }
+
+            },
+            defaultLab(e){
+                var cpnyid_ele = document.querySelector("#id_cpnyid");
+                if(cpnyid_ele.value.length===0)
+                {
+
+                    vm_wrongModal.wrongMsg = "欲匯入系統預設標籤 公司品牌 不可空白";
+                    $('#wrongMsg_vue').modal('show');
+                    e.preventDefault();
+                    return false;
                 }
 
             },

@@ -1,0 +1,5 @@
+host,127.0.0.1
+port,3306
+user,root
+password,eddieWANG#183120880215
+db,crm01

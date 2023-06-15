@@ -21,7 +21,3 @@ button.labelBtn:active{
     border: 2px solid rgb(203, 3, 3);
 }
 
-div.chart{
-    width: 100%;
-    height: 300px;
-}

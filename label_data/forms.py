@@ -72,3 +72,21 @@ class VIP_LABEL_STATModelForm(ModelForm):
     class Meta:
         model = VIP_LABEL_STAT
         fields = ['cpnyid']
+from datetime import date
+
+class VIP_LABEL_STATModelForm2(ModelForm):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.fields["caledate"].widget = forms.widgets.DateInput(
+            attrs={
+                'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)',
+                'class': 'form-control',
+                'value':  str(date.today())
+                },
+           
+            )
+
+    class Meta:
+        model = VIP_LABEL_STAT
+        fields = ['cpnyid','caledate']
+    

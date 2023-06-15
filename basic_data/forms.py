@@ -6,7 +6,7 @@ from .models import (
 from django.forms import ModelForm
 from django import forms
 from django.core.exceptions import ValidationError
-
+from datetime import date
 def set_class_attr2_fields(fields:dict,general_attrs:str,specific_fields_attrs=None):
     """
     這個函數用來為表單的欄位添加屬性
@@ -76,10 +76,17 @@ class CRM_COMPANY_ModelForm(ModelForm):
 
     class Meta :
         model=CRM_COMPANY
-        fields = ["cpnyid","cocname","coename","coscname","cosename"]
+        fields = ["cpnyid","cocname","coename","coscname","cosename","cdate"]
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.errList = []
+        self.fields["cdate"].widget = forms.widgets.DateInput(
+            attrs={
+                'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)',
+                'class': 'form-control',
+                'value':str(date.today())
+                }
+            )
         set_class_attr2_fields(self.fields,'form_field',{"cpnyid":{"class":"pkField"}})
         self.verbose_name_fields = []
         self.return_query_cols = []

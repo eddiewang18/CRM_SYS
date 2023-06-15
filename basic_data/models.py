@@ -94,7 +94,7 @@ class CRM_COMPANY(models.Model,CrmQueryData):
     coscname = models.CharField(max_length=255,db_column="coscname",verbose_name='公司中文簡稱',blank=True,null=True)
     cosename = models.CharField(max_length=255,db_column="cosename",verbose_name='公司英文簡稱',blank=True,null=True) 
     cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
-    cdate = models.DateField(db_column="cdate",verbose_name='創立日期',auto_now_add=True)
+    cdate = models.DateField(db_column="cdate",verbose_name='品牌創立日期')
     ctime = models.TimeField(db_column="ctime",verbose_name='創立時間',auto_now_add=True)
     muser = models.CharField(max_length=20,db_column="muser",verbose_name='異動者') 
     mdate = models.DateField(db_column="mdate",verbose_name='異動日期',auto_now=True)

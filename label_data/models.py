@@ -56,7 +56,7 @@ class Formula(models.Model):
 class VIP_LABEL_GROUP(models.Model,CrmQueryData):
     cpnyid = models.ForeignKey(to="basic_data.CRM_COMPANY",to_field='cpnyid',db_column='cpnyid',verbose_name='公司品牌',on_delete=models.CASCADE)
     label_gid = models.CharField(max_length=20,primary_key=True,db_column='label_gid',verbose_name="標籤群組代號")
-    label_gname = models.CharField(max_length=50,db_column='label_gname',verbose_name='標籤群組名稱',unique=True)
+    label_gname = models.CharField(max_length=50,db_column='label_gname',verbose_name='標籤群組名稱')
     formula_id = models.ForeignKey(to="Formula",to_field='formula_id',db_column="formula_id",verbose_name='標籤計算公式',on_delete=models.CASCADE) 
     descr = models.TextField(db_column="descr",verbose_name="標籤群組描述",blank=True,null=True)
     color = models.CharField(db_column='color',verbose_name='標籤群組標記顏色',max_length=8)
@@ -64,15 +64,16 @@ class VIP_LABEL_GROUP(models.Model,CrmQueryData):
     xor = models.CharField(db_column="isxor",verbose_name='貼標時客人是否可以擁有群組內一個以上的標籤',max_length=2,choices=xor_choices,default='1')
     label_enable_choices = [('0','否'),('1','是')]
     label_enable = models.CharField(db_column="label_enable",verbose_name='是否停用',max_length=2,choices=label_enable_choices,default='0')
-    cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
+    cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人',default='admin') 
     cdate = models.DateField(db_column="cdate",verbose_name='創立日期',auto_now_add=True)
     ctime = models.TimeField(db_column="ctime",verbose_name='創立時間',auto_now_add=True)
-    muser = models.CharField(max_length=20,db_column="muser",verbose_name='異動者') 
+    muser = models.CharField(max_length=20,db_column="muser",verbose_name='異動者',default='admin') 
     mdate = models.DateField(db_column="mdate",verbose_name='異動日期',auto_now=True)
     mtime = models.TimeField(db_column="mtime",verbose_name='異動時間',auto_now=True)
-
+    sys_create = models.CharField(max_length=2,db_column='sys_create',verbose_name='系統預設創建標籤',null=True,blank=True)
     class Meta:
         db_table = "VIP_LABEL_GROUP"  
+        unique_together = ('cpnyid', 'label_gname')
 
     fieldQueryRule = {
         "equals":["cpnyid","xor","label_enable","formula_id"],
@@ -88,24 +89,24 @@ class VIP_LABEL_GROUP(models.Model,CrmQueryData):
 class VIP_LABEL(models.Model):
     label_gid = models.ForeignKey(to="VIP_LABEL_GROUP",to_field='label_gid',db_column='label_gid',verbose_name="標籤群組代號",on_delete=models.CASCADE)
     label_id = models.CharField(primary_key=True,db_column="label_id",verbose_name="標籤代號",max_length=50)
-    label_name = models.CharField(max_length=50,db_column='label_name',verbose_name='標籤名稱',unique=True)
+    label_name = models.CharField(max_length=50,db_column='label_name',verbose_name='標籤名稱')
     calmin = models.DecimalField(max_digits=10, decimal_places=2,db_column='calmin',verbose_name='計算區間起')
     calmax = models.DecimalField(max_digits=10, decimal_places=2,db_column='calmax',verbose_name='計算區間迄')
     label_enable_choices = [('0','否'),('1','是')]
     label_enable = models.CharField(db_column="label_enable",verbose_name='是否停用',max_length=2,choices=label_enable_choices,default='0')
-    cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人') 
+    cuser = models.CharField(max_length=20,db_column="cuser",verbose_name='創始人',default='admin') 
     cdate = models.DateField(db_column="cdate",verbose_name='創立日期',auto_now_add=True)
     ctime = models.TimeField(db_column="ctime",verbose_name='創立時間',auto_now_add=True)
-    muser = models.CharField(max_length=20,db_column="muser",verbose_name='異動者') 
+    muser = models.CharField(max_length=20,db_column="muser",verbose_name='異動者',default='admin') 
     mdate = models.DateField(db_column="mdate",verbose_name='異動日期',auto_now=True)
     mtime = models.TimeField(db_column="mtime",verbose_name='異動時間',auto_now=True)
-
+    sys_create = models.CharField(max_length=2,db_column='sys_create',verbose_name='系統預設創建標籤',null=True,blank=True)    
     def __str__(self):
         return  self.label_name   
 
     class Meta:
         db_table = "VIP_LABEL"  
-
+        unique_together = ('label_gid', 'label_name')
 
 class Sales00(models.Model):
     sale00_id = models.CharField(primary_key=True,max_length=30,db_column="sale00_id",verbose_name='銷售單據單號') 

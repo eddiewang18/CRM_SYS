@@ -17,53 +17,45 @@
 <link rel="stylesheet" href="{%	static 'css/wrong_modal.css' %}">
 <link rel="stylesheet" href="{% static 'css/crmForm.css' %}">
 <link rel="stylesheet" href="{% static 'css/b02.css' %}">
-<link rel="stylesheet" href="{% static 'css/b03.css' %}">
+<link rel="stylesheet" href="{% static 'css/b04.css' %}">
+
 {% endblock style2 %}
 
 
 
 {% block content %}
 
-
 <div class="wrap">
     <div class="funcTitle ablock">
         <!-- 設定功能頁面的標題 -->
-        B03貼標統計    
+        B04手動執行貼標    
     </div>
-    <form action="" method="POST"  novalidate="novalidate">
+    <form id="my-form" action="" method="POST"  novalidate="novalidate">
         {% csrf_token %}
+        {% for field in form %}
         <span class="field">
-            <span id="{{ vip_grp_form.cpnyid.auto_id }}_label" class="input_label">{{vip_grp_form.cpnyid.label}}</span>
-            <span class="input_field field1">{{vip_grp_form.cpnyid}}</span>
-            <span id="{{ vip_grp_form.cpnyid.auto_id }}_err" class="errMsg"></span>
+            <span id="{{ field.auto_id }}_label" class="input_label">{{field.label}}</span>
+            <span class="input_field field1">{{field}}</span>
+            <span id="{{ field.auto_id }}_err" class="errMsg"></span>
         </span>
-
+        {% endfor %}
         <div class="btnArea ablock">
-
-            <button type="submit" @click="examine_front_end_col">查詢</button>
+            <button type="submit" @click="examine_front_end_col">執行</button>
         </div>
-        {% if no_data %}
-            {% include 'share/noData_modal.html' %}
-            {% include 'share/show_noData_msg.html' %}
-        {% else %}
-            {% if  lab_grp_objs %}
-            <div class="labelArea ablock">
-                {% for lab_grp_obj in lab_grp_objs %}
-                    <button name="{{lab_grp_obj.label_gid}}" id="{{lab_grp_obj.label_gid}}" type="submit" class="labelBtn" style="background-color: {{lab_grp_obj.color}};">{{lab_grp_obj.label_gname}}</button>
-                {% endfor %}
-            </div>
-            {% endif %}
-        {% endif %}
-    </form>
-    {% if no_data %}
+        
+        <div id="progress-bar"></div>
 
-    {% else %}
-        {% if  lab_grp_objs %}
-            <div class='chart'>
-                <canvas id="myChart"></canvas>
-            </div>
-        {% endif %}
-    {% endif %}
+    </form>
+    <div id="loadmsg" class="bounce">
+        <span class="letter">正</span>
+        <span class="letter">在</span>
+        <span class="letter">執</span>
+        <span class="letter">行</span>
+        <span class="letter">貼</span>
+        <span class="letter">標</span>
+        <span class="letter">中</span>
+        <span class="letter">~</span>
+      </div>
 </div>
 
 
@@ -72,7 +64,14 @@
     // 這個tag用來填寫那些欄位要做基本的檢核(輸入字串的長度,是否必填,英數字組合....)
     var cpnyid = new FieldExamine("id_cpnyid","id_cpnyid_label",false,false,0,0,'id_cpnyid_err',[]);
     cpnyid.executeField();
+
+    var cpnyid = new FieldExamine("id_cpnyid","id_cpnyid_label",false,false,0,0,'id_cpnyid_err',[]);
+    cpnyid.executeField();
 </script>
+
+
+
+
 <!--Jquery-->
 <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
 
@@ -114,59 +113,10 @@
 
 
 {% include 'share/bootstrap_script.html' %}
+
+
 <script src="{% static 'js/common.js' %}"></script>
 <script src="{% static 'js/vue.js' %}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
-<script>
-    var data = [{
-        data: {{lab_data|safe}},
-        backgroundColor: [
-            "#4b77a9",
-            "#5f255f",
-            "#d21243",
-            "#B27200",
-            "#99E64D"
-        ],
-        borderColor: "#fff"
-        }];
-
-    var options = {
-    tooltips: {
-    enabled: true
-    },
-    plugins: {
-    datalabels: {
-    formatter: (value, ctx) => {
-
-        let sum = ctx.dataset._meta[0].total;
-        let percentage = (value * 100 / sum).toFixed(2) + "%";
-        return percentage;
-
-
-    },
-    color: '#fff',
-    }
-    }
-    };
-
-
-    var ctx = document.getElementById("myChart").getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-        labels: {{lab_labels|safe}},
-        datasets: data
-        },
-        options: options
-    });
-    var ctx_obj = document.getElementById("myChart");
-    ctx_obj.style.height='300px';
-    ctx_obj.style.weight='600px';
-</script>
-
-
 
 <script>
     
@@ -197,14 +147,15 @@
                     if(ele.textContent.trim().length>0){
                         // 若有欄位為符合檢核，則不會發送表單
                         e.preventDefault();
+                        return;
                     }
                 }
+                var loadele = document.querySelector("#loadmsg");
+                loadele.style.display = 'block';
                 return true;
             },
 
 
-
-        
 
                         }
                     })
